@@ -1,0 +1,23 @@
+{
+    "name": "PayIcam/inscription_galadesicam",
+    "description": "A web app to enable Icam student to register and pay their ticket to private the Gala des Icam event.",
+    "keywords": ["PayIcam"],
+    "homepage": "https://barcafetlille.icam.fr/about.php",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Antoine Giraud"
+        }
+    ],
+    "autoload": {
+        "classmap": ["vendor/payutc-json-client/jsonclient/"],
+        "psr-0": { "PayIcam": "src" }
+    },
+    "require": {
+        "php": ">=5.5.0",
+        "slim/slim": "~3.0",
+        "slim/php-view": "^2.0",
+        "monolog/monolog": "^1.17",
+        "slim/flash": "^0.1.0"
+    }
+}
