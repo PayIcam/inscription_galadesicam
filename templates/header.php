@@ -36,9 +36,6 @@
           <ul class="nav navbar-nav">
             <li<?php if($RouteHelper->curPage == '/') echo ' class="active"'; ?>><a href="<?= $RouteHelper->getPathFor() ?>">Home</a></li>
             <li<?php if($RouteHelper->curPage == '/about') echo ' class="active"'; ?>><a href="<?= $RouteHelper->getPathFor('about') ?>">A propos</a></li>
-            <?php if ($Auth->isLogged()): ?>
-            <li<?php if($RouteHelper->curPage == '/contact') echo ' class="active"'; ?>><a href="<?= $RouteHelper->getPathFor('contact') ?>">Contact</a></li>
-            <?php endif ?>
           </ul>
           <?php if ($Auth->isLogged()): ?>
           <ul class="nav navbar-nav navbar-right">

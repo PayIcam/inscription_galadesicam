@@ -16,6 +16,7 @@ return [
 
         'public_path' => 'public/',
         'webSiteTitle' => 'Inscriptions Gala des Icam 118',
+        'emailContactGala' => 'galadesicam@icam.fr',
 
         'PayIcam' => [
             'payutc_server' => 'http://payicam.dev/server/web/', // URL du serveur payutc (avec le / final)
