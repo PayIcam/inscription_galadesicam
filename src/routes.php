@@ -3,7 +3,6 @@
 
 $Auth = new \PayIcam\Auth();
 
-
 // get payutcClient
 function getPayutcClient($service) {
     global $app, $settings;
@@ -50,7 +49,7 @@ $app->get('/', function ($request, $response, $args) {
     global $Auth, $payutcClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
     $status = $payutcClient->getStatus();
-    if (!$Auth->isLogged() || empty($status['user'] || empty($status['application'])){
+    if (!$Auth->isLogged() || empty($status->user) || empty($status->application)){
         if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
         $this->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
@@ -85,7 +84,7 @@ $app->get('/edit', function ($request, $response, $args) {
     global $Auth, $payutcClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
     $emailContactGala = $this->get('settings')['emailContactGala'];
     $status = $payutcClient->getStatus();
-    if (!$Auth->isLogged() || empty($status['user'] || empty($status['application'])){
+    if (!$Auth->isLogged() || empty($status->user) || empty($status->application)){
         if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
         $this->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
