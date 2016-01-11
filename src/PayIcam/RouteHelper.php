@@ -21,7 +21,6 @@ class RouteHelper {
 
     function __construct($app, $request, $pageName){
         $this->app = $app;
-        $this->app = $app;
 
         $this->publicPath = $app->get('settings')['public_path'];
         $this->curPageUri = $request->getUri();

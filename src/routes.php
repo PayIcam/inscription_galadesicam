@@ -14,6 +14,7 @@ function getPayutcClient($service) {
         isset($_SESSION['payutc_cookie']) ? $_SESSION['payutc_cookie'] : "");
 }
 $payutcClient = getPayutcClient("WEBSALE");
+$gingerClient = new \Ginger\Client\GingerClient($settings['settings']['PayIcam']['ginger_key'], $settings['settings']['PayIcam']['ginger_server']);
 
 $admin = $payutcClient->isSuperAdmin();
 $isAdminFondation = $payutcClient->isAdmin();
@@ -46,7 +47,7 @@ $app->get('/about', function ($request, $response, $args) {
 // Espace Icam //
 /////////////////
 $app->get('/', function ($request, $response, $args) {
-    global $Auth, $payutcClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
     $status = $payutcClient->getStatus();
     if (!$Auth->isLogged() || empty($status->user) || empty($status->application)){
@@ -63,6 +64,8 @@ $app->get('/', function ($request, $response, $args) {
 
     // $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => 'hugo.leandri@2018.icam.fr '));
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $Auth->getUserField('email')));
+    $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
+    var_dump($gingerUserCard);
     $UserGuests = array();
     if (count($UserReservation) == 1) {
         $UserId = $UserReservation[0]['id'];
@@ -79,59 +82,118 @@ $app->get('/', function ($request, $response, $args) {
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('home');
 
-
-$app->get('/edit', function ($request, $response, $args) {
-    global $Auth, $payutcClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
-    $emailContactGala = $this->get('settings')['emailContactGala'];
-    $status = $payutcClient->getStatus();
+////////////////////////////////////////////
+// Routes pour l'édition des réservations //
+////////////////////////////////////////////
+function secureEditPart($Auth, $status, $UserReservation, $app, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala){
     if (!$Auth->isLogged() || empty($status->user) || empty($status->application)){
         if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
-        $this->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
-        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
+        $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
+        return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('about'));
     }
-
-    // $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => 'hugo.leandri@2018.icam.fr '));
-    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $Auth->getUserField('email')));
     if (count($UserReservation) > 1){
-        $this->flash->addMessage('danger', 'Nous avons plusieurs réservations enregistrées à votre email...<br>
+        $app->flash->addMessage('danger', 'Nous avons plusieurs réservations enregistrées à votre email...<br>
             <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Contactez nous</a> svp !');
-        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
+        return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     }elseif (!$canWeRegisterNewGuests && count($UserReservation) == 0){
-        $this->flash->addMessage('warning', 'De nouvelles réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Gala</a>');
-        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
+        $app->flash->addMessage('warning', 'De nouvelles réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Gala</a>');
+        return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     }elseif (!$canWeEditOurReservation && $canWeRegisterNewGuests && count($UserReservation) == 1){
         // On a pas le droit de modifier les infos que l'on a soumis, par contre on peut qd mm ajouter de nouveaux invités!
-        $this->flash->addMessage('warning', 'Les modifications des réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Gala</a>');
-        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
+        $app->flash->addMessage('warning', 'Les modifications des réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Gala</a>');
+        return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     }elseif (!$canWeEditOurReservation && !$canWeRegisterNewGuests && count($UserReservation) == 1){
-        $this->flash->addMessage('warning', 'Les inscriptions sont closes, on se retrouve au Gala.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Gala</a>');
-        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
+        $app->flash->addMessage('warning', 'Les inscriptions sont closes, on se retrouve au Gala.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Gala</a>');
+        return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     }
+    return true;
+}
+
+$app->get('/edit', function ($request, $response, $args) {
+    // Initialisation, récupération variables utiles
+    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
+    $emailContactGala = $this->get('settings')['emailContactGala'];
+    $status = $payutcClient->getStatus();
+
+    // Récupération infos utilisateur
+    // $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => 'hugo.leandri@2018.icam.fr '));
+    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $Auth->getUserField('email')));
+
+    //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
+    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
+    if ($retourSecure !== true) return $retourSecure;
     
+    // On continue
     if(count($UserReservation) == 1){ // il y avait déjà une réservation pour cet utilisateur
         $UserGuests = array();
-        if (count($UserReservation) == 1) {
-            $UserId = $UserReservation[0]['id'];
-            $UserGuests = $DB->query('SELECT * FROM icam_has_guest
-                                        LEFT JOIN guests ON guest_id = id
-                                      WHERE icam_id = :icam_id', array('icam_id' => $UserId));
-        }
+        $UserReservation = current($UserReservation);
+        $UserId = $UserReservation['id'];
+        $UserGuests = $DB->query('SELECT * FROM icam_has_guest
+                                    LEFT JOIN guests ON guest_id = id
+                                  WHERE icam_id = :icam_id', array('icam_id' => $UserId));
     }else{ // Nouvelle réservation
+        $RouteHelper->webSiteTitle = "Nouvelle réservation";
         $UserReservation = array();
-        $UserGuests = array();
         $UserId = -1;
+        $UserGuests = array();
     }
+
+    $Form = new \PayIcam\Forms();
+    $editLink = $this->router->pathFor('edit');
 
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
-    $editLink = $this->router->pathFor('edit');
-    $this->renderer->render($response, 'edit_reservation.php', compact('UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'emailContactGala', 'editLink', $args));
+    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'Form', $args));
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('edit');
 $app->get('/edit/', function ($request, $response, $args) {
     return $response->withStatus(301)->withHeader('Location', $this->router->pathFor('edit')); // code 301: redirection, déplacé pour toujours
+});
+$app->post('/edit', function ($request, $response, $args) {
+    // Initialisation, récupération variables utiles
+    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    $flash = $this->flash;
+    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
+    $emailContactGala = $this->get('settings')['emailContactGala'];
+    $status = $payutcClient->getStatus();
+
+    // Récupération infos utilisateur
+    // $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => 'hugo.leandri@2018.icam.fr '));
+    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $Auth->getUserField('email')));
+    
+    //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
+    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
+    if ($retourSecure !== true) return $retourSecure;
+    
+    echo "yay j'ai reçu ce que tu as posté";
+    var_dump($request->getParsedBody());
+    return $response;
+    $Form = new \PayIcam\Form();
+    $validate = array(
+        'nom'    => array('rule'=>'notEmpty','message' => 'Entrez votre nom'),
+        'prenom' => array('rule'=>'notEmpty','message' => 'Entrez votre prénom'),
+        'mail' => array('rule'=>'^[a-z-]+[.]+[a-z-]+([.0-9a-z-]+)?@(mgf\.)?([0-9]{4}[.])?icam[.]fr$','message' => 'Entrez un email Icam valide !')
+    );
+    $Form->setValidates($validate);
+
+    $d = $Member->checkForm($_POST); // $_POST for invite table : 'login','slug','nom','content','order'
+    $Form->set($d);
+    if ($Form->validates($d)) { // fin pré-traitement
+        if ($d['login'] == -1 && current($DB->queryFirst('SELECT COUNT(*) FROM users WHERE login = :login',array('login'=>$d['mail'])))) {
+            $Form->errors['mail'] = 'Utilisateur déjà existant !!';
+        }elseif ($d['login'] != -1 && $d['login'] != $d['mail'] && current($DB->queryFirst('SELECT COUNT(*) FROM users WHERE login = :login',array('login'=>$d['mail']))) ) {
+            $Form->errors['mail'] = 'Utilisateur déjà existant !! Vous ne pouvez pas changer vers le login/mail : '.$d['mail'];
+        }elseif (!empty($d['badge_uid']) && current($DB->queryFirst('SELECT COUNT(*) FROM users WHERE login != :login AND badge_uid = :badge_uid',array('login'=>$d['login'],'badge_uid'=>$d['badge_uid']))) ) {
+            $Form->errors['badge_uid'] = 'Badge '.$d['badge_uid'].' déjà utilisé !';
+        }else{
+            $Member->save();
+            header('Location:admin_edit_member.php?login='.$Member->login);exit;
+        }
+    }
+
+    // return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
 });
 
 

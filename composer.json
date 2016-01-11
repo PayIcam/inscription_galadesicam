@@ -18,6 +18,7 @@
         "slim/slim": "~3.0",
         "slim/php-view": "^2.0",
         "monolog/monolog": "^1.17",
-        "slim/flash": "^0.1.0"
+        "slim/flash": "^0.1.0",
+        "ginger/client": "*"
     }
 }

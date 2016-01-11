@@ -66,6 +66,6 @@
             </dl>
         <?php endforeach ?>
     <?php } // endelse ?>
-    <?php var_dump($UserReservation); ?>
-    <?php var_dump($UserGuests); ?>
+    <pre><?php var_dump($UserReservation); ?></pre>
+    <pre><?php var_dump($UserGuests); ?></pre>
 <?php } ?>
