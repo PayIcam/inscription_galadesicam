@@ -36,7 +36,7 @@ $app->get('/about', function ($request, $response, $args) {
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'A propos');
     $casUrl = 'https://cas.icam.fr/cas/login?service=' . urlencode($RouteHelper->curPageBaseUrl. '/login');
-    $deconnexionUrl = $editLink = $this->router->pathFor('logout');;
+    $deconnexionUrl = $this->router->pathFor('logout');;
 
     $this->renderer->render($response, 'header.php', compact('Auth', 'flash', 'RouteHelper', $args));
     $this->renderer->render($response, 'about.php', compact('Auth', 'casUrl', 'deconnexionUrl', $args));
