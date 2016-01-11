@@ -7,6 +7,6 @@
     <?php if ($Auth->isLogged()){ ?>
         <a href="<?= $casUrl ?>" class="btn btn-default">déconnexion</a>
     <?php } else { ?>
-        <a href="<?= $casUrl ?>" class="btn btn-primary">Connectez-vous !</a>
+        <a href="<?= $deconnexionUrl ?>" class="btn btn-primary">Connectez-vous !</a>
     <?php } ?>
 </p>

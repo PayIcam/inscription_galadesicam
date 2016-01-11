@@ -38,8 +38,6 @@ $app->get('/about', function ($request, $response, $args) {
     $casUrl = 'https://cas.icam.fr/cas/login?service=' . urlencode($RouteHelper->curPageBaseUrl. '/login');
     $deconnexionUrl = $editLink = $this->router->pathFor('logout');;
 
-    $status = $payutcClient->getStatus();
-
     $this->renderer->render($response, 'header.php', compact('Auth', 'flash', 'RouteHelper', $args));
     $this->renderer->render($response, 'about.php', compact('Auth', 'casUrl', 'deconnexionUrl', $args));
     return $this->renderer->render($response, 'footer.php', compact('Auth', 'RouteHelper', $args));
@@ -50,7 +48,10 @@ $app->get('/about', function ($request, $response, $args) {
 /////////////////
 $app->get('/', function ($request, $response, $args) {
     global $Auth, $payutcClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
-    if (!$Auth->isLogged()){
+
+    $status = $payutcClient->getStatus();
+    if (!$Auth->isLogged() && !empty($status['user'])){
+        if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
         $this->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
     }
@@ -83,7 +84,9 @@ $app->get('/', function ($request, $response, $args) {
 $app->get('/edit', function ($request, $response, $args) {
     global $Auth, $payutcClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
     $emailContactGala = $this->get('settings')['emailContactGala'];
-    if (!$Auth->isLogged()){
+    $status = $payutcClient->getStatus();
+    if (!$Auth->isLogged() && !empty($status['user'])){
+        if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
         $this->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
     }
