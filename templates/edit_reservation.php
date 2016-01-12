@@ -20,9 +20,9 @@
             <div class="form-group ">
                 <label class="col-sm-2 control-label">Options : </label>
                 <div class="col-sm-10">
-                    <div class="checkbox"><em>Vous participez de base à la soirée</em> <small>+<?= 18 ?>€</small></div>
-                    <?= $Form->input('repas','Participer au repas <small>+'.(15).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
-                    <?= $Form->input('buffet','Participer à la conférence <small>+'.(3).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
+                    <div class="checkbox"><em>Vous participez de base à la soirée</em> <small>+<?= $prixPromo['prixIcam']['soiree'] ?>€</small></div>
+                    <?= $Form->input('repas','Participer au repas <small>+'.($prixPromo['prixIcam']['repas']).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
+                    <?= $Form->input('buffet','Participer à la conférence <small>+'.($prixPromo['prixIcam']['buffet']).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
                 </div>
             </div>
             <?= $Form->select('tickets_boisson', 'Tickets boisson : ', array('data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
@@ -30,8 +30,9 @@
         </div>
     </fieldset>
     <fieldset class="isIcam">
-        <?php $nb = ((count($UserGuests)>3)?count($UserGuests):3);
-         for ($i=0; $i < $nb; $i+=2) { ?>
+        <p>En tant que <?= $prixPromo['gameDePrix'] ?>, vous avez le droit à <?= $prixPromo['nbInvites']; ?> invités</p>
+        <?php $nb = ((count($UserGuests)>$prixPromo['nbInvites'])?count($UserGuests):$prixPromo['nbInvites']);
+         for ($i=0; $i < $nb; $i+=2) {?>
             <div class="row">
                 <div id="invite<?= ($i+1); ?>" class="col-sm-6 invite">
                     <legend>Invité <?= ($i+1); ?></legend>
@@ -42,31 +43,31 @@
                         <div class="form-group ">
                             <label class="col-sm-2 control-label">Options : </label>
                             <div class="col-sm-10">
-                                <div class="checkbox"><em>Inscrit de base à la soirée</em> <small>+<?= 20 ?>€</small></div>
-                                <?= $Form->input('invites['.$i.'][repas]','Participe au repas <small>+'.(15).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
-                                <?= $Form->input('invites['.$i.'][buffet]','Participe à la conférence <small>+'.(3).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
+                                <div class="checkbox"><em>Inscrit de base à la soirée</em> <small>+<?= $prixPromo['prixInvite']['soiree'] ?>€</small></div>
+                                <?= $Form->input('invites['.$i.'][repas]','Participe au repas <small>+'.($prixPromo['prixInvite']['repas']).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
+                                <?= $Form->input('invites['.$i.'][buffet]','Participe à la conférence <small>+'.($prixPromo['prixInvite']['buffet']).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
                             </div>
                         </div>
                         <?= $Form->select('invites['.$i.'][tickets_boisson]','Tickets boisson : ', array('data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
                         <?= $Form->select('champagne','Bouteille de Champagne : ', array('data'=>array(0=>0,14.5=>'Une bouteille 14,5€'))); ?>
                     </div>
                 </div>
-                <?php if ($i+1 < $nb){ $i++; ?>
-                    <div id="invite<?= ($i+1); ?>" class="col-sm-6 invite">
-                        <legend>Invité <?= ($i+1); ?></legend>
+                <?php $j = $i+1; if ($j+1 < $nb){; ?>
+                    <div id="invite<?= ($j+1); ?>" class="col-sm-6 invite">
+                        <legend>Invité <?= ($j+1); ?></legend>
                         <div>
-                            <?= $Form->input('invites['.$i.'][id]', 'hidden'); ?>
-                            <?= $Form->input('invites['.$i.'][nom]','Nom : ', array('maxlength'=>'155')); ?>
-                            <?= $Form->input('invites['.$i.'][prenom]','Prénom : ', array('maxlength'=>'155')); ?>
+                            <?= $Form->input('invites['.$j.'][id]', 'hidden'); ?>
+                            <?= $Form->input('invites['.$j.'][nom]','Nom : ', array('maxlength'=>'155')); ?>
+                            <?= $Form->input('invites['.$j.'][prenom]','Prénom : ', array('maxlength'=>'155')); ?>
                             <div class="form-group ">
                                 <label class="col-sm-2 control-label">Options : </label>
                                 <div class="col-sm-10">
-                                    <div class="checkbox"><em>Inscrit de base à la soirée</em> <small>+<?= 20 ?>€</small></div>
-                                    <?= $Form->input('invites['.$i.'][repas]','Participe au repas <small>+'.(15).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
-                                    <?= $Form->input('invites['.$i.'][buffet]','Participe à la conférence <small>+'.(3).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
+                                    <div class="checkbox"><em>Inscrit de base à la soirée</em> <small>+<?= $prixPromo['prixInvite']['soiree'] ?>€</small></div>
+                                    <?= $Form->input('invites['.$j.'][repas]','Participe au repas <small>+'.($prixPromo['prixInvite']['repas']).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
+                                    <?= $Form->input('invites['.$j.'][buffet]','Participe à la conférence <small>+'.($prixPromo['prixInvite']['buffet']).'€</small>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)); ?>
                                 </div>
                             </div>
-                            <?= $Form->select('invites['.$i.'][tickets_boisson]','Tickets boisson : ', array('data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
+                            <?= $Form->select('invites['.$j.'][tickets_boisson]','Tickets boisson : ', array('data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
                             <?= $Form->select('champagne','Bouteille de Champagne : ', array('data'=>array(0=>0,14.5=>'Une bouteille 14,5€'))); ?>
                         </div>
                     </div>
@@ -84,7 +85,10 @@
 
 <hr>
 
+<pre><?php var_dump($Auth->getUser()); ?></pre>
 <pre><?php var_dump($UserReservation); ?></pre>
 <pre><?php var_dump($UserGuests); ?></pre>
 <pre><?php var_dump($canWeRegisterNewGuests); ?></pre>
 <pre><?php var_dump($canWeEditOurReservation); ?></pre>
+<pre><?php var_dump($gingerUserCard); ?></pre>
+<pre><?php var_dump($prixPromo); ?></pre>

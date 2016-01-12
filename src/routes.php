@@ -35,7 +35,7 @@ $app->get('/about', function ($request, $response, $args) {
 
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'A propos');
-    $casUrl = 'https://cas.icam.fr/cas/login?service=' . urlencode($RouteHelper->curPageBaseUrl. '/login');
+    $casUrl = $payutcClient->getCasUrl().'login?service=' . urlencode($RouteHelper->curPageBaseUrl. '/login');
     $deconnexionUrl = $this->router->pathFor('logout');;
 
     $this->renderer->render($response, 'header.php', compact('Auth', 'flash', 'RouteHelper', $args));
@@ -62,10 +62,16 @@ $app->get('/', function ($request, $response, $args) {
     // Sample log message
     // $this->logger->info("Slim-Skeleton '/' index");
 
-    // $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => 'hugo.leandri@2018.icam.fr '));
+    // $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => 'hugo.leandri@2018.icam.fr'));
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $Auth->getUserField('email')));
     $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
-    var_dump($gingerUserCard);
+    if (empty($gingerUserCard)) { // l'utilisateur n'avait jamais été ajouté à Ginger O.o
+        $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
+    }if (empty($gingerUserCard)) { // l'utilisateur n'a pas un mail icam valide // on ne devrait jamais avoir cette erreur car on passe par payutc et lui a besoin d'avoir ginger qui marche ... je crois ...
+        $this->flash->addMessage('warning', "Votre Mail Icam n'est pas reconnu par Ginger...");
+        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
+    }
+    
     $UserGuests = array();
     if (count($UserReservation) == 1) {
         $UserId = $UserReservation[0]['id'];
@@ -117,9 +123,12 @@ $app->get('/edit', function ($request, $response, $args) {
     $emailContactGala = $this->get('settings')['emailContactGala'];
     $status = $payutcClient->getStatus();
 
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
+
     // Récupération infos utilisateur
-    // $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => 'hugo.leandri@2018.icam.fr '));
-    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $Auth->getUserField('email')));
+    $gingerUserCard = $gingerClient->getUser($mailPersonne);
+    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
 
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
     $retourSecure = secureEditPart($Auth, $status, $UserReservation, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
@@ -140,12 +149,23 @@ $app->get('/edit', function ($request, $response, $args) {
         $UserGuests = array();
     }
 
+    if ($gingerUserCard->filiere == 'Apprentissage' || $gingerUserCard->filiere == 'Intégré') {
+        try {
+            $prixPromo = \PayIcam\Participant::getPricePromo($gingerUserCard->promo);
+            $prixPromo['gameDePrix'] = $gingerUserCard->promo;
+        } catch (Exception $e) {
+            $prixPromo = \PayIcam\Participant::getPricePromo('Ingenieur');
+            $prixPromo['gameDePrix'] = 'Ingenieur';
+        }
+    }
+
     $Form = new \PayIcam\Forms();
+    $Form->set(array_merge($UserReservation, array('invites'=>$UserGuests)));
     $editLink = $this->router->pathFor('edit');
 
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
-    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'Form', $args));
+    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'Form', 'prixPromo', 'gingerUserCard', $args));
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('edit');
 $app->get('/edit/', function ($request, $response, $args) {
