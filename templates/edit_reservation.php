@@ -26,7 +26,6 @@
                 </div>
             </div>
             <?= $Form->select('tickets_boisson', 'Tickets boisson : ', array('data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
-            <?= $Form->select('champagne', 'Bouteille de Champagne : ', array('data'=>array(0=>0,14.5=>'Une bouteille 14,5 €'))); ?>
         </div>
     </fieldset>
     <fieldset class="isIcam">
@@ -49,7 +48,6 @@
                             </div>
                         </div>
                         <?= $Form->select('invites['.$i.'][tickets_boisson]','Tickets boisson : ', array('data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
-                        <?= $Form->select('champagne','Bouteille de Champagne : ', array('data'=>array(0=>0,14.5=>'Une bouteille 14,5€'))); ?>
                     </div>
                 </div>
                 <?php $j = $i+1; if ($j+1 < $nb){; ?>
@@ -68,7 +66,6 @@
                                 </div>
                             </div>
                             <?= $Form->select('invites['.$j.'][tickets_boisson]','Tickets boisson : ', array('data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
-                            <?= $Form->select('champagne','Bouteille de Champagne : ', array('data'=>array(0=>0,14.5=>'Une bouteille 14,5€'))); ?>
                         </div>
                     </div>
                 <?php }?>
