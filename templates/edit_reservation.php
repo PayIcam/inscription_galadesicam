@@ -164,16 +164,20 @@ angular.module('editGuestApp', [])
     // Préparation données Réservation déjà effectuée par l'utilisateur
     if ($scope.UserReservation.prenom != undefined) {
         options = getOptions($scope.UserReservation, 'prixIcam');
-        $scope.dejaPaye += getOptionsPrice(options);
-        $scope.guestsDejaPaye.push({'nom':'Vous', 'options':options});
+        if (options.length > 0 && $scope.UserReservation.price >= $scope.prixPromo['prixIcam']['soiree']){
+            $scope.dejaPaye += getOptionsPrice(options);
+            $scope.guestsDejaPaye.push({'nom':'Vous', 'options':options});
+        }
     };
 
     if ($scope.UserGuests != undefined){
         for (var i = 0; i < $scope.UserGuests.length; i++) {
             guest = $scope.UserGuests[i];
-            options = getOptions(guest, 'prixInvite')
-            $scope.dejaPaye += getOptionsPrice(options);
-            $scope.guestsDejaPaye.push({'nom':guest['prenom']+' '+guest['nom'], 'options': options});
+            options = getOptions(guest, 'prixInvite');
+            if (options.length > 0){
+                $scope.dejaPaye += getOptionsPrice(options);
+                $scope.guestsDejaPaye.push({'nom':guest['prenom']+' '+guest['nom'], 'options': options});
+            }
         };
     };
 
@@ -196,7 +200,7 @@ angular.module('editGuestApp', [])
         // Préparation données Réservation déjà effectuée par l'utilisateur
         if ($scope.resa.prenom != undefined) {
             options = getOptions($scope.resa, 'prixIcam');
-            if ($scope.UserReservation.prenom != undefined) {
+            if ($scope.UserReservation.prenom != undefined && $scope.guestsDejaPaye[0] != undefined) {
                 optionsCurRes = $scope.guestsDejaPaye[0].options;
                 options = getNonCommonOptions(optionsCurRes, options);
                 if (options.length > 0) {
@@ -213,14 +217,14 @@ angular.module('editGuestApp', [])
             for (var i = 0; i < $scope.resa.invites.length; i++) {
                 guest = $scope.resa.invites[i];
                 options = getOptions(guest, 'prixInvite')
-                if ($scope.UserGuests[i].prenom != undefined) {
+                if ($scope.UserGuests[i] != undefined && $scope.UserGuests[i].prenom != undefined && $scope.UserGuests[i].nom != undefined ) {
                     optionsCurRes = $scope.guestsDejaPaye[i+1].options;
                     options = getNonCommonOptions(optionsCurRes, options);
                     if (options.length > 0) {
                         $scope.newPrice += getOptionsPrice(options);
                         $scope.guestsDoitEncorePayer.push({'nom':guest['prenom']+' '+guest['nom'], 'options': options});
                     };
-                }else{ // On en avait pas encore, tout est à payer
+                }else if(!(guest.prenom == '' && guest.nom == '')){ // On en avait pas encore, tout est à payer
                     $scope.newPrice += getOptionsPrice(options);
                     $scope.guestsDoitEncorePayer.push({'nom':guest['prenom']+' '+guest['nom'], 'options': options});
                 };

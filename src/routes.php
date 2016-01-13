@@ -144,7 +144,17 @@ $app->get('/edit', function ($request, $response, $args) {
                                   WHERE icam_id = :icam_id', array('icam_id' => $UserId));
     }else{ // Nouvelle réservation
         $RouteHelper->webSiteTitle = "Nouvelle réservation";
-        $UserReservation = array();
+        $UserReservation = array(
+            'nom' => $gingerUserCard->nom,
+            'prenom' => $gingerUserCard->prenom,
+            'is_icam' => 1,
+            'promo' => $gingerUserCard->promo,
+            'email' => $gingerUserCard->email,
+            'sexe' => $gingerUserCard->sexe,
+            'paiement' => 'PayIcam',
+            'price' => 0,
+            'image' => $gingerUserCard->img_link
+        );
         $UserId = -1;
         $UserGuests = array();
     }
