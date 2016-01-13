@@ -3,7 +3,8 @@
     <p class="alert alert-warning"><em>Attention, vous ne pouvez plus ajouter de nouveaux invités, par contre, vous pouvez encore modifier les informations ou les options de tout le monde (déjà invité).</em></p>
 <?php endif ?>
     <p class="alert alert-warning"><em>Attention, vous ne pouvez pas prendre une offre inférieure à celle déjà prise: vous ne pouvez pas annuler les options une fois payées.</em></p>
-<form action="<?= $editLink ?>" method="post" class="form-horizontal" role="form">
+<div ng-app="editGuestApp">
+<form action="<?= $editLink ?>" method="post" class="form-horizontal" role="form" ng-controller="EditGuestFormController">
     <fieldset>
         <legend>Vous :</legend>
         <div>
@@ -84,14 +85,25 @@
             </div>
         <?php } ?>
     </fieldset>
+    <fieldset class="recap">
+        <legend>Récaputilatif - prix à payer</legend>
+        <h3>Déjà payé <small>{{dejaPaye}}€</small></h3>
+        <ul>
+            <li ng-repeat="guest in guestsDejaPaye">{{guest.nom}}: <span style="margin-right:5px;" class="label label-success" ng-repeat="option in guest.options">{{option.nom}} : {{option.price}}€</span></li>
+        </ul>
+        <h3>Nouvelles options <small>{{newPrice}}€</small></h3>
+        <ul>
+            <li ng-repeat="guest in guestsDoitEncorePayer">{{guest.nom}}: <span style="margin-right:5px;" class="label label-success" ng-repeat="option in guest.options">{{option.nom}} : {{option.price}}€</span></li>
+        </ul>
+        <p ng-hide="{{newPrice}}">Vous n'avez rien pour le moment à payer, les modifications portant sur le nom des invités sont sans coûts.</p>
+    </fieldset>
     <hr>
     <div class="form-actions">
-        <button class="btn btn-primary" type="submit">Save changes</button>
+        <button class="btn btn-primary" type="submit">Valider</button>
         &nbsp;
         <button class="btn" type="reset">Cancel</button>
     </div>
 </form>
-
 <hr>
 
 <pre><?php var_dump($Auth->getUser()); ?></pre>
@@ -104,5 +116,54 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script>
-    
+angular.module('editGuestApp', [])
+  .controller('EditGuestFormController', function($scope) {
+    $scope.newPrice = 0;
+    $scope.dejaPaye = 0;
+
+    $scope.UserReservation = <?= json_encode($UserReservation) ?>;
+    $scope.UserGuests = <?= json_encode($UserGuests) ?>;
+    $scope.UserNewReservation = <?= json_encode($UserReservation) ?>;
+    $scope.prixPromo = <?= json_encode($prixPromo) ?>;
+
+    $scope.guestsDejaPaye = [];
+    $scope.guestsDoitEncorePayer = [];
+
+    function getOptions(user, typeUser){
+        options = [];
+        options.push({'nom':'Soirée', 'price':$scope.prixPromo[typeUser]['soiree']});
+        $scope.dejaPaye += $scope.prixPromo[typeUser]['soiree'];
+        console.log(parseInt(user.repas), 'parseInt(user.repas)', user.repas); 
+        if (parseInt(user.repas)){
+            $scope.dejaPaye += $scope.prixPromo[typeUser]['repas'];
+            options.push({'nom':'Repas', 'price':$scope.prixPromo[typeUser]['repas']});
+        }
+        console.log(parseInt(user.buffet), 'parseInt(user.buffet)', user.buffet); 
+        if (parseInt(user.buffet)){
+            $scope.dejaPaye += $scope.prixPromo[typeUser]['buffet'];
+            options.push({'nom':'Conférence', 'price':$scope.prixPromo[typeUser]['buffet']});
+        }
+        return options;
+    }
+
+    // Préparation données Réservation déjà effectuée par l'utilisateur
+    if ($scope.UserReservation.prenom != undefined) {
+        $scope.guestsDejaPaye.push({'nom':'Vous', 'options':getOptions($scope.UserReservation, 'prixIcam')});
+    };
+
+    angular.forEach($scope.UserGuests, function(value, key) {
+        this.push({'nom':value['prenom']+' '+value['nom'], 'options':getOptions(value, 'prixInvite')});
+    }, $scope.guestsDejaPaye);
+
+    // Préparation données Réservation déjà effectuée par l'utilisateur
+    if ($scope.UserNewReservation.prenom != undefined) {
+        $scope.guestsDoitEncorePayer.push({'nom':'Vous', 'options':getOptions($scope.UserNewReservation, 'prixIcam')});
+    };
+
+    angular.forEach($scope.UserNewReservation.invites, function(value, key) {
+        this.push({'nom':value['prenom']+' '+value['nom'], 'options':getOptions(value, 'prixInvite')});
+    }, $scope.guestsDoitEncorePayer);
+
+  });
 </script>
+</div>
