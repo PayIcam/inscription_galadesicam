@@ -251,10 +251,12 @@ $app->post('/edit', function ($request, $response, $args) {
         $_SESSION['formErrors']['hasErrors'] = true;
     }
     // On va regarder si il y a des erreurs dans les réservations des utilisateurs.
-    $_SESSION['formErrors']['resa'] = checkUserFieldsIntegrity($_SESSION['newResa']['resa']);
+    $errors = checkUserFieldsIntegrity($_SESSION['newResa']['resa']);
+    if (!empty($errors)) $_SESSION['formErrors']['resa'] = $errors;
     foreach ($_SESSION['newResa']['resa']['invites'] as $k => $guest) {
         if ($k >= count($UserGuests)) break; // ça sert à rien d'aller plus loin, il a triché !
-        $_SESSION['formErrors']['resa']['invites'][$k] = checkUserFieldsIntegrity($guest, $UserGuests[$k]);
+        $errors = checkUserFieldsIntegrity($guest, $UserGuests[$k]);
+        if (!empty($errors)) $_SESSION['formErrors']['resa']['invites'][$k] = $errors;
     }
 
     if (isset($_SESSION['formErrors']))
