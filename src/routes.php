@@ -160,7 +160,7 @@ $app->get('/edit', function ($request, $response, $args) {
     }
 
     $Form = new \PayIcam\Forms();
-    $Form->set(array_merge($UserReservation, array('invites'=>$UserGuests)));
+    $Form->set(array('resa' => array_merge($UserReservation, array('invites'=>$UserGuests))));
     $editLink = $this->router->pathFor('edit');
 
     // Render index view

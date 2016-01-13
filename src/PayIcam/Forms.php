@@ -33,8 +33,17 @@ class Forms{
     			if (isset($this->data[$ex[0]][$ex[1]])) 
     				$return = $this->data[$ex[0]][$ex[1]];
     		}if ($countExplode == 3) {
-    			if (isset($this->data[$ex[0]][$ex[1]][$ex[2]])) 
-    				$return = $this->data[$ex[0]][$ex[1]][$ex[2]];
+                if (isset($this->data[$ex[0]][$ex[1]][$ex[2]])) 
+                    $return = $this->data[$ex[0]][$ex[1]][$ex[2]];
+            }if ($countExplode == 4) {
+                if (isset($this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]])) 
+                    $return = $this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]];
+            }if ($countExplode == 5) {
+                if (isset($this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]])) 
+                    $return = $this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]];
+            }if ($countExplode == 6) {
+    			if (isset($this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]][$ex[5]]))
+    				$return = $this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]][$ex[5]];
     		}
     	}
     	return $return;
@@ -122,14 +131,10 @@ class Forms{
 			$value = $this->getFieldData($name);
 
 		if ($label=='hidden')
-			return '<input type="hidden" name="'.$name.'" value="'.$value.'"/>';
+			return '<input type="hidden" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" value="'.$value.'"/>';
 
 		if (isset($options['type'],$options['checkboxNoClassControl']) && $options['type'] == 'checkbox')
 			$html ='';
-		else if (isset($options['type'],$options['class']) && ($options['class']=='wysiwyg') && $options['type']=='textarea')
-			$html ='<div class="form-group '.$classError.'">
-				<label class="col-sm-2 control-label" for="'.$idName.'">'.$label.'</label>
-				<div class="col-sm-10">';
 		else
 			$html ='<div class="form-group '.$classError.'">
 				<label class="col-sm-2 control-label" for="'.$idName.'">'.$label.'</label>
@@ -148,11 +153,11 @@ class Forms{
 		}
 		if (!isset($options['type']) && $name == 'email' || $name == 'mail') {
 			$html.= '<div class="input-group">
-				<span class="input-group-addon">@</span><input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="text" name="'.$name.'" id="'.$idName.'" value="'.$value.'" '.$attr.'/>
+				<span class="input-group-addon">@</span><input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="text" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" id="'.$idName.'" value="'.$value.'" '.$attr.'/>
 			</div>';
 		}else if (!isset($options['type']) && $name == 'date' || (!empty($options['input-group-addon']) && $options['input-group-addon'] == 'date')) {
 			$html.= '<div class="input-group">
-				<span class="input-group-addon"><i class="glyphicon glyphicon-calendar ui-datepicker-trigger"></i></span><input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="text" name="'.$name.'" id="'.$idName.'" value="'.$value.'" '.$attr.'/>
+				<span class="input-group-addon"><i class="glyphicon glyphicon-calendar ui-datepicker-trigger"></i></span><input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="text" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" id="'.$idName.'" value="'.$value.'" '.$attr.'/>
 			</div>';
 		}else if (!isset($options['type']) && (isset($options['input-group-prepend']) || isset($options['input-group-append']))) {
 			$html.= '<div class="input-group">';
@@ -175,7 +180,7 @@ class Forms{
 					}
 				}
 			}
-			$html.= '<input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="text" name="'.$name.'" id="'.$idName.'" value="'.$value.'" '.$attr.'/>';
+			$html.= '<input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="text" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" id="'.$idName.'" value="'.$value.'" '.$attr.'/>';
 			if (isset($options['input-group-append']) && !is_array($options['input-group-append'])) {
 				if (!preg_match('/span|button|input/', $options['input-group-append']))
 					$html.= '<span class="input-group-addon">'.$options['input-group-append'].'</span>';
@@ -197,10 +202,10 @@ class Forms{
 			}
 			$html.= '</div>';
 		}else if (!isset($options['type'])) {
-			$html.= '<input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="text" name="'.$name.'" id="'.$idName.'" value="'.$value.'" '.$attr.'/>';
+			$html.= '<input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="text" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" id="'.$idName.'" value="'.$value.'" '.$attr.'/>';
 		}elseif($options['type'] == 'textarea'){
 			if (isset($options['class']) && $options['class']=='wysiwyg') {$html.= '<div class="clear"></div>';}
-			$html.= '<textarea name="'.$name.'" id="'.$idName.'" '.$attr.'>'.$value.'</textarea>';
+			$html.= '<textarea '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" id="'.$idName.'" '.$attr.'>'.$value.'</textarea>';
 		}elseif($options['type'] == 'checkbox' || $options['type'] == 'radio'){
 			$html .= '<div class="'.$options['type'].'">';
 			if (isset($options['value'])) {
@@ -219,15 +224,15 @@ class Forms{
 				$html.= '<label class="'.$options['type'].(($options['type'] == 'checkbox')?' checkbox-inline':' radio-inline').'"
 				'.((isset($options['type'],$options['checkboxNoClassControl']) && $options['type'] == 'checkbox')?' for="'.$idName.'"':'').'>
 					<input type="hidden" name="'.$name.'" value="0"/>
-					<input class="'.((!empty($options['class']))?' '.$options['class']:'').'" type="checkbox" '.((!empty($options['class']))?'class="'.$options['class'].'"':'').' id="'.$idName.'" name="'.$name.'" value="1" '.((!empty($value))?'checked="checked"':'').'/>
+					<input class="'.((!empty($options['class']))?' '.$options['class']:'').'" type="checkbox" '.((!empty($options['class']))?'class="'.$options['class'].'"':'').' id="'.$idName.'" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" value="1" '.((!empty($value))?'checked="checked"':'').'/>
 					'.((isset($options['type'],$options['checkboxNoClassControl']) && $options['type'] == 'checkbox')?$label:'').'
 				</label>';
 			}
 			$html .= '</div>';
 		}elseif($options['type'] == 'file'){
-			$html.= '<input type="file" class="input-file" id="'.$idName.'" name="'.$name.'" '.$attr.'/>';
+			$html.= '<input type="file" class="input-file" id="'.$idName.'" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" '.$attr.'/>';
 		}elseif($options['type'] == 'password'){
-			$html.= '<input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="password" id="'.$idName.'" name="'.$name.'" value="'.$value.'" '.$attr.'/>';
+			$html.= '<input class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" type="password" id="'.$idName.'" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" value="'.$value.'" '.$attr.'/>';
 		}
 		if (isset($options['datalist'])) {
 			$html.='<datalist class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" id="'.$options['list'].'">';
@@ -280,7 +285,7 @@ class Forms{
         $value = $this->getFieldData($field);
 
         $r = '<div class="form-group" '.$classError.'><label class="col-sm-2 control-label" for="select'.$field.'">'.$label.'</label>';
-        $r.= '<div class="col-sm-10"><select class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" name="'.$field.'" id="'.(!empty($options['id'])?$options['id']:'select'.$field).'">';
+        $r.= '<div class="col-sm-10"><select class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').'  name="'.$field.'" id="'.(!empty($options['id'])?$options['id']:'select'.$field).'">';
         foreach ($options['data'] as $k => $v) {
         	if (is_array($v)) {
         		$r .= '<optgroup label="'.$k.'">';
@@ -313,7 +318,7 @@ class Forms{
      * Returns a select to choose rather male or female option
      * @param  string $name='sexe'        The name of your select
      * @param  string $class='input-mini' The class you want your select to have
-     * @return string <select name="'.$name.'" class="'.$class.'"><option value="male">Male</option><option>Female</option></select>
+     * @return string <select '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" class="'.$class.'"><option value="male">Male</option><option>Female</option></select>
      */
     static function selectMaleFemale($name='sexe',$class='input-mini'){
     	return form::simpleSelect($name,array('class'=>$class,'data'=>array('M'=>'M.','Mme'=>'Mme.')));
@@ -326,7 +331,7 @@ class Forms{
 		foreach ($options as $k => $v) { if (!in_array($k,array('data','type','helper','datalist','append','prepend','input-group','input-group','selected'))){
 				$attr .= $k.'="'.$v.'" ';
 		}}
-    	$select = '<select class="form-control '.((!empty($options['class']))?$options['class']:'').'" name="'.$name.'" id="'.(!empty($options['id'])?$options['id']:'select'.$name).'" '.$attr.'>';
+    	$select = '<select class="form-control '.((!empty($options['class']))?$options['class']:'').'" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" id="'.(!empty($options['id'])?$options['id']:'select'.$name).'" '.$attr.'>';
     	foreach ($options['data'] as $k => $v) {
         	if (is_array($v)) {
         		$select .= '<optgroup label="'.$k.'">';
