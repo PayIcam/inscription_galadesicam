@@ -134,6 +134,16 @@ $app->get('/edit', function ($request, $response, $args) {
     $retourSecure = secureEditPart($Auth, $status, $UserReservation, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
     if ($retourSecure !== true) return $retourSecure;
     
+    if ($gingerUserCard->filiere == 'Apprentissage' || $gingerUserCard->filiere == 'Intégré') {
+        try {
+            $prixPromo = \PayIcam\Participant::getPricePromo($gingerUserCard->promo);
+            $prixPromo['gameDePrix'] = $gingerUserCard->promo;
+        } catch (Exception $e) {
+            $prixPromo = \PayIcam\Participant::getPricePromo('Ingenieur');
+            $prixPromo['gameDePrix'] = 'Ingenieur';
+        }
+    }
+
     // On continue
     if(count($UserReservation) == 1){ // il y avait déjà une réservation pour cet utilisateur
         $UserGuests = array();
@@ -149,24 +159,22 @@ $app->get('/edit', function ($request, $response, $args) {
             'prenom' => $gingerUserCard->prenom,
             'is_icam' => 1,
             'promo' => $gingerUserCard->promo,
-            'email' => $gingerUserCard->email,
+            'email' => $gingerUserCard->mail,
             'sexe' => $gingerUserCard->sexe,
             'paiement' => 'PayIcam',
             'price' => 0,
+            'repas' => 0,
+            'buffet' => 0,
+            'tickets_boisson' => "0",
             'image' => $gingerUserCard->img_link
         );
         $UserId = -1;
+        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => "0", 'is_icam' => 0);
         $UserGuests = array();
-    }
-
-    if ($gingerUserCard->filiere == 'Apprentissage' || $gingerUserCard->filiere == 'Intégré') {
-        try {
-            $prixPromo = \PayIcam\Participant::getPricePromo($gingerUserCard->promo);
-            $prixPromo['gameDePrix'] = $gingerUserCard->promo;
-        } catch (Exception $e) {
-            $prixPromo = \PayIcam\Participant::getPricePromo('Ingenieur');
-            $prixPromo['gameDePrix'] = 'Ingenieur';
+        for ($i=0; $i < $prixPromo['nbInvites']; $i++) { 
+            $UserGuests[] = $emptyUser;
         }
+        $emptyUser['repas'] = 1;
     }
 
     $Form = new \PayIcam\Forms();

@@ -51,7 +51,7 @@
                         <div class="form-group ">
                             <label class="col-sm-2 control-label">Options : </label>
                             <div class="col-sm-10">
-                                <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($Form->data['resa']['invites'][$i]) && $Form->data['resa']['invites'][$i])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
+                                <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($Form->data['resa']['invites'][$i]['prenom']) && $Form->data['resa']['invites'][$i]['prenom'])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
                                 <?= (isset($Form->data['resa']['invites'][$i]['repas']) && $Form->data['resa']['invites'][$i]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">+'.$prixPromo['prixInvite']['repas'].'€</span></div>'
                                     : (($prixPromo['prixInvite']['repas'] == null) ? ''
                                         : $Form->input('resa[invites]['.$i.'][repas]','Participe au repas <span class="label label-default">+'.($prixPromo['prixInvite']['repas']).'€</span class="label label-default">', array('ng-model' => 'resa.invites['.$i.'].repas', 'type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
@@ -76,7 +76,7 @@
                             <div class="form-group ">
                                 <label class="col-sm-2 control-label">Options : </label>
                                 <div class="col-sm-10">
-                                    <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($Form->data['resa']['invites'][$j]) && $Form->data['resa']['invites'][$j])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
+                                    <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($Form->data['resa']['invites'][$j]['prenom']) && $Form->data['resa']['invites'][$j]['prenom'])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
                                     <?= (isset($Form->data['resa']['invites'][$j]['repas']) && $Form->data['resa']['invites'][$j]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">+'.$prixPromo['prixInvite']['repas'].'€</span></div>'
                                         : (($prixPromo['prixInvite']['repas'] == null) ? ''
                                             : $Form->input('resa[invites]['.$j.'][repas]','Participe au repas <span class="label label-default">+'.($prixPromo['prixInvite']['repas']).'€</span class="label label-default">', array('ng-model' => 'resa.invites['.$j.'].repas', 'type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
@@ -143,6 +143,7 @@ angular.module('editGuestApp', [])
 
     function getOptions(user, typeUser){
         options = [];
+        if (user.prenom == undefined && user.nom == undefined) return options;
         options.push({'nom':'Soirée', 'price':$scope.prixPromo[typeUser]['soiree']});
         if (user.repas == true || parseInt(user.repas))
             options.push({'nom':'Repas', 'price':$scope.prixPromo[typeUser]['repas']});
