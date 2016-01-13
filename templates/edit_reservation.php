@@ -20,11 +20,11 @@
             <div class="form-group ">
                 <label class="col-sm-2 control-label">Options : </label>
                 <div class="col-sm-10">
-                    <div class="checkbox"><em>Vous participez de base à la soirée</em> <span class="label label-<?= ($Form->data['price']>=$prixPromo['prixIcam']['soiree'])?'success':'info' ?>">+<?= $prixPromo['prixIcam']['soiree'] ?>€</span></div>
-                    <?= ($Form->data['repas']) ? '<div class="checkbox">Vous participez déjà au repas <span class="label label-success">(+'.$prixPromo['prixIcam']['repas'].'€)</span></div>'
+                    <div class="checkbox"><em>Vous participez de base à la soirée</em> <span class="label label-<?= (isset($Form->data['price']) && $Form->data['price']>=$prixPromo['prixIcam']['soiree'])?'success':'info' ?>">+<?= $prixPromo['prixIcam']['soiree'] ?>€</span></div>
+                    <?= (isset($Form->data['repas']) && $Form->data['repas']) ? '<div class="checkbox">Vous participez déjà au repas <span class="label label-success">(+'.$prixPromo['prixIcam']['repas'].'€)</span></div>'
                             : (($prixPromo['prixIcam']['repas'] == null) ? ''
                                 : $Form->input('repas','Participer au repas <span class="label label-default">+'.($prixPromo['prixIcam']['repas']).'€</span>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                    <?= ($Form->data['buffet']) ? '<div class="checkbox">Vous participez déjà à la conférence <span class="label label-success">(+'.$prixPromo['prixIcam']['buffet'].'€)</span></div>'
+                    <?= (isset($Form->data['buffet']) && $Form->data['buffet']) ? '<div class="checkbox">Vous participez déjà à la conférence <span class="label label-success">(+'.$prixPromo['prixIcam']['buffet'].'€)</span></div>'
                             : (($prixPromo['prixIcam']['buffet'] == null) ? ''
                                 : $Form->input('buffet','Participer à la conférence <span class="label label-default">+'.($prixPromo['prixIcam']['buffet']).'€</span>', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
                 </div>
@@ -46,11 +46,11 @@
                         <div class="form-group ">
                             <label class="col-sm-2 control-label">Options : </label>
                             <div class="col-sm-10">
-                                <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= ($Form->data['invites'][$i])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
-                                <?= ($Form->data['invites'][$i]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">(+'.$prixPromo['prixInvite']['repas'].'€)</span></div>'
+                                <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($Form->data['invites'][$i]) && $Form->data['invites'][$i])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
+                                <?= (isset($Form->data['invites'][$i]['repas']) && $Form->data['invites'][$i]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">(+'.$prixPromo['prixInvite']['repas'].'€)</span></div>'
                                     : (($prixPromo['prixInvite']['repas'] == null) ? ''
                                         : $Form->input('invites['.$i.'][repas]','Participe au repas <span class="label label-default">+'.($prixPromo['prixInvite']['repas']).'€</span class="label label-default">', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                                <?= ($Form->data['invites'][$i]['buffet']) ? '<div class="checkbox">Participe déjà à la conférence <span class="label label-success">(+'.$prixPromo['prixInvite']['buffet'].'€)</span></div>'
+                                <?= (isset($Form->data['invites'][$i]['buffet']) && $Form->data['invites'][$i]['buffet']) ? '<div class="checkbox">Participe déjà à la conférence <span class="label label-success">(+'.$prixPromo['prixInvite']['buffet'].'€)</span></div>'
                                     : (($prixPromo['prixInvite']['buffet'] == null) ? ''
                                         : $Form->input('invites['.$i.'][buffet]','Participe à la conférence <span class="label label-default">+'.($prixPromo['prixInvite']['buffet']).'€</span class="label label-default">', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
                             </div>
@@ -68,11 +68,11 @@
                             <div class="form-group ">
                                 <label class="col-sm-2 control-label">Options : </label>
                                 <div class="col-sm-10">
-                                    <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= ($Form->data['invites'][$j])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
-                                    <?= ($Form->data['invites'][$j]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">(+'.$prixPromo['prixInvite']['repas'].'€)</span></div>'
+                                    <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($Form->data['invites'][$j]) && $Form->data['invites'][$j])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
+                                    <?= (isset($Form->data['invites'][$j]['repas']) && $Form->data['invites'][$j]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">(+'.$prixPromo['prixInvite']['repas'].'€)</span></div>'
                                         : (($prixPromo['prixInvite']['repas'] == null) ? ''
                                             : $Form->input('invites['.$j.'][repas]','Participe au repas <span class="label label-default">+'.($prixPromo['prixInvite']['repas']).'€</span class="label label-default">', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                                    <?= ($Form->data['invites'][$j]['buffet']) ? '<div class="checkbox">Participe déjà à la conférence <span class="label label-success">(+'.$prixPromo['prixInvite']['buffet'].'€)</span></div>'
+                                    <?= (isset($Form->data['invites'][$j]['buffet']) && $Form->data['invites'][$j]['buffet']) ? '<div class="checkbox">Participe déjà à la conférence <span class="label label-success">(+'.$prixPromo['prixInvite']['buffet'].'€)</span></div>'
                                         : (($prixPromo['prixInvite']['buffet'] == null) ? ''
                                             : $Form->input('invites['.$j.'][buffet]','Participe à la conférence <span class="label label-default">+'.($prixPromo['prixInvite']['buffet']).'€</span class="label label-default">', array('type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
                                 </div>
@@ -101,3 +101,8 @@
 <pre><?php var_dump($canWeEditOurReservation); ?></pre>
 <pre><?php var_dump($gingerUserCard); ?></pre>
 <pre><?php var_dump($prixPromo); ?></pre>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script>
+    
+</script>
