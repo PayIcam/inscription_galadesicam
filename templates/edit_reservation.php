@@ -224,7 +224,7 @@ angular.module('editGuestApp', [])
                         $scope.newPrice += getOptionsPrice(options);
                         $scope.guestsDoitEncorePayer.push({'nom':guest['prenom']+' '+guest['nom'], 'options': options});
                     };
-                }else if(!(guest.prenom == '' && guest.nom == '')){ // On en avait pas encore, tout est à payer
+                }else if(!(guest.prenom == '' && guest.nom == '') && !(guest.prenom == undefined && guest.nom == undefined) && !(guest.prenom == '' && guest.nom == undefined) && !(guest.prenom == undefined && guest.nom == '')){ // On en avait pas encore, tout est à payer
                     $scope.newPrice += getOptionsPrice(options);
                     $scope.guestsDoitEncorePayer.push({'nom':guest['prenom']+' '+guest['nom'], 'options': options});
                 };
