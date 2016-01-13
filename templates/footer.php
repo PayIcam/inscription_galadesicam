@@ -2,8 +2,7 @@
 
   <footer class="footer">
       <p class="clearfix">
-          &copy; 2015, PayIcam, Antoine <em>(115)</em>
-          <a class="pull-right" href="#">Back to top</a>
+          &copy; 2015, PayIcam, Antoine <em>(115)</em> - <a href="../" title="Retour PayIcam">Retour PayIcam</a></p>
       </p>
   </footer>
 
