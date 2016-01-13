@@ -126,6 +126,7 @@
 <pre><?php var_dump($prixPromo); ?></pre>
 <pre><?php var_dump($Form->data); ?></pre>
 <pre><?php var_dump($Form->data['resa']['invites']); ?></pre>
+<pre><?php var_dump($Form); ?></pre>
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script>
@@ -142,8 +143,8 @@ angular.module('editGuestApp', [])
     $scope.guestsDejaPaye = [];
     $scope.guestsDoitEncorePayer = [];
 
+    // On s'assure que les données vont être lisibles par AngularJS et qu'il ne va pas faire n'importe quoi
     function setCheckBoxToTrueFalse(guest){
-        console.log("guest", guest); 
         guest.repas = Boolean(parseInt(guest.repas));
         guest.buffet = Boolean(parseInt(guest.buffet));
         guest.tickets_boisson = guest.tickets_boisson+"";

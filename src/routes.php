@@ -137,23 +137,6 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
     return compact('UserGuests', 'UserReservation', 'UserId', 'dataResaForm');
 }
 
-function mergeUserReservations($array1, $array2){
-    $retour = $array1['resa'];
-    $icamValues2 = $array2['resa'];
-    $icamGuests2 = $array2['resa']['invites'];
-    unset($icamValues2['invites']);
-    $retour = array_merge($retour, $icamValues2);
-    foreach ($retour['invites'] as $k => $guest) {
-        // On boucle sur les invités du premier tableau, soit la première résa pour que le gars ne puisse pas tricher !!
-        // Si il y a plus d'invités dans la 2e résa que la 1 c'est qu'il a du essayer d'en rajouter à la main...
-        // et on les prend dans l'ordre !
-        if (isset($icamGuests2[$k])) {
-            $retour['invites'][$k] = array_merge($guest, $icamGuests2[$k]);
-        } // sinon, ba yen a pas, on garde ceux du premier tableau.
-    }
-    return array('resa'=>$retour);
-}
-
 $app->get('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
     global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
@@ -180,7 +163,13 @@ $app->get('/edit', function ($request, $response, $args) {
     
     $Form = new \PayIcam\Forms();
     $Form->set( (isset($_SESSION['newResa'])) ? $_SESSION['newResa'] : $dataResaForm );
-    if( isset($_SESSION['newResa']) ) unset($_SESSION['newResa']); // On veut pas avoir le formulaire plus longtemps en session, il sera regénéré au pire.
+    
+    if( isset($_SESSION['newResa']) ){ var_dump($_SESSION['newResa']);var_dump($_SESSION['newResa']['resa']['invites']);unset($_SESSION['newResa']); } // On veut pas avoir le formulaire plus longtemps en session, il sera regénéré au pire.
+
+    if( isset($_SESSION['formErrors']) ){
+        $Form->errors = $_SESSION['formErrors'];
+        unset($_SESSION['formErrors']);
+    }
 
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
@@ -190,6 +179,46 @@ $app->get('/edit', function ($request, $response, $args) {
 $app->get('/edit/', function ($request, $response, $args) {
     return $response->withStatus(301)->withHeader('Location', $this->router->pathFor('edit')); // code 301: redirection, déplacé pour toujours
 });
+
+//////////////////////////////
+// Traitement du formulaire //
+//////////////////////////////
+function mergeUserReservations($array1, $array2){
+    $retour = $array1['resa'];
+    $icamValues2 = $array2['resa'];
+    $icamGuests2 = $array2['resa']['invites'];
+    unset($icamValues2['invites']);
+    $retour = array_merge($retour, $icamValues2);
+    foreach ($retour['invites'] as $k => $guest) {
+        // On boucle sur les invités du premier tableau, soit la première résa pour que le gars ne puisse pas tricher !!
+        // Si il y a plus d'invités dans la 2e résa que la 1 c'est qu'il a du essayer d'en rajouter à la main...
+        // et on les prend dans l'ordre !
+        if (isset($icamGuests2[$k])) {
+            $retour['invites'][$k] = array_merge($guest, $icamGuests2[$k]);
+        } // sinon, ba yen a pas, on garde ceux du premier tableau.
+    }
+    return array('resa'=>$retour);
+}
+function checkUserFieldsIntegrity($newUser, $oldUser=''){
+    $errors = array();
+    if (empty($newUser['nom']) && empty($newUser['prenom']) && !empty($oldUser['nom'])) {
+        $errors['nom'] = 'Vous ne pouvez pas retirer un invité';
+        $errors['prenom'] = 'Vous ne pouvez pas retirer un invité';
+    }elseif(empty($newUser['nom']) && !empty($newUser['prenom'])){
+        $errors['nom'] = 'Vous devez remplir le nom aussi';
+    }elseif(!empty($newUser['nom']) && empty($newUser['prenom'])){
+        $errors['prenom'] = 'Vous devez remplir le prénom aussi';
+    }elseif(empty($newUser['nom']) && empty($newUser['prenom'])){ // pas besoin d'aller plus loin, on a pas d'invité ! on l'ignorera anyway
+        return array();
+    }
+    $ticket = intval($newUser['tickets_boisson']);
+    $oldTicket = (isset($oldUser['tickets_boisson']))?intval($oldUser['tickets_boisson']):0;
+    if ($ticket != 0 && $ticket != 10 && $ticket != $oldTicket) {
+        $errors['tickets_boisson'] = 'Vous avez un problème avec les tickets boisson, vous avez le choix que entre 0 ou 10 tickets!';
+    }
+    return $errors;
+}
+
 $app->post('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
     global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
@@ -214,11 +243,27 @@ $app->post('/edit', function ($request, $response, $args) {
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId, dataResaForm
 
     $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody() );
+    ////////////////////////////////////////////////////////
+    // On va vérifier que les données postées sont bonnes //
+    ////////////////////////////////////////////////////////
+    if (count($_SESSION['newResa']['resa']['invites']) > count($UserGuests)) {
+        $this->flash->addMessage('warning', 'Hé oh loulou, tu t\'es cru où ? Cherche pas, tu ne pourras plus gruger et rajouter des invités en plus des quotas !.<br>Tu as le droit qu\'à '.count($UserGuests).' invités, pas à '.count($request->getParsedBody()['resa']['invites']).' !!');
+        $_SESSION['formErrors']['hasErrors'] = true;
+    }
+    // On va regarder si il y a des erreurs dans les réservations des utilisateurs.
+    $_SESSION['formErrors']['resa'] = checkUserFieldsIntegrity($_SESSION['newResa']['resa']);
+    foreach ($_SESSION['newResa']['resa']['invites'] as $k => $guest) {
+        if ($k >= count($UserGuests)) break; // ça sert à rien d'aller plus loin, il a triché !
+        $_SESSION['formErrors']['resa']['invites'][$k] = checkUserFieldsIntegrity($guest, $UserGuests[$k]);
+    }
+
+    if (isset($_SESSION['formErrors']))
+        $this->flash->addMessage('warning', 'Vous avez des erreurs dans le formulaire.');
+    else
+        $this->flash->addMessage('success', "wahou pas d'erreurs pour le moment !");
 
     return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
     
-    var_dump($request->getParsedBody());
-    return $response;
     $Form = new \PayIcam\Form();
     $validate = array(
         'nom'    => array('rule'=>'notEmpty','message' => 'Entrez votre nom'),

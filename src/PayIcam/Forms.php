@@ -19,31 +19,33 @@ class Forms{
     function set($data){
         $this->data = $data;
     }
-    public function getFieldData($fieldName){
+    public function getFieldData($fieldName, $var = 'data'){
     	$return = '';
-    	if (isset($this->data[$fieldName])) {
-    		$return = $this->data[$fieldName];
+        $data = ($var == 'errors')?$this->errors:$this->data;
+
+    	if (isset($data[$fieldName])) {
+    		$return = $data[$fieldName];
     	}elseif(strpos($fieldName,'[') && strpos($fieldName,']')){
     		$ex = explode('[', str_replace(']', '', $fieldName));
     		$countExplode = count($ex);
     		if ($countExplode == 1) {
-    			if (isset($this->data[$ex[0]])) 
-    				$return = $this->data[$ex[0]];
+    			if (isset($data[$ex[0]])) 
+    				$return = $data[$ex[0]];
     		}if ($countExplode == 2) {
-    			if (isset($this->data[$ex[0]][$ex[1]])) 
-    				$return = $this->data[$ex[0]][$ex[1]];
+    			if (isset($data[$ex[0]][$ex[1]])) 
+    				$return = $data[$ex[0]][$ex[1]];
     		}if ($countExplode == 3) {
-                if (isset($this->data[$ex[0]][$ex[1]][$ex[2]])) 
-                    $return = $this->data[$ex[0]][$ex[1]][$ex[2]];
+                if (isset($data[$ex[0]][$ex[1]][$ex[2]])) 
+                    $return = $data[$ex[0]][$ex[1]][$ex[2]];
             }if ($countExplode == 4) {
-                if (isset($this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]])) 
-                    $return = $this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]];
+                if (isset($data[$ex[0]][$ex[1]][$ex[2]][$ex[3]])) 
+                    $return = $data[$ex[0]][$ex[1]][$ex[2]][$ex[3]];
             }if ($countExplode == 5) {
-                if (isset($this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]])) 
-                    $return = $this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]];
+                if (isset($data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]])) 
+                    $return = $data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]];
             }if ($countExplode == 6) {
-    			if (isset($this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]][$ex[5]]))
-    				$return = $this->data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]][$ex[5]];
+    			if (isset($data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]][$ex[5]]))
+    				$return = $data[$ex[0]][$ex[1]][$ex[2]][$ex[3]][$ex[4]][$ex[5]];
     		}
     	}
     	return $return;
@@ -117,13 +119,10 @@ class Forms{
 </div>
 	*/
 	public function input($name,$label,$options=array()){
-		$error = false;
-		$classError = '';
-		$idName = (!empty($options['id'])?$options['id']:'input'.$name);
-		if (isset($this->errors[$name])) {
-			$error = $this->errors[$name];
-			$classError = 'has-error';
-		}
+        $idName = (!empty($options['id'])?$options['id']:'input'.$name);
+
+        $error = $this->getFieldData($name, 'errors');
+		$classError = ($error)?'has-error':'';
 
 		if(isset($options['value']) && $label=='hidden')
 			$value = $options['value'];
@@ -207,7 +206,7 @@ class Forms{
 			if (isset($options['class']) && $options['class']=='wysiwyg') {$html.= '<div class="clear"></div>';}
 			$html.= '<textarea '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').' name="'.$name.'" id="'.$idName.'" '.$attr.'>'.$value.'</textarea>';
 		}elseif($options['type'] == 'checkbox' || $options['type'] == 'radio'){
-			$html .= '<div class="'.$options['type'].'">';
+			$html .= '<div class="'.$options['type'].' '.$classError.'">';
 			if (isset($options['value'])) {
 				foreach ($options['value'] as $k => $v) {
 				   	$html .= '<label class="'.$options['type'].(isset($options['inline'])?(($options['type'] == 'checkbox')?' checkbox-inline':' radio-inline'):'').'">';
@@ -276,15 +275,11 @@ class Forms{
      * @return string
      */
     function select($field,$label,$options){
-    	$error = false;
-		$classError = '';
-		if (isset($this->errors[$field])) {
-			$error = $this->errors[$field];
-			$classError = 'error';
-		}
+        $error = $this->getFieldData($field, 'errors');
+        $classError = ($error)?'has-error':'';
         $value = $this->getFieldData($field);
 
-        $r = '<div class="form-group" '.$classError.'><label class="col-sm-2 control-label" for="select'.$field.'">'.$label.'</label>';
+        $r = '<div class="form-group '.$classError.'"><label class="col-sm-2 control-label" for="select'.$field.'">'.$label.'</label>';
         $r.= '<div class="col-sm-10"><select class="form-control'.((!empty($options['class']))?' '.$options['class']:'').'" '.((!empty($options['ng-model']))?'ng-model="'.$options['ng-model'].'"':'').'  name="'.$field.'" id="'.(!empty($options['id'])?$options['id']:'select'.$field).'">';
         foreach ($options['data'] as $k => $v) {
         	if (is_array($v)) {
