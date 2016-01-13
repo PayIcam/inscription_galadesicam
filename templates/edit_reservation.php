@@ -18,22 +18,21 @@
                 <?php } ?>
             </div>
             <?= $Form->input('resa[telephone]', 'Votre telephone : ', array('ng-model'=>'resa.telephone', 'maxlength'=>'255', 'class'=>"col-xs-3")); ?>
-            {{resa}}
             <div class="form-group ">
                 <label class="col-sm-2 control-label">Options : </label>
                 <div class="col-sm-10">
-                    <div class="checkbox"><em>Vous participez de base à la soirée</em> <span class="label label-<?= (isset($Form->data['resa']['price']) && $Form->data['resa']['price']>=$prixPromo['prixIcam']['soiree'])?'success':'info' ?>">+<?= $prixPromo['prixIcam']['soiree'] ?>€</span></div>
-                    <?= (isset($Form->data['resa']['repas']) && $Form->data['resa']['repas']) ? '<div class="checkbox">Vous participez déjà au repas <span class="label label-success">+'.$prixPromo['prixIcam']['repas'].'€</span></div>'
+                    <div class="checkbox"><em>Vous participez de base à la soirée</em> <span class="label label-<?= (isset($UserReservation['price']) && $UserReservation['price']>=$prixPromo['prixIcam']['soiree'])?'success':'info' ?>">+<?= $prixPromo['prixIcam']['soiree'] ?>€</span></div>
+                    <?= (isset($UserReservation['repas']) && $UserReservation['repas']) ? '<div class="checkbox">Vous participez déjà au repas <span class="label label-success">+'.$prixPromo['prixIcam']['repas'].'€</span></div>'
                             : (($prixPromo['prixIcam']['repas'] == null) ? ''
                                 : $Form->input('resa[repas]','Participer au repas <span class="label label-default">+'.($prixPromo['prixIcam']['repas']).'€</span>', array('ng-model'=>'resa.repas', 'type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                    <?= (isset($Form->data['resa']['buffet']) && $Form->data['resa']['buffet']) ? '<div class="checkbox">Vous participez déjà à la conférence <span class="label label-success">+'.$prixPromo['prixIcam']['buffet'].'€</span></div>'
+                    <?= (isset($UserReservation['buffet']) && $UserReservation['buffet']) ? '<div class="checkbox">Vous participez déjà à la conférence <span class="label label-success">+'.$prixPromo['prixIcam']['buffet'].'€</span></div>'
                             : (($prixPromo['prixIcam']['buffet'] == null) ? ''
                                 : $Form->input('resa[buffet]','Participer à la conférence <span class="label label-default">+'.($prixPromo['prixIcam']['buffet']).'€</span>', array('ng-model'=>'resa.buffet', 'type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                    <?= (isset($Form->data['resa']['tickets_boisson']) && $Form->data['resa']['tickets_boisson']) ?
-                        '<div class="checkbox">Vous avez déjà réservé '.$Form->data['resa']['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$Form->data['resa']['tickets_boisson'].'€</span></div>' : ''; ?>
+                    <?= (isset($UserReservation['tickets_boisson']) && $UserReservation['tickets_boisson']) ?
+                        '<div class="checkbox">Vous avez déjà réservé '.$UserReservation['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserReservation['tickets_boisson'].'€</span></div>' : ''; ?>
                 </div>
             </div>
-            <?= (isset($Form->data['resa']['tickets_boisson']) && $Form->data['resa']['tickets_boisson']) ? '' :
+            <?= (isset($UserReservation['tickets_boisson']) && $UserReservation['tickets_boisson']) ? '' :
                 $Form->select('resa[tickets_boisson]', 'Tickets boisson : ', array('ng-model'=>'resa.tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 10€'))); // On veut pas afficher les tickets boissons si il en a déjà pris ! ?>
         </div>
     </fieldset>
@@ -51,18 +50,18 @@
                         <div class="form-group ">
                             <label class="col-sm-2 control-label">Options : </label>
                             <div class="col-sm-10">
-                                <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($Form->data['resa']['invites'][$i]['prenom']) && $Form->data['resa']['invites'][$i]['prenom'])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
-                                <?= (isset($Form->data['resa']['invites'][$i]['repas']) && $Form->data['resa']['invites'][$i]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">+'.$prixPromo['prixInvite']['repas'].'€</span></div>'
+                                <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($UserGuests[$i]['prenom']) && $UserGuests[$i]['prenom'])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
+                                <?= (isset($UserGuests[$i]['repas']) && $UserGuests[$i]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">+'.$prixPromo['prixInvite']['repas'].'€</span></div>'
                                     : (($prixPromo['prixInvite']['repas'] == null) ? ''
                                         : $Form->input('resa[invites]['.$i.'][repas]','Participe au repas <span class="label label-default">+'.($prixPromo['prixInvite']['repas']).'€</span class="label label-default">', array('ng-model' => 'resa.invites['.$i.'].repas', 'type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                                <?= (isset($Form->data['resa']['invites'][$i]['buffet']) && $Form->data['resa']['invites'][$i]['buffet']) ? '<div class="checkbox">Participe déjà à la conférence <span class="label label-success">+'.$prixPromo['prixInvite']['buffet'].'€</span></div>'
+                                <?= (isset($UserGuests[$i]['buffet']) && $UserGuests[$i]['buffet']) ? '<div class="checkbox">Participe déjà à la conférence <span class="label label-success">+'.$prixPromo['prixInvite']['buffet'].'€</span></div>'
                                     : (($prixPromo['prixInvite']['buffet'] == null) ? ''
                                         : $Form->input('resa[invites]['.$i.'][buffet]','Participe à la conférence <span class="label label-default">+'.($prixPromo['prixInvite']['buffet']).'€</span class="label label-default">', array('ng-model' => 'resa.invites['.$i.'].buffet', 'type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                                <?= (isset($Form->data['resa']['invites'][$i]['tickets_boisson']) && $Form->data['resa']['invites'][$i]['tickets_boisson']) ?
-                                    '<div class="checkbox">Vous avez déjà réservé '.$Form->data['resa']['invites'][$i]['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$Form->data['resa']['invites'][$i]['tickets_boisson'].'€</span></div>' : ''; ?>
+                                <?= (isset($UserGuests[$i]['tickets_boisson']) && $UserGuests[$i]['tickets_boisson']) ?
+                                    '<div class="checkbox">Vous avez déjà réservé '.$UserGuests[$i]['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserGuests[$i]['tickets_boisson'].'€</span></div>' : ''; ?>
                             </div>
                         </div>
-                        <?= (isset($Form->data['resa']['invites'][$i]['tickets_boisson']) && $Form->data['resa']['invites'][$i]['tickets_boisson']) ? '' :
+                        <?= (isset($UserGuests[$i]['tickets_boisson']) && $UserGuests[$i]['tickets_boisson']) ? '' :
                             $Form->select('resa[invites]['.$i.'][tickets_boisson]','Tickets boisson : ', array('ng-model' => 'resa.invites['.$i.'].tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
                     </div>
                 </div>
@@ -76,18 +75,18 @@
                             <div class="form-group ">
                                 <label class="col-sm-2 control-label">Options : </label>
                                 <div class="col-sm-10">
-                                    <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($Form->data['resa']['invites'][$j]['prenom']) && $Form->data['resa']['invites'][$j]['prenom'])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
-                                    <?= (isset($Form->data['resa']['invites'][$j]['repas']) && $Form->data['resa']['invites'][$j]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">+'.$prixPromo['prixInvite']['repas'].'€</span></div>'
+                                    <div class="checkbox"><em>Inscrit de base à la soirée</em> <span class="label label-<?= (isset($UserGuests[$j]['prenom']) && $UserGuests[$j]['prenom'])?'success':'info' ?>">+<?= $prixPromo['prixInvite']['soiree'] ?>€</span class="label label-default"></div>
+                                    <?= (isset($UserGuests[$j]['repas']) && $UserGuests[$j]['repas']) ? '<div class="checkbox">Participe déjà au repas <span class="label label-success">+'.$prixPromo['prixInvite']['repas'].'€</span></div>'
                                         : (($prixPromo['prixInvite']['repas'] == null) ? ''
                                             : $Form->input('resa[invites]['.$j.'][repas]','Participe au repas <span class="label label-default">+'.($prixPromo['prixInvite']['repas']).'€</span class="label label-default">', array('ng-model' => 'resa.invites['.$j.'].repas', 'type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                                    <?= (isset($Form->data['resa']['invites'][$j]['buffet']) && $Form->data['resa']['invites'][$j]['buffet']) ? '<div class="checkbox">Participe déjà à la conférence <span class="label label-success">+'.$prixPromo['prixInvite']['buffet'].'€</span></div>'
+                                    <?= (isset($UserGuests[$j]['buffet']) && $UserGuests[$j]['buffet']) ? '<div class="checkbox">Participe déjà à la conférence <span class="label label-success">+'.$prixPromo['prixInvite']['buffet'].'€</span></div>'
                                         : (($prixPromo['prixInvite']['buffet'] == null) ? ''
                                             : $Form->input('resa[invites]['.$j.'][buffet]','Participe à la conférence <span class="label label-default">+'.($prixPromo['prixInvite']['buffet']).'€</span class="label label-default">', array('ng-model' => 'resa.invites['.$j.'].buffet', 'type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                                    <?= (isset($Form->data['resa']['invites'][$j]['tickets_boisson']) && $Form->data['resa']['invites'][$j]['tickets_boisson']) ? 
-                                        '<div class="checkbox">Vous avez déjà réservé '.$Form->data['resa']['invites'][$j]['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$Form->data['resa']['invites'][$j]['tickets_boisson'].'€</span></div>' : ''; ?>
+                                    <?= (isset($UserGuests[$j]['tickets_boisson']) && $UserGuests[$j]['tickets_boisson']) ? 
+                                        '<div class="checkbox">Vous avez déjà réservé '.$UserGuests[$j]['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserGuests[$j]['tickets_boisson'].'€</span></div>' : ''; ?>
                                 </div>
                             </div>
-                            <?= (isset($Form->data['resa']['invites'][$j]['tickets_boisson']) && $Form->data['resa']['invites'][$j]['tickets_boisson']) ? '' :
+                            <?= (isset($UserGuests[$j]['tickets_boisson']) && $UserGuests[$j]['tickets_boisson']) ? '' :
                                 $Form->select('resa[invites]['.$j.'][tickets_boisson]','Tickets boisson : ', array('ng-model' => 'resa.invites['.$j.'].tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
                         </div>
                     </div>
@@ -113,8 +112,10 @@
         &nbsp;
         <button class="btn" type="reset">Cancel</button>
     </div>
+{{resa}}
 </form>
 <hr>
+
 
 <pre><?php var_dump($Auth->getUser()); ?></pre>
 <pre><?php var_dump($UserReservation); ?></pre>
@@ -140,6 +141,21 @@ angular.module('editGuestApp', [])
 
     $scope.guestsDejaPaye = [];
     $scope.guestsDoitEncorePayer = [];
+
+    function setCheckBoxToTrueFalse(guest){
+        console.log("guest", guest); 
+        guest.repas = Boolean(parseInt(guest.repas));
+        guest.buffet = Boolean(parseInt(guest.buffet));
+        guest.tickets_boisson = guest.tickets_boisson+"";
+    }
+    setCheckBoxToTrueFalse($scope.UserReservation);
+    setCheckBoxToTrueFalse($scope.resa);
+    for (var i = $scope.UserGuests.length - 1; i >= 0; i--) {
+        setCheckBoxToTrueFalse($scope.UserGuests[i]);
+    };
+    for (var i = $scope.resa.invites.length - 1; i >= 0; i--) {
+        setCheckBoxToTrueFalse($scope.resa.invites[i]);
+    };
 
     function getOptions(user, typeUser){
         options = [];

@@ -1,30 +1,5 @@
 <?php
 
-
-$Auth = new \PayIcam\Auth();
-
-// get payutcClient
-function getPayutcClient($service) {
-    global $app, $settings;
-    return new \JsonClient\AutoJsonClient(
-        $settings['settings']['PayIcam']['payutc_server'],
-        $service,
-        array(),
-        "PayIcam Json PHP Client",
-        isset($_SESSION['payutc_cookie']) ? $_SESSION['payutc_cookie'] : "");
-}
-$payutcClient = getPayutcClient("WEBSALE");
-$gingerClient = new \Ginger\Client\GingerClient($settings['settings']['PayIcam']['ginger_key'], $settings['settings']['PayIcam']['ginger_server']);
-
-$admin = $payutcClient->isSuperAdmin();
-$isAdminFondation = $payutcClient->isAdmin();
-
-$confSQL = $settings['settings']['confSQL'];
-$DB = new \PayIcam\DB($confSQL['sql_host'],$confSQL['sql_user'],$confSQL['sql_pass'],$confSQL['sql_db']);
-
-$canWeRegisterNewGuests = 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'inscriptions'))));
-$canWeEditOurReservation = 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'modifications_places'))));
-
 ////////////
 // Routes //
 ////////////
@@ -115,25 +90,7 @@ function secureEditPart($Auth, $status, $UserReservation, $app, $response, $canW
     return true;
 }
 
-$app->get('/edit', function ($request, $response, $args) {
-    // Initialisation, récupération variables utiles
-    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
-    $flash = $this->flash;
-    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
-    $emailContactGala = $this->get('settings')['emailContactGala'];
-    $status = $payutcClient->getStatus();
-
-    $mailPersonne = $Auth->getUserField('email');
-    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
-
-    // Récupération infos utilisateur
-    $gingerUserCard = $gingerClient->getUser($mailPersonne);
-    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
-
-    //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
-    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
-    if ($retourSecure !== true) return $retourSecure;
-    
+function getPrixPromo($gingerUserCard){
     if ($gingerUserCard->filiere == 'Apprentissage' || $gingerUserCard->filiere == 'Intégré') {
         try {
             $prixPromo = \PayIcam\Participant::getPricePromo($gingerUserCard->promo);
@@ -143,17 +100,18 @@ $app->get('/edit', function ($request, $response, $args) {
             $prixPromo['gameDePrix'] = 'Ingenieur';
         }
     }
+    return $prixPromo;
+}
 
-    // On continue
+function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB){
+    $UserGuests = array();
     if(count($UserReservation) == 1){ // il y avait déjà une réservation pour cet utilisateur
-        $UserGuests = array();
         $UserReservation = current($UserReservation);
         $UserId = $UserReservation['id'];
         $UserGuests = $DB->query('SELECT * FROM icam_has_guest
                                     LEFT JOIN guests ON guest_id = id
                                   WHERE icam_id = :icam_id', array('icam_id' => $UserId));
     }else{ // Nouvelle réservation
-        $RouteHelper->webSiteTitle = "Nouvelle réservation";
         $UserReservation = array(
             'nom' => $gingerUserCard->nom,
             'prenom' => $gingerUserCard->prenom,
@@ -165,21 +123,64 @@ $app->get('/edit', function ($request, $response, $args) {
             'price' => 0,
             'repas' => 0,
             'buffet' => 0,
-            'tickets_boisson' => "0",
+            'tickets_boisson' => 0,
             'image' => $gingerUserCard->img_link
         );
         $UserId = -1;
-        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => "0", 'is_icam' => 0);
-        $UserGuests = array();
+        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0);
         for ($i=0; $i < $prixPromo['nbInvites']; $i++) { 
             $UserGuests[] = $emptyUser;
         }
         $emptyUser['repas'] = 1;
     }
+    $dataResaForm = array('resa' => array_merge($UserReservation, array('invites'=>$UserGuests)));
+    return compact('UserGuests', 'UserReservation', 'UserId', 'dataResaForm');
+}
 
-    $Form = new \PayIcam\Forms();
-    $Form->set(array('resa' => array_merge($UserReservation, array('invites'=>$UserGuests))));
+function mergeUserReservations($array1, $array2){
+    $retour = $array1['resa'];
+    $icamValues2 = $array2['resa'];
+    $icamGuests2 = $array2['resa']['invites'];
+    unset($icamValues2['invites']);
+    $retour = array_merge($retour, $icamValues2);
+    foreach ($retour['invites'] as $k => $guest) {
+        // On boucle sur les invités du premier tableau, soit la première résa pour que le gars ne puisse pas tricher !!
+        // Si il y a plus d'invités dans la 2e résa que la 1 c'est qu'il a du essayer d'en rajouter à la main...
+        // et on les prend dans l'ordre !
+        if (isset($icamGuests2[$k])) {
+            $retour['invites'][$k] = array_merge($guest, $icamGuests2[$k]);
+        } // sinon, ba yen a pas, on garde ceux du premier tableau.
+    }
+    return array('resa'=>$retour);
+}
+
+$app->get('/edit', function ($request, $response, $args) {
+    // Initialisation, récupération variables utiles
+    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    $flash = $this->flash;
+    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
+    $emailContactGala = $this->get('settings')['emailContactGala'];
+    $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
+
+    // Récupération infos utilisateur
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    $gingerUserCard = $gingerClient->getUser($mailPersonne);
+    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
+
+    //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
+    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
+    if ($retourSecure !== true) return $retourSecure;  
+
+    // On continue
+    if(count($UserReservation) == 0) $RouteHelper->webSiteTitle = "Nouvelle réservation";
+    $prixPromo = getPrixPromo($gingerUserCard);
+    extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId
+    
+    $Form = new \PayIcam\Forms();
+    $Form->set( (isset($_SESSION['newResa'])) ? $_SESSION['newResa'] : $dataResaForm );
+    if( isset($_SESSION['newResa']) ) unset($_SESSION['newResa']); // On veut pas avoir le formulaire plus longtemps en session, il sera regénéré au pire.
 
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
@@ -196,16 +197,26 @@ $app->post('/edit', function ($request, $response, $args) {
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
     $emailContactGala = $this->get('settings')['emailContactGala'];
     $status = $payutcClient->getStatus();
+    $editLink = $this->router->pathFor('edit');
 
     // Récupération infos utilisateur
-    // $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => 'hugo.leandri@2018.icam.fr '));
-    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $Auth->getUserField('email')));
-    
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    $gingerUserCard = $gingerClient->getUser($mailPersonne);
+    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
+
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
     $retourSecure = secureEditPart($Auth, $status, $UserReservation, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
-    if ($retourSecure !== true) return $retourSecure;
+    if ($retourSecure !== true) return $retourSecure;  
+
+    // On continue
+    $prixPromo = getPrixPromo($gingerUserCard);
+    extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId, dataResaForm
+
+    $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody() );
+
+    return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
     
-    echo "yay j'ai reçu ce que tu as posté";
     var_dump($request->getParsedBody());
     return $response;
     $Form = new \PayIcam\Form();
