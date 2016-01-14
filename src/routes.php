@@ -147,8 +147,8 @@ $app->get('/edit', function ($request, $response, $args) {
     $editLink = $this->router->pathFor('edit');
 
     // Récupération infos utilisateur
-    // $mailPersonne = $Auth->getUserField('email');
-    $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
 
@@ -301,8 +301,8 @@ $app->post('/edit', function ($request, $response, $args) {
     $editLink = $this->router->pathFor('edit');
 
     // Récupération infos utilisateur
-    // $mailPersonne = $Auth->getUserField('email');
-    $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
 
@@ -355,7 +355,7 @@ $app->post('/edit', function ($request, $response, $args) {
             $guestData = getGuestData($guest, $prixPromo);
             $guestData['paiement'] = 'PayIcam';
             $guestData['inscription'] = date('Y-m-d H:m:s');
-            $statusFormSubmition['insertGuest'] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
+            $statusFormSubmition['insertGuest'][] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
             var_dump($guestData);
         }
     }else{ // UPDATE
@@ -385,7 +385,7 @@ $app->post('/edit', function ($request, $response, $args) {
                 $guestData['paiement'] = 'PayIcam';
                 $guestData['inscription'] = date('Y-m-d H:m:s');
                 var_dump($guestData);
-                $statusFormSubmition['insertGuest'] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
+                $statusFormSubmition['insertGuest'][] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
             }else{
                 echo "<p>UPDATE de l'invité #".$k."</p>";
                 $guestData = getGuestData($guest, $prixPromo, $UserGuests[$k]);
