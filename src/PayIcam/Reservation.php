@@ -118,8 +118,10 @@ class Reservation{
         if (!empty($this->icamData)) {
             $this->saveNewGuest($this->icamData);
         }
-        foreach ($this->guestsData as $guest) {
-            $this->saveNewGuest($guest);
+        if (!empty($this->guestsData)) {
+            foreach ($this->guestsData as $guest) {
+                $this->saveNewGuest($guest);
+            }
         }
     }
 

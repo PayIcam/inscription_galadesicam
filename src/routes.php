@@ -45,8 +45,11 @@ $app->get('/', function ($request, $response, $args) {
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
     }
 
-    // $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => 'hugo.leandri@2018.icam.fr'));
-    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $Auth->getUserField('email')));
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
+
+    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
+    $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
     $userResaCount = count($UserReservation);
     $prixPromo = getPrixPromo($gingerUserCard);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId
@@ -54,7 +57,7 @@ $app->get('/', function ($request, $response, $args) {
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
     $editLink = $this->router->pathFor('edit');
-    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', $args));
+    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'UserWaitingResa', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', $args));
 
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('home');
@@ -62,11 +65,15 @@ $app->get('/', function ($request, $response, $args) {
 ////////////////////////////////////////////
 // Routes pour l'édition des réservations //
 ////////////////////////////////////////////
-function secureEditPart($Auth, $status, $UserReservation, $app, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala){
+function secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $app, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala){
     if (!$Auth->isLogged() || empty($status->user) || empty($status->application)){
         if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
         $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('about'));
+    }
+    if (count($UserWaitingResa) >= 1){$count = count($UserWaitingResa);
+        $app->flash->addMessage('warning', 'Nous avons déjà '.(($count == 1)?'une':$count).' réservations en attente à votre nom... veuillez régler la facture sur PayIcam decelle-ci, ou veuillez l\'annuler si vous voulez éditer le nom de vos invités.');
+        return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     }
     if (count($UserReservation) > 1){
         $app->flash->addMessage('danger', 'Nous avons plusieurs réservations enregistrées à votre email...<br>
@@ -163,9 +170,10 @@ $app->get('/edit', function ($request, $response, $args) {
     // $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
+    $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
 
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
-    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
+    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
     if ($retourSecure !== true) return $retourSecure;  
 
     // On continue
@@ -176,7 +184,7 @@ $app->get('/edit', function ($request, $response, $args) {
     $Form = new \PayIcam\Forms();
     $Form->set( (isset($_SESSION['newResa'])) ? $_SESSION['newResa'] : $dataResaForm );
     
-    if( isset($_SESSION['newResa']) ){ var_dump($_SESSION['newResa']);var_dump($_SESSION['newResa']['resa']['invites']);unset($_SESSION['newResa']); } // On veut pas avoir le formulaire plus longtemps en session, il sera regénéré au pire.
+    if( isset($_SESSION['newResa']) ){ unset($_SESSION['newResa']); } // On veut pas avoir le formulaire plus longtemps en session, il sera regénéré au pire.
 
     if( isset($_SESSION['formErrors']) ){
         $Form->errors = $_SESSION['formErrors'];
@@ -312,9 +320,10 @@ $app->post('/edit', function ($request, $response, $args) {
     // $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
+    $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
 
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
-    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
+    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
     if ($retourSecure !== true) return $retourSecure;  
 
     // On continue
@@ -474,8 +483,10 @@ $app->post('/edit', function ($request, $response, $args) {
             echo '<li>'.$a['count'].' x '.$a['article']['nom'].'('.$a['article']['price'].'€) = '.($a['count']*$a['article']['price']).'€</li>';
         }
         echo '</ul>';
-        echo "Soit, un total de ".$Reservation->price."€ à payer";
-        // $Reservation->save();
+        echo "<p>Soit, un total de ".$Reservation->price."€ à payer</p>";
+        $Reservation->save();
+        echo "<p><strong>Votre réservation a bien été faite, il ne vous reste plus qu'à la payer sur payicam, mais ça ne marche pas encore</strong></p>";
+        echo '<p><a href="'.$this->router->pathFor('edit').'">Retour accueil</a></p>';
     }
 
     return $response;//->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));

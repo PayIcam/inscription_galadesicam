@@ -112,21 +112,21 @@
         &nbsp;
         <button class="btn" type="reset">Cancel</button>
     </div>
-{{resa}}
+
 </form>
 <hr>
 
-
-<pre><?php var_dump($Auth->getUser()); ?></pre>
-<pre><?php var_dump($UserReservation); ?></pre>
-<pre><?php var_dump($UserGuests); ?></pre>
-<pre><?php var_dump($canWeRegisterNewGuests); ?></pre>
-<pre><?php var_dump($canWeEditOurReservation); ?></pre>
-<pre><?php var_dump($gingerUserCard); ?></pre>
-<pre><?php var_dump($prixPromo); ?></pre>
-<pre><?php var_dump($Form->data); ?></pre>
-<pre><?php var_dump($Form->data['resa']['invites']); ?></pre>
-<pre><?php var_dump($Form); ?></pre>
+<!-- {{resa}} -->
+<!-- <pre><?php // var_dump($Auth->getUser()); ?></pre> -->
+<!-- <pre><?php // var_dump($UserReservation); ?></pre> -->
+<!-- <pre><?php // var_dump($UserGuests); ?></pre> -->
+<!-- <pre><?php // var_dump($canWeRegisterNewGuests); ?></pre> -->
+<!-- <pre><?php // var_dump($canWeEditOurReservation); ?></pre> -->
+<!-- <pre><?php // var_dump($gingerUserCard); ?></pre> -->
+<!-- <pre><?php // var_dump($prixPromo); ?></pre> -->
+<!-- <pre><?php // var_dump($Form->data); ?></pre> -->
+<!-- <pre><?php // var_dump($Form->data['resa']['invites']); ?></pre> -->
+<!-- <pre><?php // var_dump($Form); ?></pre> -->
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script>

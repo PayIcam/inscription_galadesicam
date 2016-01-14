@@ -1,24 +1,29 @@
 <h1>Inscription au Gala des Icam</h1>
 
-<?php if ($userResaCount == 0 && $canWeRegisterNewGuests) { ?>
+<?php if (count($UserWaitingResa)) { $count = count($UserWaitingResa); ?>
+    <p class="alert alert-warning">
+        Vous avez bien soumis <?= (($count == 1)?'une':$count) ?> réservation mais vous ne l'avez pas encore réglée.<br>
+        Ne tardez pas, vous avez 15 min après quoi elle sera annulée.
+    </p>
+<?php } elseif ($userResaCount == 0 && $canWeRegisterNewGuests) { ?>
     <p>
         Vous n'avez pas encore de réservation,<br>
         mais vous pouvez encore vous enregistrer:
     </p>
     <p><a href="<?= $editLink ?>" class="btn btn-primary">S'inscrire au Gala</a></p>
-<?php }elseif ($userResaCount == 0) { ?>
+<?php } elseif ($userResaCount == 0) { ?>
     <p>
         Vous n'avez pas eu le temps de prendre votre réservation ...<br>
         et malheureusement les ventes de places sont maintenant finies ...<br>
         On se dit à l'année prochaine ?
     </p>
-<?php }elseif($userResaCount > 1){ ?>
+<?php } elseif($userResaCount > 1){ ?>
     <p>Nous avons plusieurs réservations enregistrées à votre email...<br>
         <a href="mailto:<?= $emailContactGala ?>">Contactez nous</a> svp !</p>
-<?php }elseif($userResaCount == 1){ $UserReservation = current($UserReservation); ?>
+<?php } if($userResaCount == 1){ ?>
     <h2>
         Votre réservation:
-        <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation)?'':' title="Vous ne pouvez plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>éditer sa place</a></small>
+        <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && count($UserWaitingResa) == 0)?'':' title="Vous ne pouvez pas ou plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>éditer sa place</a></small>
     </h2>
     <dl class="dl-horizontal">
         <dt>Nom:</dt>
@@ -64,6 +69,5 @@
             </dl>
         <?php endforeach ?>
     <?php } // endelse ?>
-    <pre><?php var_dump($UserReservation); ?></pre>
-    <pre><?php var_dump($UserGuests); ?></pre>
+    
 <?php } ?>
