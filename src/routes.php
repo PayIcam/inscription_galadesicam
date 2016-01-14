@@ -493,6 +493,33 @@ $app->post('/edit', function ($request, $response, $args) {
 });
 
 
+$app->get('/cancel', function ($request, $response, $args) {
+    // Initialisation, récupération variables utiles
+    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    $status = $payutcClient->getStatus();
+
+    // Récupération infos utilisateur
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    $gingerUserCard = $gingerClient->getUser($mailPersonne);
+
+    $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
+
+    //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
+    if (!$Auth->isLogged() || empty($status->user) || empty($status->application)){
+        if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
+        $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
+        return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('about'));
+    }
+    $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
+    if (count($UserWaitingResa) >= 1){
+        $DB->query("UPDATE reservations_payicam SET status = 'A' WHERE login = :login AND status = 'W'", ['login'=>$mailPersonne]);
+    }
+    $this->flash->addMessage('info', "Vous avez bien annulé votre réservation au Gala");
+    return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
+})->setName('cancel');
+
+
 //////////////////////////////
 // Routes pour la connexion //
 //////////////////////////////
