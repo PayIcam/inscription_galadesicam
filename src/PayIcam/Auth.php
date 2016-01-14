@@ -194,5 +194,3 @@ class Auth{
         return $role['name'];
     }
 }
-
-$Auth = new Auth();

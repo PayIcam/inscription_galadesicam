@@ -147,8 +147,8 @@ $app->get('/edit', function ($request, $response, $args) {
     $editLink = $this->router->pathFor('edit');
 
     // Récupération infos utilisateur
-    // $mailPersonne = $Auth->getUserField('email');
-    $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
 
@@ -301,8 +301,8 @@ $app->post('/edit', function ($request, $response, $args) {
     $editLink = $this->router->pathFor('edit');
 
     // Récupération infos utilisateur
-    // $mailPersonne = $Auth->getUserField('email');
-    $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
 
@@ -347,6 +347,7 @@ $app->post('/edit', function ($request, $response, $args) {
         $icamData = getIcamData($gingerUserCard, $prixPromo, $_SESSION['newResa']['resa']);
         $icamData['paiement'] = 'PayIcam';
         $icamData['inscription'] = date('Y-m-d H:m:s');
+        $statusFormSubmition['insertIcam']['data'] = $icamData;
         $statusFormSubmition['insertIcam']['msg'] = 'Ajout Icam: '.$icamData['prenom'].' '.$icamData['nom'].' '.$icamData['promo'].' pour '.$icamData['price'].'€';
         var_dump($icamData);
         foreach ($_SESSION['newResa']['resa']['invites'] as $k => $guest) {
@@ -355,6 +356,7 @@ $app->post('/edit', function ($request, $response, $args) {
             $guestData = getGuestData($guest, $prixPromo);
             $guestData['paiement'] = 'PayIcam';
             $guestData['inscription'] = date('Y-m-d H:m:s');
+            $statusFormSubmition['insertGuest']['data'][] = $guestData;
             $statusFormSubmition['insertGuest']['msg'][] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
             var_dump($guestData);
         }
@@ -367,6 +369,9 @@ $app->post('/edit', function ($request, $response, $args) {
         if ($icamData['price'] > $UserReservation['price'] ) {
             echo "<p>Oh on a de nouvelles options $$ !</p>";
             $updatedFields = getUpdatedFields($icamData, $UserReservation);
+            $statusFormSubmition['updateOptions']['updatedFields'][] = $updatedFields;
+            $statusFormSubmition['updateOptions']['curResa'][] = $UserReservation;
+            $statusFormSubmition['updateOptions']['newResa'][] = $icamData;
             $statusFormSubmition['updateOptions']['msg'][] = 'MAJ options'.json_encode($updatedFields).' pour '.$icamData['prenom'].' '.$icamData['nom'].' de '.$UserReservation['price'].' à '.$icamData['price'].'€';
         }else{
             $updatedFields = getUpdatedFields($icamData, $UserReservation);
@@ -386,6 +391,7 @@ $app->post('/edit', function ($request, $response, $args) {
                 $guestData['paiement'] = 'PayIcam';
                 $guestData['inscription'] = date('Y-m-d H:m:s');
                 var_dump($guestData);
+                $statusFormSubmition['insertGuest']['data'][] = $guestData;
                 $statusFormSubmition['insertGuest']['msg'][] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
             }else{
                 echo "<p>UPDATE de l'invité #".$k."</p>";
@@ -395,6 +401,9 @@ $app->post('/edit', function ($request, $response, $args) {
                 if ($guestData['price'] > $UserGuests[$k]['price'] ) {
                     echo "<p>Oh on a de nouvelles options $$ !</p>";
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
+                    $statusFormSubmition['updateOptions']['updatedFields'][] = $updatedFields;
+                    $statusFormSubmition['updateOptions']['curResa'][] = $UserGuests[$k];
+                    $statusFormSubmition['updateOptions']['newResa'][] = $guestData;
                     $statusFormSubmition['updateOptions']['msg'][] = 'MAJ options'.json_encode($updatedFields).' pour '.$guestData['prenom'].' '.$guestData['nom'].' de '.$UserGuests[$k]['price'].' à '.$guestData['price'].'€';
                 }else{
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
@@ -417,8 +426,11 @@ $app->post('/edit', function ($request, $response, $args) {
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
     }elseif(isset($statusFormSubmition['insertIcam'])){ // On a déjà une résa pour l'icam !
         echo '<p>'.$statusFormSubmition['insertIcam']['msg'].'</p>';
-        if(isset($statusFormSubmition['insertGuest'])){
-            echo '<p>'.implode('<br>', $statusFormSubmition['insertGuest']['msg']).'</p>';
+        $Reservation = new \PayIcam\Reservation($mailPersonne);
+        $Reservation->addNewIcam($statusFormSubmition['insertIcam']['data']);
+
+        foreach ($statusFormSubmition['insertGuest']['data'] as $k => $data) {
+            echo "<p>".$statusFormSubmition['insertGuest']['msg'][$k]."</p>";
         }
     }else{ // On a déjà une résa pour l'icam !
         if(isset($statusFormSubmition['updateFields'])){ // On peut faire les MAJ dès maintenant ! il n'y a pas de sous en jeu !
