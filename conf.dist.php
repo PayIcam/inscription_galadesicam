@@ -20,7 +20,9 @@ return [
 
         'PayIcam' => [
             'payutc_server' => 'http://payicam.dev/server/web/', // URL du serveur payutc (avec le / final)
-            'payutc_key' => 'xxx' // Clé de l'application
+            'payutc_key' => 'xxx', // Clé de l'application
+            'ginger_server' => 'http://payicam.dev/ginger/index.php/v1/',
+            'ginger_key' => 'xxx'
         ],
 
         'confSQL' => [

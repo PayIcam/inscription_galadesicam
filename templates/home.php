@@ -1,21 +1,21 @@
 <h1>Inscription au Gala des Icam</h1>
 
-<?php if (count($UserReservation) == 0 && $canWeRegisterNewGuests) { ?>
+<?php if ($userResaCount == 0 && $canWeRegisterNewGuests) { ?>
     <p>
         Vous n'avez pas encore de réservation,<br>
         mais vous pouvez encore vous enregistrer:
     </p>
     <p><a href="<?= $editLink ?>" class="btn btn-primary">S'inscrire au Gala</a></p>
-<?php }elseif (count($UserReservation) == 0) { ?>
+<?php }elseif ($userResaCount == 0) { ?>
     <p>
         Vous n'avez pas eu le temps de prendre votre réservation ...<br>
         et malheureusement les ventes de places sont maintenant finies ...<br>
         On se dit à l'année prochaine ?
     </p>
-<?php }elseif(count($UserReservation) > 1){ ?>
+<?php }elseif($userResaCount > 1){ ?>
     <p>Nous avons plusieurs réservations enregistrées à votre email...<br>
         <a href="mailto:<?= $emailContactGala ?>">Contactez nous</a> svp !</p>
-<?php }elseif(count($UserReservation) == 1){ $UserReservation = current($UserReservation); ?>
+<?php }elseif($userResaCount == 1){ $UserReservation = current($UserReservation); ?>
     <h2>
         Votre réservation:
         <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation)?'':' title="Vous ne pouvez plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>éditer sa place</a></small>

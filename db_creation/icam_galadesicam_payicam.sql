@@ -59,7 +59,7 @@ CREATE TABLE `reservations_payicam` (
   `id` int(11) NOT NULL,
   `soirees` int(11) NOT NULL DEFAULT '0',
   `repas` int(11) NOT NULL DEFAULT '0',
-  `conferences` int(11) NOT NULL DEFAULT '0',
+  `buffets` int(11) NOT NULL DEFAULT '0',
   `articles` text NOT NULL,
   `date_option` datetime NOT NULL,
   `date_paiement` datetime NOT NULL,
