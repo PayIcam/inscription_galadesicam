@@ -6,7 +6,17 @@ namespace PayIcam;
 class Reservation{
     
     private $id;
+    private $soirees;
+    private $repas;
+    private $buffets;
+    public $articles;
+    private $date_option;
+    private $date_paiement;
+    private $status;
+    private $tra_id_payicam;
+    public $tra_url_payicam;
     private $login;
+    public $price;
 
     private $app;
     private $gingerUserCard;
@@ -19,7 +29,7 @@ class Reservation{
     
     public $statusMsg;
 
-    function __construct($login, $gingerUserCard, $prixPromo, $articlesPayIcam, $app){
+    function __construct($data, $gingerUserCard, $prixPromo, $articlesPayIcam, $app){
         global $DB;
 
         $this->app = $app;
@@ -27,20 +37,72 @@ class Reservation{
         $this->prixPromo = $prixPromo;
         $this->articlesPayIcam = $articlesPayIcam;
         
-        $this->login = $login;
-        $this->soirees = 0;
-        $this->repas = 0;
-        $this->buffets = 0;
-        $this->price = 0;
-        $this->articles = array();
-        $this->date_option = date('Y-m-d H:m:s');
+        if (is_array($data) && !empty($data['id'])) { // On a déjà le contenu d'une résa
+            $this->id = $data['id'];
+            $this->soirees = $data['soirees'];
+            $this->repas = $data['repas'];
+            $this->buffets = $data['buffets'];
+            $this->articles = json_decode($data['articles']);
+            $this->date_option = $data['date_option'];
+            $this->date_paiement = $data['date_paiement'];
+            $this->status = $data['status'];
+            $this->tra_id_payicam = $data['tra_id_payicam'];
+            $this->tra_url_payicam = $data['tra_url_payicam'];
+            $this->login = $data['login'];
+            $this->price = $data['price'];
+
+            $this->loadResaGuestsData();
+        }else{
+            $this->login = $data;
+            $this->soirees = 0;
+            $this->repas = 0;
+            $this->buffets = 0;
+            $this->price = 0;
+            $this->articles = array();
+            $this->date_option = date('Y-m-d H:m:s');
+        }
         
         $this->statusMsg = array();
     }
+
+    public function loadResaGuestsData(){
+        global $DB;
+        $guestsData = array();
+        $guests = $DB->query('SELECT * FROM guests_payicam WHERE reservation_id = :reservation_id ORDER BY is_icam DESC', array('reservation_id' => $this->id));
+        foreach ($guests as $k => $guest) { $guest = self::parseGuestData($guest);
+            if ($k == 0 && !$guest['is_icam']) { // ça veut dire que l'on a déjà une réservation pour cet icam normalement. Allons chercher son id !
+                $this->icam_id = $this->lookIcamIdInGuestsTable();
+            }
+            if ($guest['is_icam']) {
+                try {
+                    $this->icam_id = $this->lookIcamIdInGuestsTable();
+                    $guest['guest_id'] = $this->icam_id; // Il y avait déjà un user avec cet email dans la base, on va écraser sa résa
+                } catch (\Exception $e) {
+                    $this->icam_id = $guest['guest_id'];
+                }
+                $this->icamData = $guest;
+            }else{
+                $this->guestsData[] = $guest;
+            }
+        }
+    }
+    public function lookIcamIdInGuestsTable(){
+        global $DB;
+        $icam_id = $DB->queryFirst('SELECT id FROM guests WHERE email = :email ORDER BY is_icam DESC', array('email' => $this->login));
+        if (empty($icam_id)) throw new \Exception("Houston, we have a problem... ".$this->login." n'a pas de réservations au gala!", 1);
+        return intval(current($icam_id));
+    }
+    public function updateStatus($status){
+        global $DB;
+        $this->status = $status;
+        $this->date_paiement = date("Y-m-d H:i:s");
+        $data = ['status'=>$this->status, 'date_paiement'=>$this->date_paiement, 'id'=>$this->id];
+        $DB->query("UPDATE reservations_payicam SET status = :status, date_paiement = :date_paiement WHERE id = :id", $data);
+    }
+
     public function addIcamId($icam_id){
         $this->icam_id = $icam_id;
     }
-
     public function addGuest($data, $updatedFields=false){
         if ($data['is_icam']){ $this->icamData = $data; $msg = 'Icam ('.$data['promo'].') : '; }
         else{ $this->guestsData[] = $data; $msg = 'Invité : '; }
@@ -112,13 +174,14 @@ class Reservation{
         }
         return $articles;
     }
+
     public function save(){
         global $DB, $payutcClient;
         $vente = $payutcClient->createTransaction(array(
             "items" => json_encode($this->getArticles()),
             "fun_id" => $this->app->get('settings')['fun_id'],
             "mail" => $this->login,
-            "return_url" =>  $this->app->request->getUri()->getBaseUrl() . '/callback',
+            "return_url" =>  $this->app->request->getUri()->getBaseUrl() . '/',
             "callback_url" =>  $this->app->request->getUri()->getBaseUrl() . '/callback'
         ));
 
@@ -157,6 +220,58 @@ class Reservation{
         }else 
             $data['guest_id'] = -1;
         $DB->query("INSERT INTO guests_payicam (".implode(', ', array_keys($data)).") VALUES (:".implode(', :', array_keys($data)).")", $data);
+    }
+
+    public function registerGuestGala($guest){
+        global $DB;
+        $guest_id = $guest['guest_id'];
+        unset($guest['id']);
+        unset($guest['guest_id']);
+        unset($guest['icam_id']);
+        unset($guest['reservation_id']);
+        
+        if ($guest_id > 0) { // UPDATE
+            $data = array();   $updatedFields = array();
+            foreach ($guest as $k => $v){
+                if($k == 'id') continue;
+                $data[$k] = $guest[$k];
+                $updatedFields[] = $k.' = :'.$k;
+            }
+            $data['id'] = $guest_id;
+            $DB->query("UPDATE guests SET ".implode(', ', $updatedFields)." WHERE id = :id", $data);
+        }else{ // INSERT
+            $guest_id = $DB->query("INSERT INTO guests (".implode(', ', array_keys($guest)).") VALUES (:".implode(', :', array_keys($guest)).")", $guest);
+            if (!$guest['is_icam']) {
+                if(empty($this->icam_id) || $this->icam_id <= 0)
+                    throw new \Exception("Houston, we have a problem... ".$this->login." n'a pas de réservations au gala!<br>Ou bien tu as mal utilisé la classe Reservation !", 1);
+                $DB->query("INSERT INTO icam_has_guest (icam_id, guest_id) VALUES (:icam_id, :guest_id)", ['icam_id'=>$this->icam_id, 'guest_id'=>$guest_id]);
+            }
+        }
+        return $guest_id;
+    }
+
+    public function registerGuestsToTheGala(){
+        if (!empty($this->icamData)) {
+            $this->icam_id = $this->registerGuestGala($this->icamData);
+        }
+        if (!empty($this->guestsData)) {
+            foreach ($this->guestsData as $guest) {
+                $this->registerGuestGala($guest);
+            }
+        }
+    }
+
+    public static function parseGuestData($guest){
+        if (isset($guest['id'])) $guest['id'] = intval($guest['id']);
+        if (isset($guest['is_icam'])) $guest['is_icam'] = intval($guest['is_icam']);
+        if (isset($guest['sexe'])) $guest['sexe'] = intval($guest['sexe']);
+        if (isset($guest['bracelet_id'])) $guest['bracelet_id'] = intval($guest['bracelet_id']);
+        if (isset($guest['champagne'])) $guest['champagne'] = intval($guest['champagne']);
+        if (isset($guest['repas'])) $guest['repas'] = intval($guest['repas']);
+        if (isset($guest['buffet'])) $guest['buffet'] = intval($guest['buffet']);
+        if (isset($guest['tickets_boisson'])) $guest['tickets_boisson'] = intval($guest['tickets_boisson']);
+        if (isset($guest['price'])) $guest['price'] = floatval($guest['price']);
+        return $guest;
     }
 }
  

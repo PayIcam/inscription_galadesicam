@@ -45,13 +45,37 @@ $app->get('/', function ($request, $response, $args) {
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
     }
 
+    $fun_id = $this->get('settings')['fun_id'];
+    $prixPromo = getPrixPromo($gingerUserCard);
+    
     $mailPersonne = $Auth->getUserField('email');
     // $mailPersonne = 'hugo.leandri@2018.icam.fr';
 
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
+    if (count($UserWaitingResa) >= 1){
+        $curResa = current($UserWaitingResa);
+        // On veut reset les autres
+        if (count($UserWaitingResa) >= 1){
+            $data = ['login' => $mailPersonne, 'id' => $curResa['id']];
+            $DB->query("UPDATE reservations_payicam SET status = 'A' WHERE login = :login AND status = 'W' AND id != :id", $data);
+        }
+        try {   
+            $transaction = $payutcClient->getTransactionInfo(array("fun_id" => $fun_id, "tra_id" => $curResa['tra_id_payicam']));
+            if($transaction->status != $curResa['status']){
+                $Reservation = new \PayIcam\Reservation($curResa, $gingerUserCard, $prixPromo, $this->get('settings')['articlesPayIcam'], $this);
+                $Reservation->updateStatus($transaction->status);
+                if ($transaction->status == 'V') {
+                    $Reservation->registerGuestsToTheGala();
+                    $this->flash->addMessage('success', "Votre réservation a bien été prise en compte");
+                }else{
+                    $this->flash->addMessage('info', "Le status de votre réservation a été mis à jour de ".$curResa['status'].' vers '.$transaction->status);
+                }
+                return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
+            }
+        } catch (Exception $e) { var_dump($e->getMessage()); }
+    }
     $userResaCount = count($UserReservation);
-    $prixPromo = getPrixPromo($gingerUserCard);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId
     
     // Render index view
@@ -529,6 +553,15 @@ $app->get('/callback', function ($request, $response, $args) {
             try {
                 $transaction = $payutcClient->getTransactionInfo(array("fun_id" => $fun_id, "tra_id" => $resa['tra_id_payicam']));
                 if($transaction->status != $resa['status']){
+                    $Reservation = new \PayIcam\Reservation($resa, null, null, $this->get('settings')['articlesPayIcam'], $this);
+                    $Reservation->updateStatus($transaction->status);
+                    if ($transaction->status == 'V') {
+                        $Reservation->registerGuestsToTheGala();
+                        $this->flash->addMessage('success', "Votre réservation a bien été prise en compte");
+                    }else{
+                        $this->flash->addMessage('info', "Le status de votre réservation a été mis à jour de ".$curResa['status'].' vers '.$transaction->status);
+                    }
+
                     $data = ['status'=>$transaction->status, 'date_paiement'=>date("Y-m-d H:i:s"), 'id'=>$resa['id']];
                     $DB->query("UPDATE reservations_payicam SET status = :status, date_paiement = :date_paiement WHERE id = :id", $data);
                     if ($Auth->getUserField('email') == $resa['login']) {
