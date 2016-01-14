@@ -28,7 +28,7 @@ class Participant{
 		'119' => array('nbInvites' => 1,
 				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
 				'prixInvite' => array("repas" => 20, "buffet" => 2, "soiree" => 20)),
-		'118' => array('nbInvites' => 3,
+		'118' => array('nbInvites' => 4,
 				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soiree" => 0),
 				'prixInvite' => array("repas" => 20, "buffet" => 2, "soiree" => 20)),
 		'117' => array('nbInvites' => 2,

@@ -183,18 +183,18 @@ $app->get('/edit/', function ($request, $response, $args) {
 //////////////////////////////
 // Traitement du formulaire //
 //////////////////////////////
-function mergeUserReservations($array1, $array2){
+function mergeUserReservations($array1, $array2, $prixPromo){
     $retour = $array1['resa'];
     $icamValues2 = $array2['resa'];
     $icamGuests2 = $array2['resa']['invites'];
     unset($icamValues2['invites']);
     $retour = array_merge($retour, $icamValues2);
-    foreach ($retour['invites'] as $k => $guest) {
+    foreach ($icamGuests2 as $k => $guest) {
         // On boucle sur les invités du premier tableau, soit la première résa pour que le gars ne puisse pas tricher !!
         // Si il y a plus d'invités dans la 2e résa que la 1 c'est qu'il a du essayer d'en rajouter à la main...
         // et on les prend dans l'ordre !
-        if (isset($icamGuests2[$k])) {
-            $retour['invites'][$k] = array_merge($guest, $icamGuests2[$k]);
+        if ($k < $prixPromo['nbInvites']) {
+            $retour['invites'][$k] = isset($retour['invites'][$k]) ? array_merge($retour['invites'][$k], $icamGuests2[$k]) : $icamGuests2[$k];
         } // sinon, ba yen a pas, on garde ceux du premier tableau.
     }
     return array('resa'=>$retour);
@@ -217,6 +217,62 @@ function checkUserFieldsIntegrity($newUser, $oldUser=''){
         $errors['tickets_boisson'] = 'Vous avez un problème avec les tickets boisson, vous avez le choix que entre 0 ou 10 tickets!';
     }
     return $errors;
+}
+
+function getBoolValue($str){
+    if ($str == '0' || $str == 0 || $str == 'false' || $str == 'False' || empty($str)) return 0;
+    else return 1;
+}
+function guessSexe($prenom){
+    $prenoms = array('caroline','julia','emilie','claire','emmanuelle','camille','anaïs','djilane','josephine','anne-catherine','cécile','clotilde-marie','jeanne','marie','marine','aliénor','aurélie','marion','perrine','ragnheidur','juliette','coline','charlotte','mylène','claire-isabelle','paula','aude','adèle');
+    return (in_array(strtolower($prenom), $prenoms))? 2 : 1;
+}
+function getGuestValues($field, $newResa='', $curResa=''){
+    if ($field == 'repas'){
+        $curResa = (!isset($curResa['repas']))? 0 : getBoolValue($curResa['repas']);
+        return (getBoolValue($newResa['repas'])>=$curResa)? getBoolValue($newResa['repas']): 1;
+    }
+    if ($field == 'buffet'){
+        $curResa = (!isset($curResa['buffet']))? 0 : getBoolValue($curResa['buffet']);
+        return (getBoolValue($newResa['buffet'])>=$curResa)? getBoolValue($newResa['buffet']): 1;
+    }
+}
+function getPrice($resa, $typeUser, $prixPromo){
+    $prix = $prixPromo[$typeUser]['soiree'];
+    $prix += ($resa['repas'])?$prixPromo[$typeUser]['repas']:0;
+    $prix += ($resa['buffet'])?$prixPromo[$typeUser]['buffet']:0;
+    $prix += ($resa['tickets_boisson'])?$resa['tickets_boisson']:0;
+    return $prix;
+}
+function getIcamData($gingerUserCard, $prixPromo, $resa, $oldResa=""){
+    $icamData = array(
+        'nom' => $gingerUserCard->nom,
+        'prenom' => $gingerUserCard->prenom,
+        'is_icam' => 1,
+        'telephone' => $resa['telephone'],
+        'promo' => $gingerUserCard->promo,
+        'email' => $gingerUserCard->mail,
+        'sexe' => $gingerUserCard->sexe,
+        'repas' => getGuestValues('repas', $resa, $oldResa),
+        'buffet' => getGuestValues('buffet', $resa, $oldResa),
+        'tickets_boisson' => intval($resa['tickets_boisson']),
+        'image' => $gingerUserCard->img_link
+    );
+    $icamData['price'] = getPrice($icamData, 'prixIcam', $prixPromo);
+    return $icamData;
+}
+function getGuestData($guest, $prixPromo, $oldResa=""){
+    $guestData = array(
+        'nom' => $guest['nom'],
+        'prenom' => $guest['prenom'],
+        'is_icam' => 0,
+        'sexe' => guessSexe($guest['prenom']),
+        'repas' => getGuestValues('repas', $guest, $oldResa),
+        'buffet' => getGuestValues('buffet', $guest, $oldResa),
+        'tickets_boisson' => intval($guest['tickets_boisson'])
+    );
+    $guestData['price'] = getPrice($guestData, 'prixInvite', $prixPromo);
+    return $guestData;
 }
 
 $app->post('/edit', function ($request, $response, $args) {
@@ -242,12 +298,12 @@ $app->post('/edit', function ($request, $response, $args) {
     $prixPromo = getPrixPromo($gingerUserCard);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId, dataResaForm
 
-    $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody() );
+    $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody(), $prixPromo );
     ////////////////////////////////////////////////////////
     // On va vérifier que les données postées sont bonnes //
     ////////////////////////////////////////////////////////
-    if (count($_SESSION['newResa']['resa']['invites']) > count($UserGuests)) {
-        $this->flash->addMessage('warning', 'Hé oh loulou, tu t\'es cru où ? Cherche pas, tu ne pourras plus gruger et rajouter des invités en plus des quotas !.<br>Tu as le droit qu\'à '.count($UserGuests).' invités, pas à '.count($request->getParsedBody()['resa']['invites']).' !!');
+    if (count($_SESSION['newResa']['resa']['invites']) > $prixPromo['nbInvites']) {
+        $this->flash->addMessage('warning', 'Hé oh loulou, tu t\'es cru où ? Cherche pas, tu ne pourras plus gruger et rajouter des invités en plus des quotas !.<br>Tu as le droit qu\'à '.$prixPromo['nbInvites'].' invités, pas à '.count($request->getParsedBody()['resa']['invites']).' !!');
         $_SESSION['formErrors']['hasErrors'] = true;
     }
     // On va regarder si il y a des erreurs dans les réservations des utilisateurs.
@@ -258,38 +314,55 @@ $app->post('/edit', function ($request, $response, $args) {
         $errors = checkUserFieldsIntegrity($guest, $UserGuests[$k]);
         if (!empty($errors)) $_SESSION['formErrors']['resa']['invites'][$k] = $errors;
     }
-
-    if (isset($_SESSION['formErrors']))
+    if (isset($_SESSION['formErrors'])){   
         $this->flash->addMessage('warning', 'Vous avez des erreurs dans le formulaire.');
-    else
-        $this->flash->addMessage('success', "wahou pas d'erreurs pour le moment !");
-
-    return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
-    
-    $Form = new \PayIcam\Form();
-    $validate = array(
-        'nom'    => array('rule'=>'notEmpty','message' => 'Entrez votre nom'),
-        'prenom' => array('rule'=>'notEmpty','message' => 'Entrez votre prénom'),
-        'mail' => array('rule'=>'^[a-z-]+[.]+[a-z-]+([.0-9a-z-]+)?@(mgf\.)?([0-9]{4}[.])?icam[.]fr$','message' => 'Entrez un email Icam valide !')
-    );
-    $Form->setValidates($validate);
-
-    $d = $Member->checkForm($_POST); // $_POST for invite table : 'login','slug','nom','content','order'
-    $Form->set($d);
-    if ($Form->validates($d)) { // fin pré-traitement
-        if ($d['login'] == -1 && current($DB->queryFirst('SELECT COUNT(*) FROM users WHERE login = :login',array('login'=>$d['mail'])))) {
-            $Form->errors['mail'] = 'Utilisateur déjà existant !!';
-        }elseif ($d['login'] != -1 && $d['login'] != $d['mail'] && current($DB->queryFirst('SELECT COUNT(*) FROM users WHERE login = :login',array('login'=>$d['mail']))) ) {
-            $Form->errors['mail'] = 'Utilisateur déjà existant !! Vous ne pouvez pas changer vers le login/mail : '.$d['mail'];
-        }elseif (!empty($d['badge_uid']) && current($DB->queryFirst('SELECT COUNT(*) FROM users WHERE login != :login AND badge_uid = :badge_uid',array('login'=>$d['login'],'badge_uid'=>$d['badge_uid']))) ) {
-            $Form->errors['badge_uid'] = 'Badge '.$d['badge_uid'].' déjà utilisé !';
-        }else{
-            $Member->save();
-            header('Location:admin_edit_member.php?login='.$Member->login);exit;
-        }
+        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
     }
 
-    // return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+    ///////////////////////////////////////////
+    // On continue vers l'INSERT ou l'UPDATE //
+    ///////////////////////////////////////////
+    // Pas besoin de vérifier si l'utilisateur existe déjà, on aurait son id déjà sinon !
+    if ($UserId == -1) { // INSERT de l'icam & de ses invités!
+        echo "<p>INSERT de l'icam & de ses invités!</p>";
+        $icamData = getIcamData($gingerUserCard, $prixPromo, $_SESSION['newResa']['resa']);
+        $icamData['paiement'] = 'PayIcam';
+        $icamData['inscription'] = date('Y-m-d H:m:s');
+        var_dump($icamData);
+        foreach ($_SESSION['newResa']['resa']['invites'] as $k => $guest) {
+            if (empty($guest['nom']) && empty($guest['prenom'])) {
+                echo "<p>pas d'invité à ajouter</p>"; continue; }
+            $guestData = getGuestData($guest, $prixPromo);
+            $guestData['paiement'] = 'PayIcam';
+            $guestData['inscription'] = date('Y-m-d H:m:s');
+            var_dump($guestData);
+        }
+    }else{ // UPDATE
+        echo '<p>UPDATE de la personne</p>';
+        // UPDATE de la personne
+        $icamData = getIcamData($gingerUserCard, $prixPromo, $_SESSION['newResa']['resa'], $UserReservation);
+        var_dump($icamData);
+        // Checker les invités: update ? insert ?
+        foreach ($_SESSION['newResa']['resa']['invites'] as $k => $guest) {
+            if (empty($guest['nom']) && empty($guest['prenom'])) {
+                echo "<p>pas d'invité à ajouter</p>"; continue; }
+            elseif(empty($UserGuests[$k]['nom'])){
+                echo "<p>INSERT de l'invité".$k."</p>";
+                $guestData = getGuestData($guest, $prixPromo, isset($UserGuests[$k])? $UserGuests[$k]:'');
+                $guestData['paiement'] = 'PayIcam';
+                $guestData['inscription'] = date('Y-m-d H:m:s');
+                var_dump($guestData);
+
+            }else{
+                echo "<p>UPDATE de l'invité".$k."</p>";
+                $guestData = getGuestData($guest, $prixPromo, $UserGuests[$k]);
+                var_dump($guestData);
+
+            }
+        }        
+    }
+
+    return $response;//->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
 });
 
 

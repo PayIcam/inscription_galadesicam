@@ -65,7 +65,7 @@
                             $Form->select('resa[invites]['.$i.'][tickets_boisson]','Tickets boisson : ', array('ng-model' => 'resa.invites['.$i.'].tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 10€'))); ?>
                     </div>
                 </div>
-                <?php $j = $i+1; if ($j+1 < $nb){; ?>
+                <?php $j = $i+1; if ($j+1 <= $nb){; ?>
                     <div id="invite<?= ($j+1); ?>" class="col-sm-6 invite">
                         <legend>Invité <?= ($j+1); ?></legend>
                         <div>
