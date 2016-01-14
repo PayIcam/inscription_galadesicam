@@ -159,8 +159,8 @@ $app->get('/edit', function ($request, $response, $args) {
     $editLink = $this->router->pathFor('edit');
 
     // Récupération infos utilisateur
-    // $mailPersonne = $Auth->getUserField('email');
-    $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
 
@@ -308,8 +308,8 @@ $app->post('/edit', function ($request, $response, $args) {
     $editLink = $this->router->pathFor('edit');
 
     // Récupération infos utilisateur
-    // $mailPersonne = $Auth->getUserField('email');
-    $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
 
