@@ -147,8 +147,8 @@ $app->get('/edit', function ($request, $response, $args) {
     $editLink = $this->router->pathFor('edit');
 
     // Récupération infos utilisateur
-    $mailPersonne = $Auth->getUserField('email');
-    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    // $mailPersonne = $Auth->getUserField('email');
+    $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
 
@@ -301,8 +301,8 @@ $app->post('/edit', function ($request, $response, $args) {
     $editLink = $this->router->pathFor('edit');
 
     // Récupération infos utilisateur
-    $mailPersonne = $Auth->getUserField('email');
-    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
+    // $mailPersonne = $Auth->getUserField('email');
+    $mailPersonne = 'hugo.leandri@2018.icam.fr';
     $gingerUserCard = $gingerClient->getUser($mailPersonne);
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
 
@@ -347,7 +347,7 @@ $app->post('/edit', function ($request, $response, $args) {
         $icamData = getIcamData($gingerUserCard, $prixPromo, $_SESSION['newResa']['resa']);
         $icamData['paiement'] = 'PayIcam';
         $icamData['inscription'] = date('Y-m-d H:m:s');
-        $statusFormSubmition['insertIcam'] = 'Ajout Icam: '.$icamData['prenom'].' '.$icamData['nom'].' '.$icamData['promo'].' pour '.$icamData['price'].'€';
+        $statusFormSubmition['insertIcam']['msg'] = 'Ajout Icam: '.$icamData['prenom'].' '.$icamData['nom'].' '.$icamData['promo'].' pour '.$icamData['price'].'€';
         var_dump($icamData);
         foreach ($_SESSION['newResa']['resa']['invites'] as $k => $guest) {
             if (empty($guest['nom']) && empty($guest['prenom'])) {
@@ -355,24 +355,25 @@ $app->post('/edit', function ($request, $response, $args) {
             $guestData = getGuestData($guest, $prixPromo);
             $guestData['paiement'] = 'PayIcam';
             $guestData['inscription'] = date('Y-m-d H:m:s');
-            $statusFormSubmition['insertGuest'][] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
+            $statusFormSubmition['insertGuest']['msg'][] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
             var_dump($guestData);
         }
     }else{ // UPDATE
         echo '<p>UPDATE de la personne</p>';
         // UPDATE de la personne
         $icamData = getIcamData($gingerUserCard, $prixPromo, $_SESSION['newResa']['resa'], $UserReservation);
+        $icamData['id'] = intval($UserReservation['id']);
         var_dump($icamData);
         if ($icamData['price'] > $UserReservation['price'] ) {
             echo "<p>Oh on a de nouvelles options $$ !</p>";
             $updatedFields = getUpdatedFields($icamData, $UserReservation);
-            $statusFormSubmition['updateOptions'][] = 'MAJ options'.json_encode($updatedFields).' pour '.$icamData['prenom'].' '.$icamData['nom'].' de '.$UserReservation['price'].' à '.$icamData['price'].'€';
+            $statusFormSubmition['updateOptions']['msg'][] = 'MAJ options'.json_encode($updatedFields).' pour '.$icamData['prenom'].' '.$icamData['nom'].' de '.$UserReservation['price'].' à '.$icamData['price'].'€';
         }else{
             $updatedFields = getUpdatedFields($icamData, $UserReservation);
             if (!empty($updatedFields)) {
                 echo "<p>UPDATE des champs ".json_encode($updatedFields)."</p>";
-                $statusFormSubmition['updateFields'][] = 'MAJ champs'.json_encode($updatedFields).' pour '.$icamData['prenom'].' '.$icamData['nom'];
-                // $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
+                $statusFormSubmition['updateFields']['data'][] = array_merge($icamData, array('updatedFields'=>$updatedFields));
+                $statusFormSubmition['updateFields']['msg'][] = 'MAJ champs'.json_encode($updatedFields).' pour '.$icamData['prenom'].' '.$icamData['nom'];
             }else echo "<p>En fait non rien à mettre à jour !</p>";
         }
         // Checker les invités: update ? insert ?
@@ -385,7 +386,7 @@ $app->post('/edit', function ($request, $response, $args) {
                 $guestData['paiement'] = 'PayIcam';
                 $guestData['inscription'] = date('Y-m-d H:m:s');
                 var_dump($guestData);
-                $statusFormSubmition['insertGuest'][] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
+                $statusFormSubmition['insertGuest']['msg'][] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
             }else{
                 echo "<p>UPDATE de l'invité #".$k."</p>";
                 $guestData = getGuestData($guest, $prixPromo, $UserGuests[$k]);
@@ -394,12 +395,13 @@ $app->post('/edit', function ($request, $response, $args) {
                 if ($guestData['price'] > $UserGuests[$k]['price'] ) {
                     echo "<p>Oh on a de nouvelles options $$ !</p>";
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
-                    $statusFormSubmition['updateOptions'][] = 'MAJ options'.json_encode($updatedFields).' pour '.$guestData['prenom'].' '.$guestData['nom'].' de '.$UserGuests[$k]['price'].' à '.$guestData['price'].'€';
+                    $statusFormSubmition['updateOptions']['msg'][] = 'MAJ options'.json_encode($updatedFields).' pour '.$guestData['prenom'].' '.$guestData['nom'].' de '.$UserGuests[$k]['price'].' à '.$guestData['price'].'€';
                 }else{
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
                     if (!empty($updatedFields)) {
                         echo "<p>UPDATE des champs ".json_encode($updatedFields)."</p>";
-                        $statusFormSubmition['updateFields'][] = 'MAJ champs'.json_encode($updatedFields).' pour '.$guestData['prenom'].' '.$guestData['nom'];
+                        $statusFormSubmition['updateFields']['data'][] = array_merge($guestData, array('updatedFields'=>$updatedFields));
+                        $statusFormSubmition['updateFields']['msg'][] = 'MAJ champs'.json_encode($updatedFields).' pour '.$guestData['prenom'].' '.$guestData['nom'];
                         
                     }else echo "<p>En fait non rien à mettre à jour !</p>";
                 }
@@ -411,16 +413,36 @@ $app->post('/edit', function ($request, $response, $args) {
     echo "<hr>";
     echo "<h2>Récap</h2>";
     if (empty($statusFormSubmition)) {
-        echo "<p>Vous n'avez rien modifié</p>";
-    }else{
-        if(isset($statusFormSubmition['updateFields']))
-            echo '<p>'.implode('<br>', $statusFormSubmition['updateFields']).'</p>';
-        if(isset($statusFormSubmition['updateOptions']))
-            echo '<p>'.implode('<br>', $statusFormSubmition['updateOptions']).'</p>';
-        if(isset($statusFormSubmition['insertIcam']))
-            echo '<p>'.$statusFormSubmition['insertIcam'].'</p>';
-        if(isset($statusFormSubmition['insertGuest']))
-            echo '<p>'.implode('<br>', $statusFormSubmition['insertGuest']).'</p>';
+        $this->flash->addMessage('info', "Vous n'avez rien modifié");
+        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+    }elseif(isset($statusFormSubmition['insertIcam'])){ // On a déjà une résa pour l'icam !
+        echo '<p>'.$statusFormSubmition['insertIcam']['msg'].'</p>';
+        if(isset($statusFormSubmition['insertGuest'])){
+            echo '<p>'.implode('<br>', $statusFormSubmition['insertGuest']['msg']).'</p>';
+        }
+    }else{ // On a déjà une résa pour l'icam !
+        if(isset($statusFormSubmition['updateFields'])){ // On peut faire les MAJ dès maintenant ! il n'y a pas de sous en jeu !
+            foreach ($statusFormSubmition['updateFields']['data'] as $guest) {
+                $data = array();   $updatedFields = array();
+                var_dump($guest);
+                foreach ($guest['updatedFields'] as $field){
+                    $data[$field] = $guest[$field];
+                    $updatedFields[] = $field.' = :'.$field;
+                }
+                $data['id'] = $guest['id'];
+                $DB->query("UPDATE guests SET ".implode(', ', $updatedFields)." WHERE id = :id", $data);
+            }
+            $this->flash->addMessage('success', 'Les champs ont bien été mit à jours.<br>'.implode('<br>', $statusFormSubmition['updateFields']['msg']));
+            if (!isset($statusFormSubmition['updateOptions']) && !isset($statusFormSubmition['insertGuest'])) {
+                return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+            }
+        }
+        if(isset($statusFormSubmition['updateOptions'])){
+            echo '<p>'.implode('<br>', $statusFormSubmition['updateOptions']['msg']).'</p>';
+        }
+        if(isset($statusFormSubmition['insertGuest'])){
+            echo '<p>'.implode('<br>', $statusFormSubmition['insertGuest']['msg']).'</p>';
+        }
     }
 
     return $response;//->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
