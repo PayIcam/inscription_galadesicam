@@ -360,7 +360,7 @@ $app->post('/edit', function ($request, $response, $args) {
         $icamData['inscription'] = date('Y-m-d H:m:s');
         $Reservation->addGuest($icamData);
 
-        var_dump($icamData);
+        // var_dump($icamData);
         foreach ($_SESSION['newResa']['resa']['invites'] as $k => $guest) {
             if (empty($guest['nom']) && empty($guest['prenom'])) {
                 echo "<p>pas d'invité à ajouter</p>"; continue; }
@@ -368,7 +368,7 @@ $app->post('/edit', function ($request, $response, $args) {
             $guestData['paiement'] = 'PayIcam';
             $guestData['inscription'] = date('Y-m-d H:m:s');
             $Reservation->addGuest($guestData);
-            var_dump($guestData);
+            // var_dump($guestData);
         }
         $statusFormSubmition = $Reservation->statusMsg;
     }else{ // UPDATE
@@ -376,7 +376,8 @@ $app->post('/edit', function ($request, $response, $args) {
         // UPDATE de la personne
         $icamData = getIcamData($gingerUserCard, $prixPromo, $_SESSION['newResa']['resa'], $UserReservation);
         $icamData['id'] = intval($UserReservation['id']);
-        var_dump($icamData);
+        // var_dump($icamData);
+        $Reservation->addIcamId($icamData['id']);
         if ($icamData['price'] > $UserReservation['price'] ) {
             echo "<p>Oh on a de nouvelles options $$ !</p>";
             $updatedFields = getUpdatedFields($icamData, $UserReservation);
@@ -398,17 +399,14 @@ $app->post('/edit', function ($request, $response, $args) {
                 $guestData = getGuestData($guest, $prixPromo, isset($UserGuests[$k])? $UserGuests[$k]:'');
                 $guestData['paiement'] = 'PayIcam';
                 $guestData['inscription'] = date('Y-m-d H:m:s');
-                var_dump($guestData);
+                // var_dump($guestData);
 
-                $Reservation->addGuest($icamData);
-
-                $statusFormSubmition['insertGuest'][] = 'Ajout Invité: '.$guestData['prenom'].' '.$guestData['nom'].' pour '.$guestData['price'].'€';
+                $Reservation->addGuest($guestData);
             }else{
                 echo "<p>UPDATE de l'invité #".$k."</p>";
-                var_dump($guest);
                 $guestData = getGuestData($guest, $prixPromo, $UserGuests[$k]);
                 $guestData['id'] = intval($UserGuests[$k]['id']);
-                var_dump($guestData);
+                // var_dump($guestData);
                 if ($guestData['price'] > $UserGuests[$k]['price'] ) {
                     echo "<p>Oh on a de nouvelles options $$ !</p>";
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
@@ -427,14 +425,15 @@ $app->post('/edit', function ($request, $response, $args) {
         }        
     }
 
+    if (!empty($Reservation->statusMsg['insertGuest'])) {
+        $statusFormSubmition['insertGuest'] = $Reservation->statusMsg['insertGuest'];
+    }
     if (!empty($Reservation->statusMsg['updateOptions'])) {
         $statusFormSubmition['updateOptions']['msg'] = $Reservation->statusMsg['updateOptions'];
     }
 
     echo "<hr>";
-    var_dump($Reservation->articles);
-    echo "<hr>";
-    echo "<h2>Récap</h2>";
+    echo "<h2>Récap changements</h2>";
     if (empty($statusFormSubmition)) {
         $this->flash->addMessage('info', "Vous n'avez rien modifié");
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
@@ -465,6 +464,18 @@ $app->post('/edit', function ($request, $response, $args) {
         if(isset($statusFormSubmition['insertGuest'])){
             echo '<p>'.implode('<br>', $statusFormSubmition['insertGuest']).'</p>';
         }
+    }
+
+    if (!empty($Reservation->statusMsg)) {
+        echo "<hr>";
+        echo "<h2>Articles de la nouvelle réservation:</h2>";
+        echo '<ul>';
+        foreach ($Reservation->articles as $a) {
+            echo '<li>'.$a['count'].' x '.$a['article']['nom'].'('.$a['article']['price'].'€) = '.($a['count']*$a['article']['price']).'€</li>';
+        }
+        echo '</ul>';
+        echo "Soit, un total de ".$Reservation->price."€ à payer";
+        // $Reservation->save();
     }
 
     return $response;//->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));

@@ -43,27 +43,30 @@ class Reservation{
         $msg .= $data['prenom'].' '.$data['nom']. ', ';
 
         if ($updatedFields === false ) { // INSERT
+            $options = array('1 soirée');
             $this->soirees += 1;
             $this->addArticle('soiree', $data['is_icam']);
-            if($data['repas']){ $this->repas += 1;
+            if($data['repas']){ $this->repas += 1; $options[] = '1 repas';
                 $this->addArticle('repas', $data['is_icam']); }
-            if($data['buffet']){ $this->buffets += 1;
+            if($data['buffet']){ $this->buffets += 1; $options[] = '1 buffet';
                 $this->addArticle('buffet', $data['is_icam']); }
-            if($data['tickets_boisson']){
+            if($data['tickets_boisson']){ $options[] = $data['tickets_boisson'].' tickets';
                 $this->addArticle('tickets_boisson', $data['is_icam']); }
             $this->price += $data['price'];
-            $msg = 'Ajout' . $msg .'pour '. $data['price'].'€';
+            $msg = 'Ajout' . $msg .'pour '. $data['price'].'€ ['.implode(', ', $options).']';
         }else{ // MAJ options
             if (in_array('price', $updatedFields)) {
                 $prix = 0;
-                if (in_array('repas', $updatedFields))
+                $options = array();
+                if (in_array('repas', $updatedFields)){ $options[] = '1 repas';
                     $prix += $this->addArticle('repas', $data['is_icam']);
-                if (in_array('buffet', $updatedFields))
+                }if (in_array('buffet', $updatedFields)){ $options[] = '1 buffet';
                     $prix += $this->addArticle('buffet', $data['is_icam']);
-                if (in_array('tickets_boisson', $updatedFields))
+                }if (in_array('tickets_boisson', $updatedFields)){ $options[] = $data['tickets_boisson'].' tickets';
                     $prix += $this->addArticle('tickets_boisson', $data['is_icam']);
+                }
                 $this->price += $prix;
-                $msg = 'MAJ options'.json_encode($updatedFields). ' ' . $msg.' avec +'.$prix.'€, soit '.$data['price'].'€ maintenant';
+                $msg = 'MAJ options'.json_encode($updatedFields). ' ' . $msg.' avec +'.$prix.'€, soit '.$data['price'].'€ maintenant ['.implode(', ', $options).']';
             }
         }
         if ($updatedFields === false) {
@@ -98,22 +101,36 @@ class Reservation{
         }
         return false;
     }
+    public function save(){
+        global $DB;
+        $data = array(
+            'login' => $this->login,
+            'soirees' => $this->soirees,
+            'repas' => $this->repas,
+            'buffets' => $this->buffets,
+            'price' => $this->price,
+            'articles' => json_encode($this->articles),
+            'date_option' => $this->date_option
+        );
 
-    public function getResaId(){
-        if (empty($this->id)) {
-            $this->id = $DB->query(
-                'INSERT INTO reservations_payicam (date_option, login) VALUES (:date_option, :login)',
-                array('date_option'=> date('Y-m-d H:m:s'), 'login' => $this->login)
-            );
+        $this->id = $DB->query( 'INSERT INTO reservations_payicam ('.implode(', ', array_keys($data)).') VALUES (:'.implode(', :', array_keys($data)).')', $data );
+
+        if (!empty($this->icamData)) {
+            $this->saveNewGuest($this->icamData);
         }
-        return $this->id;
+        foreach ($this->guestsData as $guest) {
+            $this->saveNewGuest($guest);
+        }
     }
 
-    public function addNewIcam($data){
+    public function saveNewGuest($data){
         global $DB;
         $data['reservation_id'] = $this->id;
-        $this->icam_id = $DB->query("INSERT INTO guests_payicam (".implode(', ', array_keys($data)).") VALUES (:".implode(', :', array_keys($data)).")", $data);
-        echo 'new id: '.$this->icam_id;
+        if (isset($data['id']) && $data['id'] > 0){
+            $data['guest_id'] = $data['id']; unset($data['id']);
+        }else 
+            $data['guest_id'] = -1;
+        $DB->query("INSERT INTO guests_payicam (".implode(', ', array_keys($data)).") VALUES (:".implode(', :', array_keys($data)).")", $data);
     }
 }
  
