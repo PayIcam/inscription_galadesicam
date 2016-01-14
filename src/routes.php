@@ -57,7 +57,7 @@ $app->get('/', function ($request, $response, $args) {
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
     $editLink = $this->router->pathFor('edit');
-    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'UserWaitingResa', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', $args));
+    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'UserWaitingResa', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'RouteHelper', $args));
 
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('home');
@@ -360,7 +360,7 @@ $app->post('/edit', function ($request, $response, $args) {
     $statusFormSubmition = array();
 
     // Si on va faire une maj des options
-    $Reservation = new \PayIcam\Reservation($mailPersonne, $gingerUserCard, $prixPromo, $this->get('settings')['articlesPayIcam']);
+    $Reservation = new \PayIcam\Reservation($mailPersonne, $gingerUserCard, $prixPromo, $this->get('settings')['articlesPayIcam'], $this);
 
     if ($UserId == -1) { // INSERT de l'icam & de ses invités!
         echo "<p>INSERT de l'icam & de ses invités!</p>";
@@ -485,8 +485,8 @@ $app->post('/edit', function ($request, $response, $args) {
         echo '</ul>';
         echo "<p>Soit, un total de ".$Reservation->price."€ à payer</p>";
         $Reservation->save();
-        echo "<p><strong>Votre réservation a bien été faite, il ne vous reste plus qu'à la payer sur payicam, mais ça ne marche pas encore</strong></p>";
-        echo '<p><a href="'.$this->router->pathFor('edit').'">Retour accueil</a></p>';
+        echo "<p><strong>Votre réservation est prête à être soumise</strong>, vous allez être redirigé sur PayIcam pour effectuer le paiement:</p>";
+        echo '<p><a href="'.$Reservation->tra_url_payicam.'">Valider la commande</a></p>';
     }
 
     return $response;//->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
@@ -518,6 +518,30 @@ $app->get('/cancel', function ($request, $response, $args) {
     $this->flash->addMessage('info', "Vous avez bien annulé votre réservation au Gala");
     return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
 })->setName('cancel');
+
+$app->get('/callback', function ($request, $response, $args) {
+    global $payutcClient, $DB, $Auth;
+    $fun_id = $this->get('settings')['fun_id'];
+    $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE status = "W"');
+    var_dump($UserWaitingResa);
+    if (count($UserWaitingResa) >= 1){
+        foreach ($UserWaitingResa as $resa) {
+            try {
+                $transaction = $payutcClient->getTransactionInfo(array("fun_id" => $fun_id, "tra_id" => $resa['tra_id_payicam']));
+                if($transaction->status != $resa['status']){
+                    $data = ['status'=>$transaction->status, 'date_paiement'=>date("Y-m-d H:i:s"), 'id'=>$resa['id']];
+                    $DB->query("UPDATE reservations_payicam SET status = :status, date_paiement = :date_paiement WHERE id = :id", $data);
+                    if ($Auth->getUserField('email') == $resa['login']) {
+                        $this->flash->addMessage('info', "Le status de votre réservation a été mis à jour de ".$resa['status'].' vers '.$transaction->status);
+                    }
+                }
+            } catch (Exception $e) {
+                var_dump($e->getMessage());
+            }
+        }
+    }
+    return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
+})->setName('callback');
 
 
 //////////////////////////////

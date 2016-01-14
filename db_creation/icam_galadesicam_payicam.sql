@@ -64,7 +64,8 @@ CREATE TABLE `reservations_payicam` (
   `date_option` datetime NOT NULL,
   `date_paiement` datetime NOT NULL,
   `status` enum('A','V','W') NOT NULL DEFAULT 'W',
-  `url` varchar(255) NOT NULL,
+  `tra_id_payicam` int(11) NOT NULL,
+  `tra_url_payicam` varchar(255) NOT NULL,
   `login` varchar(255) NOT NULL,
   `price` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

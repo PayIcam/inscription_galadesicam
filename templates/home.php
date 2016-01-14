@@ -1,10 +1,13 @@
 <h1>Inscription au Gala des Icam</h1>
 
-<?php if (count($UserWaitingResa)) { $count = count($UserWaitingResa); ?>
+<?php if (count($UserWaitingResa)) { $count = count($UserWaitingResa); $curResa = current($UserWaitingResa); ?>
     <p class="alert alert-warning">
         Vous avez bien soumis <?= (($count == 1)?'une':$count) ?> réservation mais vous ne l'avez pas encore réglée.<br>
-        Ne tardez pas, vous avez 15 min après quoi elle sera annulée.
+        Ne tardez pas, vous avez 15 min après quoi elle sera annulée.<br>
+        <br>
+        <a href="<?= $curResa['tra_url_payicam'] ?>" class="btn btn-primary">Régler la réservation</a> - <a href="<?= $RouteHelper->getPathFor('cancel') ?>" class="btn btn-danger">Annuler la réservation</a>
     </p>
+
 <?php } elseif ($userResaCount == 0 && $canWeRegisterNewGuests) { ?>
     <p>
         Vous n'avez pas encore de réservation,<br>

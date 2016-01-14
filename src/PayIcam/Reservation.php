@@ -7,8 +7,11 @@ class Reservation{
     
     private $id;
     private $login;
+
+    private $app;
     private $gingerUserCard;
     private $prixPromo;
+    private $articlesPayIcam;
 
     private $icam_id;
     private $icamData;
@@ -16,9 +19,10 @@ class Reservation{
     
     public $statusMsg;
 
-    function __construct($login, $gingerUserCard, $prixPromo, $articlesPayIcam){
+    function __construct($login, $gingerUserCard, $prixPromo, $articlesPayIcam, $app){
         global $DB;
 
+        $this->app = $app;
         $this->gingerUserCard = $gingerUserCard;
         $this->prixPromo = $prixPromo;
         $this->articlesPayIcam = $articlesPayIcam;
@@ -101,8 +105,26 @@ class Reservation{
         }
         return false;
     }
+    public function getArticles(){
+        $articles = array();
+        foreach ($this->articles as $a) {
+            $articles[] = [$a['article']['id'], $a['count']];
+        }
+        return $articles;
+    }
     public function save(){
-        global $DB;
+        global $DB, $payutcClient;
+        $vente = $payutcClient->createTransaction(array(
+            "items" => json_encode($this->getArticles()),
+            "fun_id" => $this->app->get('settings')['fun_id'],
+            "mail" => $this->login,
+            "return_url" =>  $this->app->request->getUri()->getBaseUrl() . '/callback',
+            "callback_url" =>  $this->app->request->getUri()->getBaseUrl() . '/callback'
+        ));
+
+        $this->tra_url_payicam = $vente->url;
+        $this->tra_id_payicam = $vente->tra_id;
+
         $data = array(
             'login' => $this->login,
             'soirees' => $this->soirees,
@@ -110,7 +132,9 @@ class Reservation{
             'buffets' => $this->buffets,
             'price' => $this->price,
             'articles' => json_encode($this->articles),
-            'date_option' => $this->date_option
+            'date_option' => $this->date_option,
+            'tra_url_payicam' => $this->tra_url_payicam,
+            'tra_id_payicam' => $this->tra_id_payicam,
         );
 
         $this->id = $DB->query( 'INSERT INTO reservations_payicam ('.implode(', ', array_keys($data)).') VALUES (:'.implode(', :', array_keys($data)).')', $data );
