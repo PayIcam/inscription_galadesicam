@@ -526,7 +526,7 @@ $app->post('/edit', function ($request, $response, $args) {
         var_dump($stats);
         var_dump($quotas);
         if ($Reservation->checkQuotas($stats, $quotas)) {
-            // $Reservation->save();
+            $Reservation->save();
             echo "<p><strong>Votre réservation est prête à être soumise</strong>, vous allez être redirigé sur PayIcam pour effectuer le paiement:</p>";
             echo '<p><a href="'.$Reservation->tra_url_payicam.'">Valider la commande</a></p>';
         }else{
