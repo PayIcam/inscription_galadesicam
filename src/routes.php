@@ -537,23 +537,25 @@ $app->post('/edit', function ($request, $response, $args) {
         
         if ($placesRestantes['soirees'] >= 0 && $placesRestantes['repas'] >= 0 && $placesRestantes['buffets'] >= 0) {
             $Reservation->save();
-            // return $response;->withStatus(303)->withHeader('Location', $Reservation->tra_url_payicam);
+            return $response->withStatus(303)->withHeader('Location', $Reservation->tra_url_payicam);
             echo "<p><strong>Votre réservation est prête à être soumise</strong>, vous allez être redirigé sur PayIcam pour effectuer le paiement:</p>";
             echo '<p><a href="'.$Reservation->tra_url_payicam.'">Valider la commande</a></p>';
         }else{
-            echo "<p>Votre réservation était prête à être soumise... <br><strong>MAIS</strong>vous n'avez pas été assez vite et certains des quotas ont été atteints:</p>";
+            $msg = "";
+            $msg .= "<p>Votre réservation était prête à être soumise... <br><strong>MAIS</strong> vous n'avez pas été assez vite et certains des quotas ont été atteints:</p>";
             if ($placesRestantes['soirees'] < 0) {
-                echo "<p>Plus de places à la soirée ne sont disponibles</p>";
+                $msg .= "<p>Plus de places à la soirée ne sont disponibles</p>";
             }if ($placesRestantes['repas'] < 0) {
-                echo "<p>Plus de places pour le repas ne sont disponibles</p>";
+                $msg .= "<p>Plus de places pour le repas ne sont disponibles</p>";
             }if ($placesRestantes['buffets'] < 0) {
-                echo "<p>Plus de places pour la conférence ne sont disponibles</p>";
+                $msg .= "<p>Plus de places pour la conférence ne sont disponibles</p>";
             }
+            $this->flash->addMessage('danger', $msg);
+            echo $msg;
             echo '<p><a href="'.$this->router->pathFor('edit').'">retour édition</a></p>';
         }
     }
-
-    // return $response;->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+    return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
 });
 
 
