@@ -504,7 +504,7 @@ $app->post('/edit', function ($request, $response, $args) {
                 $data['id'] = $guest['id'];
                 $DB->query("UPDATE guests SET ".implode(', ', $updatedFields)." WHERE id = :id", $data);
             }
-            $this->flash->addMessage('success', 'Les champs ont bien été mit à jours.<br>'.implode('<br>', $statusFormSubmition['updateFields']['msg']));
+            $this->flash->addMessage('success', 'Les champs ont bien été mit à jours.<br>');//implode('<br>', $statusFormSubmition['updateFields']['msg'])
             if (!isset($statusFormSubmition['updateOptions']) && !isset($statusFormSubmition['insertGuest'])) {
                 return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
             }
