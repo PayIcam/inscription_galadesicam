@@ -27,7 +27,7 @@
 <?php if(!empty($newResa)){ ?>
     <h2 class="page-header">
         Votre nouvelle réservation:
-        <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && empty($newResa))?'':' title="Vous ne pouvez pas ou plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>éditer sa place</a></small>
+        <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && empty($newResa))?'':' title="Vous devez payer votre réservation pour pouvoir l\'éditer à nouveau" disabled="disabled"' ?>>éditer sa place</a></small>
     </h2>
     <h3>Vous:</h3>
     <dl class="dl-horizontal">

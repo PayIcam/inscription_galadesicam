@@ -124,9 +124,9 @@ class Reservation{
             if (in_array('price', $updatedFields)) {
                 $prix = 0;
                 $options = array();
-                if (in_array('repas', $updatedFields)){ $options[] = '1 repas';
+                if (in_array('repas', $updatedFields)){ $options[] = '1 repas'; $this->repas += 1;
                     $prix += $this->addArticle('repas', $data['is_icam']);
-                }if (in_array('buffet', $updatedFields)){ $options[] = '1 buffet';
+                }if (in_array('buffet', $updatedFields)){ $options[] = '1 buffet'; $this->buffets += 1;
                     $prix += $this->addArticle('buffet', $data['is_icam']);
                 }if (in_array('tickets_boisson', $updatedFields)){ $options[] = $data['tickets_boisson'].' tickets';
                     $prix += $this->addArticle('tickets_boisson', $data['is_icam']);
@@ -262,9 +262,16 @@ class Reservation{
     }
 
     public function checkQuotas($stats, $quotas){
-        return $stats['soireesG']+$stats['soireesW'] < $quotas['soiree']
-                    && $stats['repasG']+$stats['repasW'] < $quotas['repas']
-                    && $stats['buffetsG']+$stats['buffetsW'] < $quotas['buffet'] ;
+        return $stats['soireesG']+$stats['soireesW']+$this->soirees <= $quotas['soiree']
+                 && $stats['repasG']+$stats['repasW']+$this->repas <= $quotas['repas']
+                    && $stats['buffetsG']+$stats['buffetsW']+$this->buffets <= $quotas['buffet'] ;
+    }
+
+    public function getQuotasRestant($stats, $quotas){
+        $soirees = $quotas['soiree'] - ($stats['soireesG']+$stats['soireesW']+$this->soirees);
+        $repas = $quotas['repas'] - ($stats['repasG']+$stats['repasW']+$this->repas);
+        $buffets = $quotas['buffet'] - ($stats['buffetsG']+$stats['buffetsW']+$this->buffets);
+        return compact('soirees', 'repas', 'buffets');
     }
 
     public static function parseGuestData($guest){
