@@ -41,7 +41,7 @@
         <dd><?= $newResa->icamData['telephone'] ?></dd>
         <dt>Options:</dt>
         <dd><ul class="list-unstyled">
-            <li><span class="label label-<?= (!empty($UserReservation))?'success':'info'?>">Soirée</span></li>
+            <li><span class="label label-<?= (!empty($UserReservation['guest_id'])&&$UserReservation['guest_id']>0)?'success':'info'?>">Soirée</span></li>
             <li><span class="label label-<?= (!empty($UserReservation['repas']))?'success':(($newResa->icamData['repas'])?'info':'default') ?>">Repas</span></li>
             <li><span class="label label-<?= (!empty($UserReservation['buffet']))?'success':(($newResa->icamData['buffet'])?'info':'default') ?>">Conférence</span></li>
             <li><span class="label label-<?= (!empty($UserReservation['tickets_boisson']))?'success':(($newResa->icamData['tickets_boisson'])?'info':'default') ?>"><?= $newResa->icamData['tickets_boisson'] ?> Tickets boisson</span></li>
