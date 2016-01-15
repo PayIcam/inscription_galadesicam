@@ -25,10 +25,11 @@
         <a href="mailto:<?= $emailContactGala ?>">Contactez nous</a> svp !</p>
 <?php } ?>
 <?php if(!empty($newResa)){ ?>
-    <h2>
+    <h2 class="page-header">
         Votre nouvelle réservation:
         <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && empty($newResa))?'':' title="Vous ne pouvez pas ou plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>éditer sa place</a></small>
     </h2>
+    <h3>Vous:</h3>
     <dl class="dl-horizontal">
         <dt>Nom:</dt>
         <dd><?= $newResa->icamData['prenom'] . ' ' . $newResa->icamData['nom'] ?></dd>
@@ -50,7 +51,7 @@
         <dt>Numéro de bracelet:</dt>
         <dd><?= ($newResa->icamData['bracelet_id'])?$newResa->icamData['bracelet_id']:'<em>Vous avez bien réservé votre place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
     </dl>
-    <h2>Vos invités:</h2>
+    <h3>Vos invités:</h3>
     <?php if (count($newResa->guestsData) == 0){ ?>
         <p><em>Vous n'avez pas encore d'invités. Il est cependant encore temps d'en rajouter !</em></p>
     <?php } else { ?>
@@ -60,7 +61,7 @@
                         if ($g['guest_id'] == $guest['guest_id']) $oldGuest = $g;
                     }
                 } ?>
-            <h3>Invité #<?= $key+1 ?></h3>
+            <h4>Invité #<?= $key+1 ?></h4>
             <dl class="dl-horizontal">
                 <dt>Nom:</dt>
                 <dd><?= $guest['prenom'] . ' ' . $guest['nom'] ?></dd>
@@ -80,11 +81,15 @@
     <?php } // endelse ?>
     
 <?php } ?>
+<?php if ($userResaCount == 1 && !empty($newResa)): ?>
+    <hr>
+<?php endif ?>
 <?php if($userResaCount == 1){ ?>
-    <h2>
+    <h2 class="page-header">
         Votre réservation actuelle:
         <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && empty($newResa))?'':' title="Vous ne pouvez pas ou plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>éditer sa place</a></small>
     </h2>
+    <h3>Vous:</h3>
     <dl class="dl-horizontal">
         <dt>Nom:</dt>
         <dd><?= $UserReservation['prenom'] . ' ' . $UserReservation['nom'] ?></dd>
@@ -106,12 +111,12 @@
         <dt>Numéro de bracelet:</dt>
         <dd><?= ($UserReservation['bracelet_id'])?$UserReservation['bracelet_id']:'<em>Vous avez bien réservé votre place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
     </dl>
-    <h2>Vos invités:</h2>
+    <h3>Vos invités:</h3>
     <?php if (count($UserGuests) == 0){ ?>
         <p><em>Vous n'avez pas encore d'invités. Il est cependant encore temps d'en rajouter !</em></p>
     <?php } else { ?>
         <?php foreach ($UserGuests as $key => $guest): ?>
-            <h3>Invité #<?= $key+1 ?></h3>
+            <h4>Invité #<?= $key+1 ?></h4>
             <dl class="dl-horizontal">
                 <dt>Nom:</dt>
                 <dd><?= $guest['prenom'] . ' ' . $guest['nom'] ?></dd>
