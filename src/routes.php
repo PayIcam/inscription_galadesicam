@@ -67,23 +67,24 @@ $app->get('/', function ($request, $response, $args) {
 
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
+    $newResa = null;
     if (count($UserWaitingResa) >= 1){
-        $curResa = current($UserWaitingResa);
+        $newResa = new \PayIcam\Reservation(current($UserWaitingResa), $gingerUserCard, $prixPromo, $this->get('settings')['articlesPayIcam'], $this);
         // On veut reset les autres
         if (count($UserWaitingResa) >= 1){
-            $data = ['login' => $mailPersonne, 'id' => $curResa['id']];
+            $data = ['login' => $mailPersonne, 'id' => $newResa->id];
             $DB->query("UPDATE reservations_payicam SET status = 'A' WHERE login = :login AND status = 'W' AND id != :id", $data);
         }
         try {   
-            $transaction = $payutcClient->getTransactionInfo(array("fun_id" => $fun_id, "tra_id" => $curResa['tra_id_payicam']));
-            if($transaction->status != $curResa['status']){
-                $Reservation = new \PayIcam\Reservation($curResa, $gingerUserCard, $prixPromo, $this->get('settings')['articlesPayIcam'], $this);
-                $Reservation->updateStatus($transaction->status);
+            $transaction = $payutcClient->getTransactionInfo(array("fun_id" => $fun_id, "tra_id" => $newResa->tra_id_payicam));
+            if($transaction->status != $newResa->status){
+                $Reservation = new \PayIcam\Reservation($newResa, $gingerUserCard, $prixPromo, $this->get('settings')['articlesPayIcam'], $this);
+                $newResa->updateStatus($transaction->status);
                 if ($transaction->status == 'V') {
-                    $Reservation->registerGuestsToTheGala();
+                    $newResa->registerGuestsToTheGala();
                     $this->flash->addMessage('success', "Votre réservation a bien été prise en compte");
                 }else{
-                    $this->flash->addMessage('info', "Le status de votre réservation a été mis à jour de ".$curResa['status'].' vers '.$transaction->status);
+                    $this->flash->addMessage('info', "Le status de votre réservation a été mis à jour de ".$newResa->status.' vers '.$transaction->status);
                 }
                 return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
             }
@@ -95,7 +96,7 @@ $app->get('/', function ($request, $response, $args) {
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
     $editLink = $this->router->pathFor('edit');
-    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'UserWaitingResa', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'RouteHelper', $args));
+    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'newResa', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'RouteHelper', $args));
 
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('home');
@@ -177,6 +178,7 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
             'email' => $gingerUserCard->mail,
             'sexe' => $gingerUserCard->sexe,
             'paiement' => 'PayIcam',
+            'inscription' => 0,
             'price' => 0,
             'repas' => 0,
             'buffet' => 0,
@@ -311,6 +313,7 @@ function getIcamData($gingerUserCard, $prixPromo, $resa, $oldResa=""){
         'tickets_boisson' => intval($resa['tickets_boisson']),
         'image' => $gingerUserCard->img_link
     );
+    if(!empty($oldResa['inscription'])) $icamData['inscription'] = $oldResa['inscription'];
     $icamData['price'] = getPrice($icamData, 'prixIcam', $prixPromo);
     return $icamData;
 }
@@ -324,6 +327,7 @@ function getGuestData($guest, $prixPromo, $oldResa=""){
         'buffet' => getBoolIntValues('buffet', $guest, $oldResa, $prixPromo['prixInvite']['buffet']),
         'tickets_boisson' => intval($guest['tickets_boisson'])
     );
+    if(!empty($oldResa['inscription'])) $guestData['inscription'] = $oldResa['inscription'];
     $guestData['price'] = getPrice($guestData, 'prixInvite', $prixPromo);
     return $guestData;
 }

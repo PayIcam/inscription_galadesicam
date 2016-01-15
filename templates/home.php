@@ -1,11 +1,11 @@
 <h1>Inscription au Gala des Icam</h1>
 
-<?php if (count($UserWaitingResa)) { $count = count($UserWaitingResa); $curResa = current($UserWaitingResa); ?>
+<?php if (!empty($newResa)) { ?>
     <p class="alert alert-warning">
-        Vous avez bien soumis <?= (($count == 1)?'une':$count) ?> réservation mais vous ne l'avez pas encore réglée.<br>
+        Vous avez bien soumis une réservation mais vous ne l'avez pas encore réglée.<br>
         Ne tardez pas, vous avez 15 min après quoi elle sera annulée.<br>
         <br>
-        <a href="<?= $curResa['tra_url_payicam'] ?>" class="btn btn-primary">Régler la réservation</a> - <a href="<?= $RouteHelper->getPathFor('cancel') ?>" class="btn btn-danger">Annuler la réservation</a>
+        <a href="<?= $newResa->tra_url_payicam ?>" class="btn btn-primary">Régler la réservation</a> - <a href="<?= $RouteHelper->getPathFor('cancel') ?>" class="btn btn-danger">Annuler la réservation</a>
     </p>
 
 <?php } elseif ($userResaCount == 0 && $canWeRegisterNewGuests) { ?>
@@ -23,10 +23,67 @@
 <?php } elseif($userResaCount > 1){ ?>
     <p>Nous avons plusieurs réservations enregistrées à votre email...<br>
         <a href="mailto:<?= $emailContactGala ?>">Contactez nous</a> svp !</p>
-<?php } if($userResaCount == 1){ ?>
+<?php } ?>
+<?php if(!empty($newResa)){ ?>
     <h2>
-        Votre réservation:
-        <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && count($UserWaitingResa) == 0)?'':' title="Vous ne pouvez pas ou plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>éditer sa place</a></small>
+        Votre nouvelle réservation:
+        <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && empty($newResa))?'':' title="Vous ne pouvez pas ou plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>éditer sa place</a></small>
+    </h2>
+    <dl class="dl-horizontal">
+        <dt>Nom:</dt>
+        <dd><?= $newResa->icamData['prenom'] . ' ' . $newResa->icamData['nom'] ?></dd>
+        <dt>Mail:</dt>
+        <dd><?= $newResa->icamData['email'] ?></dd>
+        <dt>Promo:</dt>
+        <dd><?= $newResa->icamData['promo'] ?></dd>
+        <dt>Téléphone:</dt>
+        <dd><?= $newResa->icamData['telephone'] ?></dd>
+        <dt>Options:</dt>
+        <dd><ul class="list-unstyled">
+            <li><span class="label label-<?= (!empty($UserReservation))?'success':'info'?>">Soirée</span></li>
+            <li><span class="label label-<?= (!empty($UserReservation['repas']))?'success':(($newResa->icamData['repas'])?'info':'default') ?>">Repas</span></li>
+            <li><span class="label label-<?= (!empty($UserReservation['buffet']))?'success':(($newResa->icamData['buffet'])?'info':'default') ?>">Conférence</span></li>
+            <li><span class="label label-<?= (!empty($UserReservation['tickets_boisson']))?'success':(($newResa->icamData['tickets_boisson'])?'info':'default') ?>"><?= $newResa->icamData['tickets_boisson'] ?> Tickets boisson</span></li>
+        </ul></dd>
+        <dt>Prix payé:</dt>
+        <dd><?= $newResa->icamData['price']; ?> <em><small>par <?= $newResa->icamData['paiement'] ?> le <?= substr($newResa->icamData['inscription'], 0, 10) ?></small></em></dd>
+        <dt>Numéro de bracelet:</dt>
+        <dd><?= ($newResa->icamData['bracelet_id'])?$newResa->icamData['bracelet_id']:'<em>Vous avez bien réservé votre place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
+    </dl>
+    <h2>Vos invités:</h2>
+    <?php if (count($newResa->guestsData) == 0){ ?>
+        <p><em>Vous n'avez pas encore d'invités. Il est cependant encore temps d'en rajouter !</em></p>
+    <?php } else { ?>
+        <?php foreach ($newResa->guestsData as $key => $guest): ?>
+            <?php if ($guest['guest_id'] != -1){ $oldGuest = null;// on va cherche la résa de cet invité
+                    foreach ($UserGuests as $g) {
+                        if ($g['guest_id'] == $guest['guest_id']) $oldGuest = $g;
+                    }
+                } ?>
+            <h3>Invité #<?= $key+1 ?></h3>
+            <dl class="dl-horizontal">
+                <dt>Nom:</dt>
+                <dd><?= $guest['prenom'] . ' ' . $guest['nom'] ?></dd>
+                <dt>Options:</dt>
+                <dd><ul class="list-unstyled">
+                    <li><span class="label label-<?= (!empty($oldGuest))?'success':'info'?>">Soirée</span></li>
+                    <li><span class="label label-<?= (!empty($oldGuest['repas']))?'success':(($guest['repas'])?'info':'default') ?>">Repas</span></li>
+                    <li><span class="label label-<?= (!empty($oldGuest['buffet']))?'success':(($guest['buffet'])?'info':'default') ?>">Conférence</span></li>
+                    <li><span class="label label-<?= (!empty($oldGuest['tickets_boisson']))?'success':(($guest['tickets_boisson'])?'info':'default') ?>"><?= $guest['tickets_boisson'] ?> tickets boisson</span></li>
+                </ul></dd>
+                <dt>Prix payé:</dt>
+                <dd><?= $guest['price']; ?> <em><small>par <?= $guest['paiement'] ?> le <?= substr($newResa->icamData['inscription'], 0, 10) ?></small></em></dd>
+                <dt>Numéro de bracelet:</dt>
+                <dd><?= ($guest['bracelet_id'])?$guest['bracelet_id']:'<em>Vous avez bien réservé sa place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
+            </dl>
+        <?php endforeach ?>
+    <?php } // endelse ?>
+    
+<?php } ?>
+<?php if($userResaCount == 1){ ?>
+    <h2>
+        Votre réservation actuelle:
+        <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && empty($newResa))?'':' title="Vous ne pouvez pas ou plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>éditer sa place</a></small>
     </h2>
     <dl class="dl-horizontal">
         <dt>Nom:</dt>
@@ -72,5 +129,4 @@
             </dl>
         <?php endforeach ?>
     <?php } // endelse ?>
-    
-<?php } ?>
+<?php } // fin réservation ?>

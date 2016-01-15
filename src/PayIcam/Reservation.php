@@ -5,17 +5,17 @@ namespace PayIcam;
 
 class Reservation{
     
-    private $id;
-    private $soirees;
-    private $repas;
-    private $buffets;
+    public $id;
+    public $soirees;
+    public $repas;
+    public $buffets;
     public $articles;
-    private $date_option;
-    private $date_paiement;
-    private $status;
-    private $tra_id_payicam;
+    public $date_option;
+    public $date_paiement;
+    public $status;
+    public $tra_id_payicam;
     public $tra_url_payicam;
-    private $login;
+    public $login;
     public $price;
 
     private $app;
@@ -23,9 +23,9 @@ class Reservation{
     private $prixPromo;
     private $articlesPayIcam;
 
-    private $icam_id;
-    private $icamData;
-    private $guestsData;
+    public $icam_id;
+    public $icamData;
+    public $guestsData;
     
     public $statusMsg;
 
@@ -38,10 +38,10 @@ class Reservation{
         $this->articlesPayIcam = $articlesPayIcam;
         
         if (is_array($data) && !empty($data['id'])) { // On a déjà le contenu d'une résa
-            $this->id = $data['id'];
-            $this->soirees = $data['soirees'];
-            $this->repas = $data['repas'];
-            $this->buffets = $data['buffets'];
+            $this->id = intval($data['id']);
+            $this->soirees = intval($data['soirees']);
+            $this->repas = intval($data['repas']);
+            $this->buffets = intval($data['buffets']);
             $this->articles = json_decode($data['articles']);
             $this->date_option = $data['date_option'];
             $this->date_paiement = $data['date_paiement'];
@@ -49,7 +49,7 @@ class Reservation{
             $this->tra_id_payicam = $data['tra_id_payicam'];
             $this->tra_url_payicam = $data['tra_url_payicam'];
             $this->login = $data['login'];
-            $this->price = $data['price'];
+            $this->price = floatval($data['price']);
 
             $this->loadResaGuestsData();
         }else{
