@@ -21,6 +21,20 @@ $app->get('/about', function ($request, $response, $args) {
 /////////////////
 // Espace Icam //
 /////////////////
+function getStatsQuotas(){
+    global $DB, $settings;
+    $stats = $DB->queryFirst("SELECT * FROM 
+        (SELECT ifnull(SUM( r.soirees ), 0) soireesW, ifnull(SUM( r.repas ), 0) repasW, ifnull(SUM( r.buffets ), 0) buffetsW
+            FROM reservations_payicam AS r WHERE r.status = 'W') rW , 
+        -- (SELECT ifnull(SUM( r.soirees ), 0) soireesV, ifnull(SUM( r.repas ), 0) repasV, ifnull(SUM( r.buffets ), 0) buffetsV
+            -- FROM reservations_payicam AS r WHERE r.status = 'V') rV , 
+        (SELECT COUNT( id ) soireesG , SUM( repas ) repasG , SUM( buffet ) buffetsG FROM guests) g ");
+    foreach ($stats as $k => $v)
+        $stats[$k] = intval($v);
+    $quotas = $settings['settings']['quotas'];
+    return compact('stats', 'quotas');
+}
+
 $app->get('/', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
@@ -508,11 +522,19 @@ $app->post('/edit', function ($request, $response, $args) {
         }
         echo '</ul>';
         echo "<p>Soit, un total de ".$Reservation->price."€ à payer</p>";
-        $Reservation->save();
-        echo "<p><strong>Votre réservation est prête à être soumise</strong>, vous allez être redirigé sur PayIcam pour effectuer le paiement:</p>";
-        echo '<p><a href="'.$Reservation->tra_url_payicam.'">Valider la commande</a></p>';
+        extract(getStatsQuotas());// stats, quotas
+        var_dump($stats);
+        var_dump($quotas);
+        if ($Reservation->checkQuotas($stats, $quotas)) {
+            // $Reservation->save();
+            echo "<p><strong>Votre réservation est prête à être soumise</strong>, vous allez être redirigé sur PayIcam pour effectuer le paiement:</p>";
+            echo '<p><a href="'.$Reservation->tra_url_payicam.'">Valider la commande</a></p>';
+        }else{
+            echo "<p>Votre réservation était prête à être soumise... <br><strong>MAIS</strong>vous n'avez pas été assez vite et certains des quotas ont été atteints.</p>";
+            echo '<p><a href="'.$this->router->pathFor('edit').'">retour édition</a></p>';
+        }
     }
-
+    exit();
     return $response;//->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
 });
 

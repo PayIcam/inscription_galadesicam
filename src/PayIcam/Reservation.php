@@ -261,6 +261,12 @@ class Reservation{
         }
     }
 
+    public function checkQuotas($stats, $quotas){
+        return $stats['soireesG']+$stats['soireesW'] < $quotas['soiree']
+                    && $stats['repasG']+$stats['repasW'] < $quotas['repas']
+                    && $stats['buffetsG']+$stats['buffetsW'] < $quotas['buffet'] ;
+    }
+
     public static function parseGuestData($guest){
         if (isset($guest['id'])) $guest['id'] = intval($guest['id']);
         if (isset($guest['is_icam'])) $guest['is_icam'] = intval($guest['is_icam']);
