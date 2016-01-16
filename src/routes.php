@@ -78,7 +78,6 @@ $app->get('/', function ($request, $response, $args) {
         try {   
             $transaction = $payutcClient->getTransactionInfo(array("fun_id" => $fun_id, "tra_id" => $newResa->tra_id_payicam));
             if($transaction->status != $newResa->status){
-                $Reservation = new \PayIcam\Reservation($newResa, $gingerUserCard, $prixPromo, $this->get('settings')['articlesPayIcam'], $this);
                 $newResa->updateStatus($transaction->status);
                 if ($transaction->status == 'V') {
                     $newResa->registerGuestsToTheGala();
@@ -250,12 +249,7 @@ function mergeUserReservations($array1, $array2, $prixPromo){
     unset($icamValues2['invites']);
     $retour = array_merge($retour, $icamValues2);
     foreach ($icamGuests2 as $k => $guest) {
-        // On boucle sur les invités du premier tableau, soit la première résa pour que le gars ne puisse pas tricher !!
-        // Si il y a plus d'invités dans la 2e résa que la 1 c'est qu'il a du essayer d'en rajouter à la main...
-        // et on les prend dans l'ordre !
-        if ($k < $prixPromo['nbInvites']) {
-            $retour['invites'][$k] = isset($retour['invites'][$k]) ? array_merge($retour['invites'][$k], parseGuestData($guest) ) : parseGuestData($guest) ;
-        } // sinon, ba yen a pas, on garde ceux du premier tableau.
+        $retour['invites'][$k] = isset($retour['invites'][$k]) ? array_merge($retour['invites'][$k], parseGuestData($guest) ) : parseGuestData($guest) ;
     }
     return array('resa'=>$retour);
 }
@@ -373,11 +367,15 @@ $app->post('/edit', function ($request, $response, $args) {
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId, dataResaForm
 
     $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody(), $prixPromo );
+    var_dump($_SESSION['newResa']['resa']['invites']);
 
     ////////////////////////////////////////////////////////
     // On va vérifier que les données postées sont bonnes //
     ////////////////////////////////////////////////////////
-    if (count($_SESSION['newResa']['resa']['invites']) > $prixPromo['nbInvites']) {
+    $countAuthorizedGuests = max($prixPromo['nbInvites'], count($UserGuests)); // si qqn lui avait déjà autorisé plus d'invités on laisse faire
+    echo "countAuthorizedGuests:".$countAuthorizedGuests;
+    echo "count(_SESSIONnewResaresainvites):".count($_SESSION['newResa']['resa']['invites']);
+    if (count($_SESSION['newResa']['resa']['invites']) > $countAuthorizedGuests) {
         $this->flash->addMessage('warning', 'Hé oh loulou, tu t\'es cru où ? Cherche pas, tu ne pourras plus gruger et rajouter des invités en plus des quotas !.<br>Tu as le droit qu\'à '.$prixPromo['nbInvites'].' invités, pas à '.count($request->getParsedBody()['resa']['invites']).' !!');
         $_SESSION['formErrors']['hasErrors'] = true;
     }
@@ -385,8 +383,8 @@ $app->post('/edit', function ($request, $response, $args) {
     $errors = checkUserFieldsIntegrity($_SESSION['newResa']['resa']);
     if (!empty($errors)) $_SESSION['formErrors']['resa'] = $errors;
     foreach ($_SESSION['newResa']['resa']['invites'] as $k => $guest) {
-        if ($k >= count($UserGuests)) break; // ça sert à rien d'aller plus loin, il a triché !
-        $errors = checkUserFieldsIntegrity($guest, $UserGuests[$k]);
+        $curResaGuest = (!empty($UserGuests[$k]))?$UserGuests[$k]:'';
+        $errors = checkUserFieldsIntegrity($guest, $curResaGuest);
         if (!empty($errors)) $_SESSION['formErrors']['resa']['invites'][$k] = $errors;
     }
     if (isset($_SESSION['formErrors'])){   
@@ -411,7 +409,7 @@ $app->post('/edit', function ($request, $response, $args) {
         $icamData['inscription'] = date('Y-m-d H:m:s');
         $Reservation->addGuest($icamData);
 
-        // var_dump($icamData);
+        var_dump($icamData);
         foreach ($_SESSION['newResa']['resa']['invites'] as $k => $guest) {
             if (empty($guest['nom']) && empty($guest['prenom'])) {
                 echo "<p>pas d'invité à ajouter</p>"; continue; }
@@ -419,7 +417,7 @@ $app->post('/edit', function ($request, $response, $args) {
             $guestData['paiement'] = 'PayIcam';
             $guestData['inscription'] = date('Y-m-d H:m:s');
             $Reservation->addGuest($guestData);
-            // var_dump($guestData);
+            var_dump($guestData);
         }
         $statusFormSubmition = $Reservation->statusMsg;
     }else{ // UPDATE
@@ -427,7 +425,7 @@ $app->post('/edit', function ($request, $response, $args) {
         // UPDATE de la personne
         $icamData = getIcamData($gingerUserCard, $prixPromo, $_SESSION['newResa']['resa'], $UserReservation);
         $icamData['id'] = intval($UserReservation['id']);
-        // var_dump($icamData);
+        var_dump($icamData);
         $Reservation->addIcamId($icamData['id']);
         if ($icamData['price'] > $UserReservation['price'] ) {
             echo "<p>Oh on a de nouvelles options $$ !</p>";
@@ -450,14 +448,14 @@ $app->post('/edit', function ($request, $response, $args) {
                 $guestData = getGuestData($guest, $prixPromo, isset($UserGuests[$k])? $UserGuests[$k]:'');
                 $guestData['paiement'] = 'PayIcam';
                 $guestData['inscription'] = date('Y-m-d H:m:s');
-                // var_dump($guestData);
+                var_dump($guestData);
 
                 $Reservation->addGuest($guestData);
             }else{
                 echo "<p>UPDATE de l'invité #".$k."</p>";
                 $guestData = getGuestData($guest, $prixPromo, $UserGuests[$k]);
                 $guestData['id'] = intval($UserGuests[$k]['id']);
-                // var_dump($guestData);
+                var_dump($guestData);
                 if ($guestData['price'] > $UserGuests[$k]['price'] ) {
                     echo "<p>Oh on a de nouvelles options $$ !</p>";
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
@@ -486,8 +484,9 @@ $app->post('/edit', function ($request, $response, $args) {
     echo "<hr>";
     echo "<h2>Récap changements</h2>";
     if (empty($statusFormSubmition)) {
+        unset($_SESSION['newResa']);
         $this->flash->addMessage('info', "Vous n'avez rien modifié");
-        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+        // return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
     }elseif(isset($statusFormSubmition['insertIcam'])){ // On a déjà une résa pour l'icam !
         echo '<p>'.$statusFormSubmition['insertIcam'].'</p>';
         if (!empty($statusFormSubmition['insertGuest'])) {
@@ -504,9 +503,10 @@ $app->post('/edit', function ($request, $response, $args) {
                 $data['id'] = $guest['id'];
                 $DB->query("UPDATE guests SET ".implode(', ', $updatedFields)." WHERE id = :id", $data);
             }
-            $this->flash->addMessage('success', 'Les champs ont bien été mit à jours.<br>');//implode('<br>', $statusFormSubmition['updateFields']['msg'])
+            $this->flash->addMessage('success', 'Les champs ont bien été mit à jours.');//implode('<br>', $statusFormSubmition['updateFields']['msg'])
             if (!isset($statusFormSubmition['updateOptions']) && !isset($statusFormSubmition['insertGuest'])) {
-                return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+                unset($_SESSION['newResa']);
+                return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
             }
         }
         if(isset($statusFormSubmition['updateOptions'])){
@@ -517,7 +517,8 @@ $app->post('/edit', function ($request, $response, $args) {
         }
     }
 
-    if (!empty($Reservation->statusMsg)) {
+    if ($Reservation->hasNewReservation()) {
+        unset($_SESSION['newResa']);
         echo "<hr>";
         echo "<h2>Articles de la nouvelle réservation:</h2>";
         echo '<ul>';
@@ -537,7 +538,7 @@ $app->post('/edit', function ($request, $response, $args) {
         
         if ($placesRestantes['soirees'] >= 0 && $placesRestantes['repas'] >= 0 && $placesRestantes['buffets'] >= 0) {
             $Reservation->save();
-            return $response->withStatus(303)->withHeader('Location', $Reservation->tra_url_payicam);
+            // return $response->withStatus(303)->withHeader('Location', $Reservation->tra_url_payicam);
             echo "<p><strong>Votre réservation est prête à être soumise</strong>, vous allez être redirigé sur PayIcam pour effectuer le paiement:</p>";
             echo '<p><a href="'.$Reservation->tra_url_payicam.'">Valider la commande</a></p>';
         }else{
@@ -555,7 +556,7 @@ $app->post('/edit', function ($request, $response, $args) {
             echo '<p><a href="'.$this->router->pathFor('edit').'">retour édition</a></p>';
         }
     }
-    return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+    // return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
 });
 
 

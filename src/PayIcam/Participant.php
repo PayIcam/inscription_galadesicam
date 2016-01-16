@@ -55,7 +55,7 @@ class Participant{
 		"Formations Continues" => array('nbInvites' => 1,
 				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
 				'prixInvite' => array("repas" => 20, "buffet" => 2, "soiree" => 20)),
-		'115' => array('nbInvites' => 1,
+		'115' => array('nbInvites' => 2,
 				'prixIcam' => array("repas" => 20, "buffet" => 3, "soiree" => 20),
 				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
 		"Erasmus" => array('nbInvites' => 1,

@@ -5,29 +5,29 @@ namespace PayIcam;
 
 class Reservation{
     
-    public $id;
-    public $soirees;
-    public $repas;
-    public $buffets;
-    public $articles;
-    public $date_option;
-    public $date_paiement;
-    public $status;
-    public $tra_id_payicam;
-    public $tra_url_payicam;
-    public $login;
-    public $price;
+    private $id;
+    private $soirees;
+    private $repas;
+    private $buffets;
+    private $articles;
+    private $date_option;
+    private $date_paiement;
+    private $status;
+    private $tra_id_payicam;
+    private $tra_url_payicam;
+    private $login;
+    private $price;
 
     private $app;
     private $gingerUserCard;
     private $prixPromo;
     private $articlesPayIcam;
 
-    public $icam_id;
-    public $icamData;
-    public $guestsData;
+    private $icam_id;
+    private $icamData;
+    private $guestsData;
     
-    public $statusMsg;
+    private $statusMsg;
 
     function __construct($data, $gingerUserCard, $prixPromo, $articlesPayIcam, $app){
         global $DB;
@@ -64,10 +64,13 @@ class Reservation{
         
         $this->statusMsg = array();
     }
-
+    public function hasNewReservation(){
+        if (empty($this->statusMsg))
+            return false;
+        else return true;
+    }
     public function loadResaGuestsData(){
         global $DB;
-        $guestsData = array();
         $guests = $DB->query('SELECT * FROM guests_payicam WHERE reservation_id = :reservation_id ORDER BY is_icam DESC', array('reservation_id' => $this->id));
         foreach ($guests as $k => $guest) { $guest = self::parseGuestData($guest);
             if ($k == 0 && !$guest['is_icam']) { // ça veut dire que l'on a déjà une réservation pour cet icam normalement. Allons chercher son id !
@@ -224,12 +227,14 @@ class Reservation{
 
     public function registerGuestGala($guest){
         global $DB;
+
         $guest_id = $guest['guest_id'];
         unset($guest['id']);
         unset($guest['guest_id']);
         unset($guest['icam_id']);
         unset($guest['reservation_id']);
         
+
         if ($guest_id > 0) { // UPDATE
             $data = array();   $updatedFields = array();
             foreach ($guest as $k => $v){
@@ -240,6 +245,9 @@ class Reservation{
             $data['id'] = $guest_id;
             $DB->query("UPDATE guests SET ".implode(', ', $updatedFields)." WHERE id = :id", $data);
         }else{ // INSERT
+            var_dump($guest);
+            var_dump($this->icam_id);
+
             $guest_id = $DB->query("INSERT INTO guests (".implode(', ', array_keys($guest)).") VALUES (:".implode(', :', array_keys($guest)).")", $guest);
             if (!$guest['is_icam']) {
                 if(empty($this->icam_id) || $this->icam_id <= 0)
@@ -285,6 +293,23 @@ class Reservation{
         if (isset($guest['tickets_boisson'])) $guest['tickets_boisson'] = intval($guest['tickets_boisson']);
         if (isset($guest['price'])) $guest['price'] = floatval($guest['price']);
         return $guest;
+    }
+
+
+    // -------------------- Getters & Setters -------------------- //
+    public function __get($var){
+        if (!isset($this->$var)) {
+            if (isset($this->attr[$var])) {
+                return $this->attr[$var];
+            }
+        }else return $this->$var;
+    }
+    public function __set($var,$val){
+        if (!isset($this->$var)) {
+            if (isset($this->attr[$var])) {
+                $this->attr[$var] = $val;
+            }
+        }else $this->$var = $val;
     }
 }
  
