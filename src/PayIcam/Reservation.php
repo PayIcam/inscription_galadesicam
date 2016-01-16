@@ -106,7 +106,7 @@ class Reservation{
     public function addIcamId($icam_id){
         $this->icam_id = $icam_id;
     }
-    public function addGuest($data, $updatedFields=false){
+    public function addGuest($data, $updatedFields=false, $oldPrice=0){
         if ($data['is_icam']){ $this->icamData = $data; $msg = 'Icam ('.$data['promo'].') : '; }
         else{ $this->guestsData[] = $data; $msg = 'Invité : '; }
         $msg .= $data['prenom'].' '.$data['nom']. ', ';
@@ -134,6 +134,7 @@ class Reservation{
                 }if (in_array('tickets_boisson', $updatedFields)){ $options[] = $data['tickets_boisson'].' tickets';
                     $prix += $this->addArticle('tickets_boisson', $data['is_icam']);
                 }
+                $data['price'] = $oldPrice + $prix;
                 $this->price += $prix;
                 $msg = 'MAJ options'.json_encode($updatedFields). ' ' . $msg.' avec +'.$prix.'€, soit '.$data['price'].'€ maintenant ['.implode(', ', $options).']';
             }
@@ -144,6 +145,8 @@ class Reservation{
         }else{
             $this->statusMsg['updateOptions'][] = $msg;
         }
+        if ($data['is_icam']){ $this->icamData = $data; }
+        else{ $this->guestsData[] = $data; }
     }
 
     public function addArticle($type, $is_icam){
@@ -180,6 +183,7 @@ class Reservation{
 
     public function save(){
         global $DB, $payutcClient;
+
         $vente = $payutcClient->createTransaction(array(
             "items" => json_encode($this->getArticles()),
             "fun_id" => $this->app->get('settings')['fun_id'],

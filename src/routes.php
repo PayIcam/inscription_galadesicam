@@ -430,7 +430,11 @@ $app->post('/edit', function ($request, $response, $args) {
         if ($icamData['price'] > $UserReservation['price'] ) {
             echo "<p>Oh on a de nouvelles options $$ !</p>";
             $updatedFields = getUpdatedFields($icamData, $UserReservation);
-            $Reservation->addGuest($icamData, $updatedFields);
+            if (in_array('repas', $updatedFields) || in_array('buffet', $updatedFields) || in_array('tickets_boisson', $updatedFields)) {
+                $Reservation->addGuest($icamData, $updatedFields, $UserReservation['price']);
+            }else{
+                echo "<p>Euhm. vous avez un prix spécial ! ça devrait être".$icamData['price']." au lieu de ".$UserReservation['price']."</p>";
+            }
         }else{
             $updatedFields = getUpdatedFields($icamData, $UserReservation);
             if (!empty($updatedFields)) {
@@ -459,7 +463,11 @@ $app->post('/edit', function ($request, $response, $args) {
                 if ($guestData['price'] > $UserGuests[$k]['price'] ) {
                     echo "<p>Oh on a de nouvelles options $$ !</p>";
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
-                    $Reservation->addGuest($guestData, $updatedFields);
+                    if (in_array('repas', $updatedFields) || in_array('buffet', $updatedFields) || in_array('tickets_boisson', $updatedFields)) {
+                        $Reservation->addGuest($guestData, $updatedFields, $UserGuests[$k]['price']);
+                    }else{
+                        echo "<p>Euhm. vous avez un prix spécial ! ça devrait être".$guestData['price']." au lieu de ".$UserGuests[$k]['price']."</p>";
+                    }
                 }else{
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
                     if (!empty($updatedFields)) {
