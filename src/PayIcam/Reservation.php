@@ -107,8 +107,8 @@ class Reservation{
         $this->icam_id = $icam_id;
     }
     public function addGuest($data, $updatedFields=false, $oldPrice=0){
-        if ($data['is_icam']){ $this->icamData = $data; $msg = 'Icam ('.$data['promo'].') : '; }
-        else{ $this->guestsData[] = $data; $msg = 'Invité : '; }
+        if ($data['is_icam']){ $msg = 'Icam ('.$data['promo'].') : '; }
+        else{ $msg = 'Invité : '; }
         $msg .= $data['prenom'].' '.$data['nom']. ', ';
 
         if ($updatedFields === false ) { // INSERT
@@ -212,6 +212,7 @@ class Reservation{
         if (!empty($this->icamData)) {
             $this->saveNewGuest($this->icamData);
         }
+        
         if (!empty($this->guestsData)) {
             foreach ($this->guestsData as $guest) {
                 $this->saveNewGuest($guest);
@@ -231,6 +232,8 @@ class Reservation{
 
     public function registerGuestGala($guest){
         global $DB;
+
+        echo "<p>je register !</p>";
 
         $guest_id = $guest['guest_id'];
         unset($guest['id']);

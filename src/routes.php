@@ -546,7 +546,7 @@ $app->post('/edit', function ($request, $response, $args) {
         
         if ($placesRestantes['soirees'] >= 0 && $placesRestantes['repas'] >= 0 && $placesRestantes['buffets'] >= 0) {
             $Reservation->save();
-            // return $response->withStatus(303)->withHeader('Location', $Reservation->tra_url_payicam);
+            return $response->withStatus(303)->withHeader('Location', $Reservation->tra_url_payicam);
             echo "<p><strong>Votre réservation est prête à être soumise</strong>, vous allez être redirigé sur PayIcam pour effectuer le paiement:</p>";
             echo '<p><a href="'.$Reservation->tra_url_payicam.'">Valider la commande</a></p>';
         }else{
@@ -564,7 +564,7 @@ $app->post('/edit', function ($request, $response, $args) {
             echo '<p><a href="'.$this->router->pathFor('edit').'">retour édition</a></p>';
         }
     }
-    // return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+    return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
 });
 
 
