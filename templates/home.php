@@ -1,4 +1,11 @@
-<h1>Inscription au Gala des Icam</h1>
+<h2 class="page-header">Précisions pour le soir même:</h2>
+<h3>Horaires:</h3>
+<ul>
+    <li>18h-20h: Conférences et/ou repas</li>
+    <li>21h-21h30: 1er créneau</li>
+    <li>21h30-22h15: 2ème créneau</li>
+    <li>22h15-23h: 3ème créneau</li>
+</ul>
 
 <?php if (!empty($newResa)) { ?>
     <p class="alert alert-warning">
@@ -29,6 +36,7 @@
         Votre nouvelle réservation:
         <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && empty($newResa))?'':' title="Vous devez payer votre réservation pour pouvoir l\'éditer à nouveau" disabled="disabled"' ?>>éditer sa place</a></small>
     </h2>
+    <?php if (!empty($newResa->icamData['nom'])): ?>
     <h3>Vous:</h3>
     <dl class="dl-horizontal">
         <dt>Nom:</dt>
@@ -47,10 +55,12 @@
             <li><span class="label label-<?= (!empty($UserReservation['tickets_boisson']))?'success':(($newResa->icamData['tickets_boisson'])?'info':'default') ?>"><?= $newResa->icamData['tickets_boisson'] ?> Tickets boisson</span></li>
         </ul></dd>
         <dt>Prix payé:</dt>
-        <dd><?= $newResa->icamData['price']; ?> <em><small>par <?= $newResa->icamData['paiement'] ?> le <?= substr($newResa->icamData['inscription'], 0, 10) ?></small></em></dd>
+        <dd><?= $newResa->icamData['price']; ?> <em><small>par <?= $newResa->icamData['paiement'] ?> le <?= substr($newResa->date_option, 0, 10) ?></small></em></dd>
         <dt>Numéro de bracelet:</dt>
         <dd><?= ($newResa->icamData['bracelet_id'])?$newResa->icamData['bracelet_id']:'<em>Vous avez bien réservé votre place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
     </dl>
+    <?php endif ?>
+    <?php if (!empty($newResa->guestsData[0]['nom'])): ?>
     <h3>Vos invités:</h3>
     <?php if (count($newResa->guestsData) == 0){ ?>
         <p><em>Vous n'avez pas encore d'invités. Il est cependant encore temps d'en rajouter !</em></p>
@@ -73,12 +83,13 @@
                     <li><span class="label label-<?= (!empty($oldGuest['tickets_boisson']))?'success':(($guest['tickets_boisson'])?'info':'default') ?>"><?= $guest['tickets_boisson'] ?> tickets boisson</span></li>
                 </ul></dd>
                 <dt>Prix payé:</dt>
-                <dd><?= $guest['price']; ?> <em><small>par <?= $guest['paiement'] ?> le <?= substr($newResa->icamData['inscription'], 0, 10) ?></small></em></dd>
+                <dd><?= $guest['price']; ?> <em><small>par <?= $guest['paiement'] ?> le <?= substr($newResa->date_option, 0, 10) ?></small></em></dd>
                 <dt>Numéro de bracelet:</dt>
                 <dd><?= ($guest['bracelet_id'])?$guest['bracelet_id']:'<em>Vous avez bien réservé sa place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
             </dl>
         <?php endforeach ?>
     <?php } // endelse ?>
+    <?php endif ?>
     
 <?php } ?>
 <?php if ($userResaCount == 1 && !empty($newResa)): ?>
