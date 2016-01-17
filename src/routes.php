@@ -36,28 +36,14 @@ function getStatsQuotas(){
 }
 
 $app->get('/', function ($request, $response, $args) {
-    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
-    $status = $payutcClient->getStatus();
-    if (!$Auth->isLogged() || empty($status->user) || empty($status->application)){
-        if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
-        $this->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
-        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
-    }
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Accueil');
     $emailContactGala = $this->get('settings')['emailContactGala'];
     
     // Sample log message
     // $this->logger->info("Slim-Skeleton '/' index");
-
-    $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
-    if (empty($gingerUserCard)) { // l'utilisateur n'avait jamais été ajouté à Ginger O.o
-        $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
-    }if (empty($gingerUserCard)) { // l'utilisateur n'a pas un mail icam valide // on ne devrait jamais avoir cette erreur car on passe par payutc et lui a besoin d'avoir ginger qui marche ... je crois ...
-        $this->flash->addMessage('warning', "Votre Mail Icam n'est pas reconnu par Ginger...");
-        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
-    }
 
     $fun_id = $this->get('settings')['fun_id'];
     $prixPromo = getPrixPromo($gingerUserCard);
@@ -197,7 +183,7 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
 
 $app->get('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
-    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
     $emailContactGala = $this->get('settings')['emailContactGala'];
@@ -207,7 +193,7 @@ $app->get('/edit', function ($request, $response, $args) {
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');
     // $mailPersonne = 'hugo.leandri@2018.icam.fr';
-    $gingerUserCard = $gingerClient->getUser($mailPersonne);
+
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
 
@@ -344,7 +330,7 @@ function getUpdatedFields($newResa, $curResa){
 
 $app->post('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
-    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
     $emailContactGala = $this->get('settings')['emailContactGala'];
@@ -354,7 +340,7 @@ $app->post('/edit', function ($request, $response, $args) {
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');
     // $mailPersonne = 'hugo.leandri@2018.icam.fr';
-    $gingerUserCard = $gingerClient->getUser($mailPersonne);
+    
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
 
@@ -570,22 +556,12 @@ $app->post('/edit', function ($request, $response, $args) {
 
 $app->get('/cancel', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
-    global $Auth, $payutcClient, $gingerClient, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
-    $status = $payutcClient->getStatus();
+    global $gingerUserCard, $Auth, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');
     // $mailPersonne = 'hugo.leandri@2018.icam.fr';
-    $gingerUserCard = $gingerClient->getUser($mailPersonne);
 
-    $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
-
-    //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
-    if (!$Auth->isLogged() || empty($status->user) || empty($status->application)){
-        if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
-        $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
-        return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('about'));
-    }
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
     if (count($UserWaitingResa) >= 1){
         $DB->query("UPDATE reservations_payicam SET status = 'A' WHERE login = :login AND status = 'W'", ['login'=>$mailPersonne]);
