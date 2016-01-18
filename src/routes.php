@@ -168,14 +168,20 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
             'repas' => 0,
             'buffet' => 0,
             'tickets_boisson' => 0,
+            'plage_horaire_entrees' => '21h-21h30',
             'image' => $gingerUserCard->img_link
         );
         $UserId = -1;
-        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0);
-        for ($i=0; $i < $prixPromo['nbInvites']; $i++) { 
+    }
+    // var_dump($prixPromo['nbInvites']);
+    // var_dump(count($UserGuests));
+    if ($prixPromo['nbInvites'] - count($UserGuests) > 0) {
+        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0, 'plage_horaire_entrees' => '21h-21h30');
+        for ($i=0; $i < ($prixPromo['nbInvites'] - count($UserGuests) +1); $i++) { 
+            // echo "<p>".$i."</p>";
             $UserGuests[] = $emptyUser;
         }
-        $emptyUser['repas'] = 1;
+        $emptyUser['repas'] = 1; // Pour montrer que le tableau en php ne se comporte pas comme un objet comme dans python ou js.
     }
     $dataResaForm = array('resa' => array_merge($UserReservation, array('invites'=>$UserGuests)));
     return compact('UserGuests', 'UserReservation', 'UserId', 'dataResaForm');
@@ -291,6 +297,7 @@ function getIcamData($gingerUserCard, $prixPromo, $resa, $oldResa=""){
         'repas' => getBoolIntValues('repas', $resa, $oldResa, $prixPromo['prixIcam']['repas']),
         'buffet' => getBoolIntValues('buffet', $resa, $oldResa, $prixPromo['prixIcam']['buffet']),
         'tickets_boisson' => intval($resa['tickets_boisson']),
+        'plage_horaire_entrees' => $resa['plage_horaire_entrees'],
         'image' => $gingerUserCard->img_link
     );
     if(!empty($oldResa['inscription'])) $icamData['inscription'] = $oldResa['inscription'];
@@ -305,6 +312,7 @@ function getGuestData($guest, $prixPromo, $oldResa=""){
         'sexe' => guessSexe($guest['prenom']),
         'repas' => getBoolIntValues('repas', $guest, $oldResa, $prixPromo['prixInvite']['repas']),
         'buffet' => getBoolIntValues('buffet', $guest, $oldResa, $prixPromo['prixInvite']['buffet']),
+        'plage_horaire_entrees' => $resa['plage_horaire_entrees'],
         'tickets_boisson' => intval($guest['tickets_boisson'])
     );
     if(!empty($oldResa['inscription'])) $guestData['inscription'] = $oldResa['inscription'];
@@ -351,7 +359,7 @@ $app->post('/edit', function ($request, $response, $args) {
     // On continue
     $prixPromo = getPrixPromo($gingerUserCard);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId, dataResaForm
-
+    var_dump($UserGuests);
     $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody(), $prixPromo );
     var_dump($_SESSION['newResa']['resa']['invites']);
 

@@ -6,6 +6,27 @@ namespace PayIcam;
 * Classe des participants au Gala
 */
 class Participant{
+    public static $plage_horaire_entrees = array(
+    	'17h30-18h'=>'18h-20h: Conférence',
+    	'20h-20h30'=>'20h-20h30: Diner',
+	    '21h-21h30'=>'21h-21h30: 1er créneau',
+	    '21h30-22h15'=>'21h30-22h15: 2ème créneau',
+	    '22h15-23h'=>'22h15-23h: 3ème créneau'
+    );
+    public static $plage_horaire_couleurs = array(
+    	'17h30-18h'=>'#07AAFF', // bleu clair
+    	'20h-20h30'=>'#07AAFF', // bleu clair  >2000
+	    '21h-21h30'=>'#670490', // Bordeaux    1500-2000
+	    '21h30-22h15'=>'#0F129A', // bleue foncé 0-1000
+	    '22h15-23h'=>'#137911' // vert vert 1000-1500
+    );
+    public static $plage_horaire_quotas = array(
+    	'17h30-20h30'=>500, // bleu clair  >2000
+	    '21h-21h30'=>500, // Bordeaux    1500-2000
+	    '21h30-22h15'=>500, // bleue foncé 0-1000
+	    '22h15-23h'=>1000 // vert vert 1000-1500
+    );
+
 	public static $promos = array(
 		'Intégrés'             =>array(116=>116,117=>117,118=>118,119=>119,120=>120),
 		115                    =>115,
@@ -55,7 +76,7 @@ class Participant{
 		"Formations Continues" => array('nbInvites' => 1,
 				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
 				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'115' => array('nbInvites' => 2,
+		'115' => array('nbInvites' => 4,
 				'prixIcam' => array("repas" => 20, "buffet" => 3, "soiree" => 20),
 				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
 		"Erasmus" => array('nbInvites' => 1,
