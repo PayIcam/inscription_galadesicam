@@ -51,6 +51,12 @@ $DB = new \PayIcam\DB($confSQL['sql_host'],$confSQL['sql_user'],$confSQL['sql_pa
 $canWeRegisterNewGuests = 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'inscriptions'))));
 $canWeEditOurReservation = 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'modifications_places'))));
 
+$quotas = array(
+    'soiree' => 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'quota_soirees')))),
+    'repas' => 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'quota_repas')))),
+    'buffet' => 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'quota_conferences'))))
+);
+
 // Sécurité que des icam
 $status = $payutcClient->getStatus();
 $gingerUserCard = null;

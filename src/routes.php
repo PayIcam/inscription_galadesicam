@@ -22,7 +22,7 @@ $app->get('/about', function ($request, $response, $args) {
 // Espace Icam //
 /////////////////
 function getStatsQuotas(){
-    global $DB, $settings;
+    global $DB, $settings, $quotas;
     $stats = $DB->queryFirst("SELECT * FROM 
         (SELECT ifnull(SUM( r.soirees ), 0) soireesW, ifnull(SUM( r.repas ), 0) repasW, ifnull(SUM( r.buffets ), 0) buffetsW
             FROM reservations_payicam AS r WHERE r.status = 'W') rW , 
@@ -31,7 +31,6 @@ function getStatsQuotas(){
         (SELECT COUNT( id ) soireesG , SUM( repas ) repasG , SUM( buffet ) buffetsG FROM guests) g ");
     foreach ($stats as $k => $v)
         $stats[$k] = intval($v);
-    $quotas = $settings['settings']['quotas'];
     return compact('stats', 'quotas');
 }
 
