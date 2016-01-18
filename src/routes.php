@@ -312,7 +312,7 @@ function getGuestData($guest, $prixPromo, $oldResa=""){
         'sexe' => guessSexe($guest['prenom']),
         'repas' => getBoolIntValues('repas', $guest, $oldResa, $prixPromo['prixInvite']['repas']),
         'buffet' => getBoolIntValues('buffet', $guest, $oldResa, $prixPromo['prixInvite']['buffet']),
-        'plage_horaire_entrees' => $resa['plage_horaire_entrees'],
+        'plage_horaire_entrees' => $guest['plage_horaire_entrees'],
         'tickets_boisson' => intval($guest['tickets_boisson'])
     );
     if(!empty($oldResa['inscription'])) $guestData['inscription'] = $oldResa['inscription'];

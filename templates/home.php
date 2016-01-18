@@ -76,10 +76,8 @@
     </dl>
     <?php endif ?>
     <?php if (!empty($newResa->guestsData[0]['nom'])): ?>
-    <h3>Vos invités:</h3>
-    <?php if (count($newResa->guestsData) == 0){ ?>
-        <p><em>Vous n'avez pas encore d'invités. Il est cependant encore temps d'en rajouter !</em></p>
-    <?php } else { ?>
+    <?php if (count($newResa->guestsData) > 0) { ?>
+        <h3>Vos invités:</h3>
         <?php foreach ($newResa->guestsData as $key => $guest): ?>
             <?php if ($guest['guest_id'] != -1){ $oldGuest = null;// on va cherche la résa de cet invité
                     foreach ($UserGuests as $g) {
@@ -143,9 +141,9 @@
     </dl>
     <h3>Vos invités:</h3>
     <?php if (count($UserGuests) == 0){ ?>
-        <p><em>Vous n'avez pas encore d'invités. Il est cependant encore temps d'en rajouter !</em></p>
+        <p><em>Vous n'avez pas encore d'invités.<?= ($canWeRegisterNewGuests)?" Il est cependant encore temps d'en rajouter !":"" ?></em></p>
     <?php } else { ?>
-        <?php foreach ($UserGuests as $key => $guest): ?>
+        <?php $j=0; foreach ($UserGuests as $key => $guest): if(empty($guest['id']) || $guest['id'] == -1) continue; $j++;?>
             <h4>Invité #<?= $key+1 ?></h4>
             <dl class="dl-horizontal">
                 <dt>Nom:</dt>
@@ -165,5 +163,8 @@
                 <dd><?= ($guest['bracelet_id'])?$guest['bracelet_id']:'<em>Vous avez bien réservé sa place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
             </dl>
         <?php endforeach ?>
+        <?php if ($j == 0){ ?>
+            <p><em>Vous n'avez pas encore d'invités.<?= ($canWeRegisterNewGuests)?" Il est cependant encore temps d'en rajouter !":"" ?></em></p>
+        <?php } ?>
     <?php } // endelse ?>
 <?php } // fin réservation ?>
