@@ -487,7 +487,7 @@ $app->post('/edit', function ($request, $response, $args) {
     if (empty($statusFormSubmition)) {
         unset($_SESSION['newResa']);
         $this->flash->addMessage('info', "Vous n'avez rien modifié");
-        // return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
     }elseif(isset($statusFormSubmition['insertIcam'])){ // On a déjà une résa pour l'icam !
         echo '<p>'.$statusFormSubmition['insertIcam'].'</p>';
         if (!empty($statusFormSubmition['insertGuest'])) {
@@ -537,7 +537,9 @@ $app->post('/edit', function ($request, $response, $args) {
         $placesRestantes = $Reservation->getQuotasRestant($stats, $quotas);
         echo "<p>places restantes:".json_encode($placesRestantes)."</p>";
         
-        if ($placesRestantes['soirees'] >= 0 && $placesRestantes['repas'] >= 0 && $placesRestantes['buffets'] >= 0) {
+        if ( (($Reservation->soirees > 0 && $placesRestantes['soirees'] >= 0) || $Reservation->soirees == 0)
+            && (($Reservation->repas > 0 && $placesRestantes['repas'] >= 0) || $Reservation->repas == 0)
+            && (($Reservation->buffets > 0 && $placesRestantes['buffets'] >= 0) || $Reservation->buffets == 0) ) {
             $Reservation->save();
             return $response->withStatus(303)->withHeader('Location', $Reservation->tra_url_payicam);
             echo "<p><strong>Votre réservation est prête à être soumise</strong>, vous allez être redirigé sur PayIcam pour effectuer le paiement:</p>";
