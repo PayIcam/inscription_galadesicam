@@ -10,14 +10,6 @@
             <li>22h15-23h: 3ème créneau</li>
         </ul>
     </div>
-    <div class="col-sm-6">
-        <h3>Pour de nouveaux invités:</h3>
-        <ul>
-            <li>Les inscriptions au shotgun ouvrent ce soir lundi 18 vers 19h. Vous avez une place de plus qui a été libérée. Il n'y aura que 175 places en plus à pourvoir.</li>
-            <li>Il ne reste plus que le premier créneau 21h-21H30.</li>
-            <li>Vous devrez impérativement récupérer vos bracelet entre 12h et 14h mardi 19/01 à la cafet.</li>
-        </ul>
-    </div>
 </div>
 
 <?php if (!empty($newResa)) { ?>
