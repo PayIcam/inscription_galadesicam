@@ -120,7 +120,7 @@ class Reservation{
             if($data['buffet']){ $this->buffets += 1; $options[] = '1 buffet';
                 $this->addArticle('buffet', $data['is_icam']); }
             if($data['tickets_boisson']){ $options[] = $data['tickets_boisson'].' tickets';
-                $this->addArticle('tickets_boisson', $data['is_icam']); }
+                $this->addArticle('tickets_boisson', $data['is_icam'], intval($data['tickets_boisson']/10)); }
             $this->price += $data['price'];
             $msg = 'Ajout' . $msg .'pour '. $data['price'].'€ ['.implode(', ', $options).']';
         }else{ // MAJ options
@@ -132,7 +132,9 @@ class Reservation{
                 }if (in_array('buffet', $updatedFields)){ $options[] = '1 buffet'; $this->buffets += 1;
                     $prix += $this->addArticle('buffet', $data['is_icam']);
                 }if (in_array('tickets_boisson', $updatedFields)){ $options[] = $data['tickets_boisson'].' tickets';
-                    $prix += $this->addArticle('tickets_boisson', $data['is_icam']);
+                    var_dump($this->articles);
+                    $prix += $this->addArticle('tickets_boisson', $data['is_icam'], intval($data['tickets_boisson']/10));
+                    var_dump($this->articles);
                 }
                 $data['price'] = $oldPrice + $prix;
                 $this->price += $prix;
@@ -149,17 +151,19 @@ class Reservation{
         else{ $this->guestsData[] = $data; }
     }
 
-    public function addArticle($type, $is_icam){
+    public function addArticle($type, $is_icam, $nb=1){
+        var_dump($type);
+        var_dump($nb);
         if ($type == 'tickets_boisson')
-            $price = 10;
+            $price = 10*$nb;
         else
             $price = $this->prixPromo[($is_icam)?'prixIcam':'prixInvite'][$type];
         $article = $this->getPayIcamArticle($type, $price);
         if (!empty($article)){
             if (empty($this->articles[$article['id']]))
-                $this->articles[$article['id']] = array('article'=>$article, 'count'=>1);
+                $this->articles[$article['id']] = array('article'=>$article, 'count'=>1*$nb);
             else
-                $this->articles[$article['id']]['count'] += 1;
+                $this->articles[$article['id']]['count'] += 1*$nb;
         }else{
             exit();
             throw new \Exception($type." non trouvé, vous avez pensé à remplir la conf ?", 1);
@@ -169,6 +173,8 @@ class Reservation{
     public function getPayIcamArticle($type, $price){
         foreach ($this->articlesPayIcam as $article) {
             if ($article['type'] == $type && $article['price'] == $price)
+                return $article;
+            elseif ($article['type'] == 'tickets_boisson' && $article['price'] == 10)
                 return $article;
         }
         return false;

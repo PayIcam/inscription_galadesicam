@@ -258,8 +258,8 @@ function checkUserFieldsIntegrity($newUser, $oldUser=''){
     }
     $ticket = intval($newUser['tickets_boisson']);
     $oldTicket = (isset($oldUser['tickets_boisson']))?intval($oldUser['tickets_boisson']):0;
-    if ($ticket != 0 && $ticket != 10 && $ticket != $oldTicket) {
-        $errors['tickets_boisson'] = 'Vous avez un problème avec les tickets boisson, vous avez le choix que entre 0 ou 10 tickets!';
+    if ($ticket != 0 && $ticket != 10 && $ticket != 20 && $ticket != 30 && $ticket != $oldTicket) {
+        $errors['tickets_boisson'] = 'Vous avez un problème avec les tickets boisson, vous avez le choix que entre 0, 10, 20 ou 30 tickets!';
     }
     return $errors;
 }
