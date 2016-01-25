@@ -59,7 +59,7 @@ class Reservation{
             $this->buffets = 0;
             $this->price = 0;
             $this->articles = array();
-            $this->date_option = date('Y-m-d H:m:s');
+            $this->date_option = date('Y-m-d H:i:s');
         }
         
         $this->statusMsg = array();

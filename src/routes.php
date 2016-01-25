@@ -399,7 +399,7 @@ $app->post('/edit', function ($request, $response, $args) {
         echo "<p>INSERT de l'icam & de ses invités!</p>";
         $icamData = getIcamData($gingerUserCard, $prixPromo, $_SESSION['newResa']['resa']);
         $icamData['paiement'] = 'PayIcam';
-        $icamData['inscription'] = date('Y-m-d H:m:s');
+        $icamData['inscription'] = date('Y-m-d H:i:s');
         $Reservation->addGuest($icamData);
 
         var_dump($icamData);
@@ -408,7 +408,7 @@ $app->post('/edit', function ($request, $response, $args) {
                 echo "<p>pas d'invité à ajouter</p>"; continue; }
             $guestData = getGuestData($guest, $prixPromo);
             $guestData['paiement'] = 'PayIcam';
-            $guestData['inscription'] = date('Y-m-d H:m:s');
+            $guestData['inscription'] = date('Y-m-d H:i:s');
             $Reservation->addGuest($guestData);
             var_dump($guestData);
         }
@@ -444,7 +444,7 @@ $app->post('/edit', function ($request, $response, $args) {
                 echo "<p>INSERT de l'invité #".$k."</p>";
                 $guestData = getGuestData($guest, $prixPromo, isset($UserGuests[$k])? $UserGuests[$k]:'');
                 $guestData['paiement'] = 'PayIcam';
-                $guestData['inscription'] = date('Y-m-d H:m:s');
+                $guestData['inscription'] = date('Y-m-d H:i:s');
                 var_dump($guestData);
 
                 $Reservation->addGuest($guestData);
