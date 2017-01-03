@@ -15,7 +15,7 @@ return [
         ],
 
         'public_path' => 'public/',
-        'webSiteTitle' => 'Inscriptions Gala des Icam 118',
+        'webSiteTitle' => 'Inscriptions Gala des Icam 119',
         'emailContactGala' => 'galadesicam@icam.fr',
 
         'PayIcam' => [

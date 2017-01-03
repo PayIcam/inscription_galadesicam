@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace PayIcam;
 
@@ -7,30 +7,29 @@ namespace PayIcam;
 */
 class Participant{
     public static $plage_horaire_entrees = array(
-    	'17h30-18h'=>'18h-20h: Conférence',
-    	'20h-20h30'=>'20h-20h30: Diner',
-	    '21h-21h30'=>'21h-21h30: 1er créneau',
-	    '21h30-22h15'=>'21h30-22h15: 2ème créneau',
-	    '22h15-23h'=>'22h15-23h: 3ème créneau'
-    );
+	    '17h30-19h30'=>'17h30-19h30: Conférence',
+	    '19h30-20h'=>'19h30-20h: Diner',
+	    '21h-21h45'=>'21h-21h45: 1er créneau',
+	    '21h45-22h30'=>'21h45-22h30: 2ème créneau',
+	    '22h30-23h'=>'22h30-23h: 3ème créneau'
+	);
     public static $plage_horaire_couleurs = array(
-    	'17h30-18h'=>'#07AAFF', // bleu clair
-    	'20h-20h30'=>'#07AAFF', // bleu clair  >2000
-	    '21h-21h30'=>'#670490', // Bordeaux    1500-2000
-	    '21h30-22h15'=>'#0F129A', // bleue foncé 0-1000
-	    '22h15-23h'=>'#137911' // vert vert 1000-1500
+    	'17h30-19h30'=>'#000', // noir
+    	'19h30-20h'=>'#000', // noir  >2000
+	    '21h-21h45'=>'#670490', // Bordeaux    1500-2000
+	    '21h45-22h30'=>'#0F129A', // bleue foncé 0-1000
+	    '22h30-23h'=>'#137911' // vert vert 1000-1500
     );
     public static $plage_horaire_quotas = array(
-    	'17h30-20h30'=>500, // bleu clair  >2000
-	    '21h-21h30'=>500, // Bordeaux    1500-2000
-	    '21h30-22h15'=>500, // bleue foncé 0-1000
-	    '22h15-23h'=>1000 // vert vert 1000-1500
+    	'17h30-20h'=>500, // bleu clair  >2000
+	    '21h-21h45'=>1000, // Bordeaux    1500-2000
+	    '21h45-22h30'=>1000, // bleue foncé 0-1000
+	    '22h30-23h'=>650 // vert vert 1000-1500
     );
 
 	public static $promos = array(
-		'Intégrés'             =>array(116=>116,117=>117,118=>118,119=>119,120=>120),
-		115                    =>115,
-		'Apprentissage'            =>array(2016=>2016,2017=>2017,2018=>2018,2019=>2019,2020=>2020),
+		'Intégrés'             =>array(117=>117,118=>118,119=>119,120=>120,121=>121),
+		'Apprentis'            =>array(2017=>2017,2018=>2018,2019=>2019,2020=>2020,2021=>2021),
 		'Erasmus'              =>'Erasmus',
 		'Formations Continues' =>'Formations Continues',
 		'Permanent'            =>'Permanent',
@@ -38,75 +37,74 @@ class Participant{
 		'Parent'               =>'Parent',
 		'Artiste'              =>'Artiste',
 		'Artiste Icam'         =>'Artiste Icam',
-		'Extras'               =>'Extras',
+		'Autre Site'           =>'Autre Site',
 		'VIP'                  =>'VIP',
     );
 
 	public static $prixParPromo = array(
-		'120' => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'119' => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'118' => array('nbInvites' => 4,
-				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soiree" => 0),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'117' => array('nbInvites' => 3,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'116' => array('nbInvites' => 3,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'2020' => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'2019' => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'2018' => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'2017' => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'2016' => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		"Formations Continues" => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		'115' => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 3, "soiree" => 20),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		"Erasmus" => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 2, "soiree" => 18),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		"Permanents" => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 3, "soiree" => 20),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		"Ingenieur" => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 3, "soiree" => 20),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		"Parents" => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 20, "buffet" => 3, "soiree" => 20),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		"Artistes" => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soiree" => 0),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		"Extras" => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soiree" => 0),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20)),
-		"VIP" => array('nbInvites' => 2,
-				'prixIcam' => array("repas" => 0, "buffet" => 0, "soiree" => 0),
-				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 20))
+		'121' => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		'120' => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		'119' => array('nbInvites' => 3,
+				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soireePumpkin" => 0, "soireeAutre" => 0, "soiree" => 0),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		'118' => array('nbInvites' => 2,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		'117' => array('nbInvites' => 2,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		'2021' => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		'2020' => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		'2019' => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		'2018' => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		'2017' => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		"Formations Continues" => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		"Erasmus" => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => 2, "soireePumpkin" => 18, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		"Permanents" => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => 20, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22),
+				'prixInvite' => array("repas" => 20, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		"Ingenieur" => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => 20, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22),
+				'prixInvite' => array("repas" => 20, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		"Parents" => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => 20, "buffet" => 0, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22),
+				'prixInvite' => array("repas" => NULL, "buffet" => NULL, "soireePumpkin" => NULL, "soireeAutre" => NULL, "soiree" => NULL)),
+		"Artistes" => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soireePumpkin" => 0, "soireeAutre" => 0, "soiree" => 0),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		"Autre Site" => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 20, "soireeAutre" => 22, "soiree" => 22)),
+		"VIP" => array('nbInvites' => 1,
+				'prixIcam' => array("repas" => 0, "buffet" => 0, "soireePumpkin" => 0, "soireeAutre" => 20, "soiree" => 20),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soireePumpkin" => 0, "soireeAutre" => 20, "soiree" => 20))
 	);
 
-    public static $paiement = array('espece'=>'En espèces','CB'=>'Carte bancaire','cheque'=>'Par Chèque','Lydia'=>'Avec Lydia');
+    public static $paiement = array('espece'=>'En espèces','CB'=>'Carte bancaire','cheque'=>'Par Chèque','Pumpkin'=>'Avec Pumpkin','PayIcam'=>'Avec PayIcam');
     public static $sexe = array('1'=>'Homme','2'=>'Femme');
     public static $formule = array('Repas'=>'Repas','Buffet'=>'Conférence','Soirée'=>'Soirée');
 
-    public static function getPricePromo($promo = 'Ingenieur'){
+    public static function getPricePromo($promo = 'Ingenieur') {
+    	if (!isset(self::$prixParPromo[$promo]))
+    		throw new \Exception("Promo inconnue", 1);
     	return self::$prixParPromo[$promo];
     }
 

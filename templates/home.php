@@ -3,11 +3,9 @@
     <div class="col-sm-6">
         <h3>Horaires:</h3>
         <ul>
-            <li>18h-18h30: Conférences</li>
-            <li>20h-20h30: Diners</li>
-            <li>21h-21h30: 1er créneau</li>
-            <li>21h30-22h15: 2ème créneau</li>
-            <li>22h15-23h: 3ème créneau</li>
+            <?php foreach (\PayIcam\Participant::$plage_horaire_entrees as $key => $plage): ?>
+                <li><?= $plage ?></li>
+            <?php endforeach ?>
         </ul>
     </div>
 </div>
@@ -97,7 +95,7 @@
         <?php endforeach ?>
     <?php } // endelse ?>
     <?php endif ?>
-    
+
 <?php } ?>
 <?php if ($userResaCount == 1 && !empty($newResa)): ?>
     <hr>
