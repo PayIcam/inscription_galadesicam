@@ -307,6 +307,8 @@ class Reservation{
         if (isset($guest['buffet'])) $guest['buffet'] = intval($guest['buffet']);
         if (isset($guest['tickets_boisson'])) $guest['tickets_boisson'] = intval($guest['tickets_boisson']);
         if (isset($guest['price'])) $guest['price'] = floatval($guest['price']);
+        if (isset($guest['plage_horaire_entrees']) && !in_array($guest['plage_horaire_entrees'], array_keys(\PayIcam\Participant::$plage_horaire_entrees)))
+            $guest['plage_horaire_entrees'] = '21h-21h45';
         return $guest;
     }
 
