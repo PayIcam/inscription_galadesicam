@@ -21,10 +21,10 @@ SET time_zone = "+00:00";
 --
 
 DROP TABLE IF EXISTS `guests_payicam`;
-CREATE TABLE `guests_payicam` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `guests_payicam` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `guest_id` int(11) NOT NULL DEFAULT '-1',
-  `icam_id` int(11) NOT NULL,
+  `icam_id` int(11) DEFAULT NULL,
   `reservation_id` int(11) NOT NULL,
   `nom` varchar(155) DEFAULT NULL,
   `prenom` varchar(155) DEFAULT NULL,
@@ -36,13 +36,14 @@ CREATE TABLE `guests_payicam` (
   `telephone` varchar(45) DEFAULT NULL,
   `inscription` datetime NOT NULL,
   `sexe` tinyint(1) NOT NULL DEFAULT '1',
-  `bracelet_id` int(4) NOT NULL,
-  `image` varchar(255) NOT NULL,
+  `bracelet_id` int(4) DEFAULT NULL,
+  `plage_horaire_entrees` varchar(255) NOT NULL DEFAULT '22h30-23h',
+  `image` varchar(255) DEFAULT NULL,
   `paiement` varchar(50) NOT NULL DEFAULT 'espece',
   `price` float NOT NULL DEFAULT '17',
   `tickets_boisson` int(11) NOT NULL,
-  `champagne` float NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -51,8 +52,8 @@ CREATE TABLE `guests_payicam` (
 --
 
 DROP TABLE IF EXISTS `reservations_payicam`;
-CREATE TABLE `reservations_payicam` (
-  `id` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `reservations_payicam` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `soirees` int(11) NOT NULL DEFAULT '0',
   `repas` int(11) NOT NULL DEFAULT '0',
   `buffets` int(11) NOT NULL DEFAULT '0',
@@ -63,36 +64,6 @@ CREATE TABLE `reservations_payicam` (
   `tra_id_payicam` int(11) NOT NULL,
   `tra_url_payicam` varchar(255) NOT NULL,
   `login` varchar(255) NOT NULL,
-  `price` int(11) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `guests_payicam`
---
-ALTER TABLE `guests_payicam`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `reservations_payicam`
---
-ALTER TABLE `reservations_payicam`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `guests_payicam`
---
-ALTER TABLE `guests_payicam`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
---
--- AUTO_INCREMENT for table `reservations_payicam`
---
-ALTER TABLE `reservations_payicam`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  `price` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

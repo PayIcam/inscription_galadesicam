@@ -3,13 +3,7 @@
     <p class="alert alert-warning"><em>Attention, vous ne pouvez plus ajouter de nouveaux invités, par contre, vous pouvez encore modifier les informations ou les options de tout le monde (déjà invité).</em></p>
 <?php endif ?>
     <p class="alert alert-warning"><em>Attention, vous ne pouvez pas prendre une offre inférieure à celle déjà prise: vous ne pouvez pas annuler les options une fois payées.</em></p>
-<?php $dataPlageHoraireEntree = array(
-    '17h30-18h'=>'18h-20h: Conférence',
-    '20h-20h30'=>'20h-20h30: Diner',
-    '21h-21h30'=>'21h-21h30: 1er créneau',
-    '21h30-22h15'=>'21h30-22h15: 2ème créneau',
-    '22h15-23h'=>'22h15-23h: 3ème créneau'
-) ?>
+<?php $dataPlageHoraireEntree = \PayIcam\Participant::$plage_horaire_entrees ?>
 <div ng-app="editGuestApp">
 <form action="<?= $editLink ?>" method="post" class="form-horizontal" role="form" ng-controller="EditGuestFormController">
     <fieldset>
@@ -42,7 +36,7 @@
                 </div>
             </div>
             <?= (isset($UserReservation['tickets_boisson']) && $UserReservation['tickets_boisson']) ? '' :
-                $Form->select('resa[tickets_boisson]', 'Tickets boisson : ', array('ng-model'=>'resa.tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 10€', 20=>'20 tickets 20€', 30=>'30 tickets 30€'))); // On veut pas afficher les tickets boissons si il en a déjà pris ! ?>
+                $Form->select('resa[tickets_boisson]', 'Tickets boisson : ', array('ng-model'=>'resa.tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 9€', 20=>'20 tickets 18€', 30=>'30 tickets 27€'))); // On veut pas afficher les tickets boissons si il en a déjà pris ! ?>
             <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ? '' :
                 $Form->select('resa[plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.plage_horaire_entrees', 'data'=>$dataPlageHoraireEntree)); // On veut pas afficher les tickets boissons si il en a déjà pris ! ?>
         </div>
@@ -75,7 +69,7 @@
                             </div>
                         </div>
                         <?= (isset($UserGuests[$i]['tickets_boisson']) && $UserGuests[$i]['tickets_boisson']) ? '' :
-                            $Form->select('resa[invites]['.$i.'][tickets_boisson]','Tickets boisson : ', array('ng-model' => 'resa.invites['.$i.'].tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 10€', 20=>'20 tickets 20€', 30=>'30 tickets 30€'))); ?>
+                            $Form->select('resa[invites]['.$i.'][tickets_boisson]','Tickets boisson : ', array('ng-model' => 'resa.invites['.$i.'].tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 9€', 20=>'20 tickets 18€', 30=>'30 tickets 27€'))); ?>
                         <?= (isset($UserGuests[$i]['plage_horaire_entrees']) && $UserGuests[$i]['plage_horaire_entrees']) ? '' :
                             $Form->select('resa[invites]['.$i.'][plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.invites['.$i.'].plage_horaire_entrees', 'data'=>$dataPlageHoraireEntree)); ?>
                     </div>
@@ -97,14 +91,14 @@
                                     <?= (isset($UserGuests[$j]['buffet']) && $UserGuests[$j]['buffet']) ? '<div class="checkbox">Participe déjà à la conférence <span class="label label-success">+'.$prixPromo['prixInvite']['buffet'].'€</span></div>'
                                         : (($prixPromo['prixInvite']['buffet'] == null) ? ''
                                             : $Form->input('resa[invites]['.$j.'][buffet]','Participe à la conférence <span class="label label-default">+'.($prixPromo['prixInvite']['buffet']).'€</span class="label label-default">', array('ng-model' => 'resa.invites['.$j.'].buffet', 'type'=>'checkbox', 'checkboxNoClassControl'=>1)) ); ?>
-                                    <?= (isset($UserGuests[$j]['tickets_boisson']) && $UserGuests[$j]['tickets_boisson']) ? 
+                                    <?= (isset($UserGuests[$j]['tickets_boisson']) && $UserGuests[$j]['tickets_boisson']) ?
                                         '<div class="checkbox">Vous avez déjà réservé '.$UserGuests[$j]['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserGuests[$j]['tickets_boisson'].'€</span></div>' : ''; ?>
                                     <?= (isset($UserGuests[$j]['plage_horaire_entrees']) && $UserGuests[$j]['plage_horaire_entrees']) ?
                                         '<div class="checkbox">Vous avez réservé la plage horaire d\'entrée de '.$dataPlageHoraireEntree[$UserGuests[$j]['plage_horaire_entrees']].'</div>' : ''; ?>
                                 </div>
                             </div>
                             <?= (isset($UserGuests[$j]['tickets_boisson']) && $UserGuests[$j]['tickets_boisson']) ? '' :
-                                $Form->select('resa[invites]['.$j.'][tickets_boisson]','Tickets boisson : ', array('ng-model' => 'resa.invites['.$j.'].tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 10€', 20=>'20 tickets 20€', 30=>'30 tickets 30€'))); ?>
+                                $Form->select('resa[invites]['.$j.'][tickets_boisson]','Tickets boisson : ', array('ng-model' => 'resa.invites['.$j.'].tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 9€', 20=>'20 tickets 18€', 30=>'30 tickets 27€'))); ?>
                             <?= (isset($UserGuests[$j]['plage_horaire_entrees']) && $UserGuests[$j]['plage_horaire_entrees']) ? '' :
                                 $Form->select('resa[invites]['.$j.'][plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.invites['.$j.'].plage_horaire_entrees', 'data'=>$dataPlageHoraireEntree)); ?>
                         </div>
@@ -186,7 +180,7 @@ angular.module('editGuestApp', [])
         if (user.buffet == true || parseInt(user.buffet))
             options.push({'nom':'Conférence', 'price':$scope.prixPromo[typeUser]['buffet']});
         if (parseInt(user.tickets_boisson))
-            options.push({'nom':'Tickets boisson', 'price':parseInt(user.tickets_boisson)});
+            options.push({'nom':'Tickets boisson', 'price':parseInt(user.tickets_boisson)*0.9});
         return options;
     }
 

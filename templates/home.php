@@ -120,7 +120,7 @@
             <li><span class="label label-success">Soirée</span></li>
             <li><span class="label label-<?= ($UserReservation['repas'])?'success':'default' ?>">Repas</span></li>
             <li><span class="label label-<?= ($UserReservation['buffet'])?'success':'default' ?>">Conférence</span></li>
-            <li><span class="label label-<?= ($UserReservation['tickets_boisson'])?'success':'default' ?>"><?= $UserReservation['tickets_boisson'] ?> Tickets boisson</span></li>
+            <li><span class="label label-<?= ($UserReservation['tickets_boisson'])?'success':'default' ?>"><?= $UserReservation['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson'] * 0.9 ?>€)</em></small></span></li>
         </ul></dd>
         <dt>Prix payé:</dt>
         <dd><?= $UserReservation['price']; ?> <em><small>par <?= $UserReservation['paiement'] ?> le <?= substr($UserReservation['inscription'], 0, 10) ?></small></em></dd>
@@ -143,7 +143,7 @@
                     <li><span class="label label-success">Soirée</span></li>
                     <li><span class="label label-<?= ($guest['repas'])?'success':'default' ?>">Repas</span></li>
                     <li><span class="label label-<?= ($guest['buffet'])?'success':'default' ?>">Conférence</span></li>
-                    <li><span class="label label-<?= ($guest['tickets_boisson'])?'success':'default' ?>"><?= $guest['tickets_boisson'] ?> tickets boisson</span></li>
+                    <li><span class="label label-<?= ($guest['tickets_boisson'])?'success':'default' ?>"><?= $guest['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson'] * 0.9 ?>€)</em></small></span></li>
                 </ul></dd>
                 <dt>Prix payé:</dt>
                 <dd><?= $guest['price']; ?> <em><small>par <?= $guest['paiement'] ?> le <?= substr($UserReservation['inscription'], 0, 10) ?></small></em></dd>

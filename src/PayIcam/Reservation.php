@@ -4,7 +4,7 @@ namespace PayIcam;
 
 
 class Reservation{
-    
+
     private $id;
     private $soirees;
     private $repas;
@@ -26,7 +26,7 @@ class Reservation{
     private $icam_id;
     private $icamData;
     private $guestsData;
-    
+
     private $statusMsg;
 
     function __construct($data, $gingerUserCard, $prixPromo, $articlesPayIcam, $app){
@@ -36,7 +36,7 @@ class Reservation{
         $this->gingerUserCard = $gingerUserCard;
         $this->prixPromo = $prixPromo;
         $this->articlesPayIcam = $articlesPayIcam;
-        
+
         if (is_array($data) && !empty($data['id'])) { // On a déjà le contenu d'une résa
             $this->id = intval($data['id']);
             $this->soirees = intval($data['soirees']);
@@ -61,7 +61,7 @@ class Reservation{
             $this->articles = array();
             $this->date_option = date('Y-m-d H:i:s');
         }
-        
+
         $this->statusMsg = array();
     }
     public function hasNewReservation(){
@@ -155,7 +155,7 @@ class Reservation{
         var_dump($type);
         var_dump($nb);
         if ($type == 'tickets_boisson')
-            $price = 10*$nb;
+            $price = 10*$nb*.9;
         else
             $price = $this->prixPromo[($is_icam)?'prixIcam':'prixInvite'][$type];
         $article = $this->getPayIcamArticle($type, $price);
@@ -165,8 +165,8 @@ class Reservation{
             else
                 $this->articles[$article['id']]['count'] += 1*$nb;
         }else{
-            exit();
             throw new \Exception($type." non trouvé, vous avez pensé à remplir la conf ?", 1);
+            exit();
         }
         return $price;
     }
@@ -174,7 +174,7 @@ class Reservation{
         foreach ($this->articlesPayIcam as $article) {
             if ($article['type'] == $type && $article['price'] == $price)
                 return $article;
-            elseif ($article['type'] == 'tickets_boisson' && $article['price'] == 10)
+            elseif ($article['type'] == 'tickets_boisson' && $article['price'] == 9)
                 return $article;
         }
         return false;
@@ -211,6 +211,7 @@ class Reservation{
             'date_option' => $this->date_option,
             'tra_url_payicam' => $this->tra_url_payicam,
             'tra_id_payicam' => $this->tra_id_payicam,
+            'date_paiement' => date("Y-m-d H:i:s")
         );
 
         $this->id = $DB->query( 'INSERT INTO reservations_payicam ('.implode(', ', array_keys($data)).') VALUES (:'.implode(', :', array_keys($data)).')', $data );
@@ -218,7 +219,7 @@ class Reservation{
         if (!empty($this->icamData)) {
             $this->saveNewGuest($this->icamData);
         }
-        
+
         if (!empty($this->guestsData)) {
             foreach ($this->guestsData as $guest) {
                 $this->saveNewGuest($guest);
@@ -231,8 +232,9 @@ class Reservation{
         $data['reservation_id'] = $this->id;
         if (isset($data['id']) && $data['id'] > 0){
             $data['guest_id'] = $data['id']; unset($data['id']);
-        }else 
+        }else
             $data['guest_id'] = -1;
+            var_dump($data);
         $DB->query("INSERT INTO guests_payicam (".implode(', ', array_keys($data)).") VALUES (:".implode(', :', array_keys($data)).")", $data);
     }
 
@@ -246,7 +248,7 @@ class Reservation{
         unset($guest['guest_id']);
         unset($guest['icam_id']);
         unset($guest['reservation_id']);
-        
+
 
         if ($guest_id > 0) { // UPDATE
             $data = array();   $updatedFields = array();
@@ -300,7 +302,7 @@ class Reservation{
         if (isset($guest['is_icam'])) $guest['is_icam'] = intval($guest['is_icam']);
         if (isset($guest['sexe'])) $guest['sexe'] = intval($guest['sexe']);
         if (isset($guest['bracelet_id'])) $guest['bracelet_id'] = intval($guest['bracelet_id']);
-        if (isset($guest['champagne'])) $guest['champagne'] = intval($guest['champagne']);
+            if (empty($guest['bracelet_id'])) $guest['bracelet_id'] = 0;
         if (isset($guest['repas'])) $guest['repas'] = intval($guest['repas']);
         if (isset($guest['buffet'])) $guest['buffet'] = intval($guest['buffet']);
         if (isset($guest['tickets_boisson'])) $guest['tickets_boisson'] = intval($guest['tickets_boisson']);
@@ -325,4 +327,3 @@ class Reservation{
         }else $this->$var = $val;
     }
 }
- 

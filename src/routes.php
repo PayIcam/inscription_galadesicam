@@ -23,11 +23,11 @@ $app->get('/about', function ($request, $response, $args) {
 /////////////////
 function getStatsQuotas(){
     global $DB, $settings, $quotas;
-    $stats = $DB->queryFirst("SELECT * FROM 
+    $stats = $DB->queryFirst("SELECT * FROM
         (SELECT ifnull(SUM( r.soirees ), 0) soireesW, ifnull(SUM( r.repas ), 0) repasW, ifnull(SUM( r.buffets ), 0) buffetsW
-            FROM reservations_payicam AS r WHERE r.status = 'W') rW , 
+            FROM reservations_payicam AS r WHERE r.status = 'W') rW ,
         -- (SELECT ifnull(SUM( r.soirees ), 0) soireesV, ifnull(SUM( r.repas ), 0) repasV, ifnull(SUM( r.buffets ), 0) buffetsV
-            -- FROM reservations_payicam AS r WHERE r.status = 'V') rV , 
+            -- FROM reservations_payicam AS r WHERE r.status = 'V') rV ,
         (SELECT COUNT( id ) soireesG , SUM( repas ) repasG , SUM( buffet ) buffetsG FROM guests) g ");
     foreach ($stats as $k => $v)
         $stats[$k] = intval($v);
@@ -40,13 +40,13 @@ $app->get('/', function ($request, $response, $args) {
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Accueil');
     $emailContactGala = $this->get('settings')['emailContactGala'];
-    
+
     // Sample log message
     // $this->logger->info("Slim-Skeleton '/' index");
 
     $fun_id = $this->get('settings')['fun_id'];
     $prixPromo = getPrixPromo($gingerUserCard);
-    
+
     $mailPersonne = $Auth->getUserField('email');
     // $mailPersonne = 'hugo.leandri@2018.icam.fr';
 
@@ -60,7 +60,7 @@ $app->get('/', function ($request, $response, $args) {
             $data = ['login' => $mailPersonne, 'id' => $newResa->id];
             $DB->query("UPDATE reservations_payicam SET status = 'A' WHERE login = :login AND status = 'W' AND id != :id", $data);
         }
-        try {   
+        try {
             $transaction = $payutcClient->getTransactionInfo(array("fun_id" => $fun_id, "tra_id" => $newResa->tra_id_payicam));
             if($transaction->status != $newResa->status){
                 $newResa->updateStatus($transaction->status);
@@ -76,7 +76,7 @@ $app->get('/', function ($request, $response, $args) {
     }
     $userResaCount = count($UserReservation);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId
-    
+
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
     $editLink = $this->router->pathFor('edit');
@@ -90,7 +90,7 @@ $app->get('/', function ($request, $response, $args) {
 ////////////////////////////////////////////
 function secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $app, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala){
     if (!$Auth->isLogged() || empty($status->user) || empty($status->application)){
-        if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']); 
+        if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']);
         $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('about'));
     }
@@ -134,7 +134,6 @@ function parseGuestData($guest){
     if (isset($guest['is_icam'])) $guest['is_icam'] = intval($guest['is_icam']);
     if (isset($guest['sexe'])) $guest['sexe'] = intval($guest['sexe']);
     if (isset($guest['bracelet_id'])) $guest['bracelet_id'] = intval($guest['bracelet_id']);
-    if (isset($guest['champagne'])) $guest['champagne'] = intval($guest['champagne']);
     if (isset($guest['repas'])) $guest['repas'] = intval($guest['repas']);
     if (isset($guest['buffet'])) $guest['buffet'] = intval($guest['buffet']);
     if (isset($guest['tickets_boisson'])) $guest['tickets_boisson'] = intval($guest['tickets_boisson']);
@@ -167,7 +166,7 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
             'repas' => 0,
             'buffet' => 0,
             'tickets_boisson' => 0,
-            'plage_horaire_entrees' => '21h-21h30',
+            'plage_horaire_entrees' => '21h-21h45',
             'image' => $gingerUserCard->img_link
         );
         $UserId = -1;
@@ -175,8 +174,8 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
     // var_dump($prixPromo['nbInvites']);
     // var_dump(count($UserGuests));
     if ($prixPromo['nbInvites'] - count($UserGuests) > 0) {
-        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0, 'plage_horaire_entrees' => '21h-21h30');
-        for ($i=0; $i < ($prixPromo['nbInvites'] - count($UserGuests) +1); $i++) { 
+        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0, 'plage_horaire_entrees' => '21h-21h45');
+        for ($i=0; $i < ($prixPromo['nbInvites'] - count($UserGuests) +1); $i++) {
             // echo "<p>".$i."</p>";
             $UserGuests[] = $emptyUser;
         }
@@ -204,16 +203,16 @@ $app->get('/edit', function ($request, $response, $args) {
 
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
     $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
-    if ($retourSecure !== true) return $retourSecure;  
+    if ($retourSecure !== true) return $retourSecure;
 
     // On continue
     if(count($UserReservation) == 0) $RouteHelper->webSiteTitle = "Nouvelle réservation";
     $prixPromo = getPrixPromo($gingerUserCard);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId
-    
+
     $Form = new \PayIcam\Forms();
     $Form->set( (isset($_SESSION['newResa'])) ? $_SESSION['newResa'] : $dataResaForm );
-    
+
     if( isset($_SESSION['newResa']) ){ unset($_SESSION['newResa']); } // On veut pas avoir le formulaire plus longtemps en session, il sera regénéré au pire.
 
     if( isset($_SESSION['formErrors']) ){
@@ -281,7 +280,7 @@ function getPrice($resa, $typeUser, $prixPromo){
     $prix = $prixPromo[$typeUser]['soiree'];
     $prix += ($resa['repas'])?$prixPromo[$typeUser]['repas']:0;
     $prix += ($resa['buffet'])?$prixPromo[$typeUser]['buffet']:0;
-    $prix += ($resa['tickets_boisson'])?$resa['tickets_boisson']:0;
+    $prix += ($resa['tickets_boisson'])?$resa['tickets_boisson'] * 0.9 :0;
     return $prix;
 }
 function getIcamData($gingerUserCard, $prixPromo, $resa, $oldResa=""){
@@ -321,7 +320,7 @@ function getGuestData($guest, $prixPromo, $oldResa=""){
 function sumUpNewOptions($newResa, $curResa, $options){
     $prix += ($newResa['repas'])?$prixPromo[$typeUser]['repas']:0;
     $prix += ($newResa['buffet'])?$prixPromo[$typeUser]['buffet']:0;
-    $prix += ($newResa['tickets_boisson'])?$resa['tickets_boisson']:0;
+    $prix += ($newResa['tickets_boisson'])?$resa['tickets_boisson'] * 0.9 :0;
     return $options;
 }
 function getUpdatedFields($newResa, $curResa){
@@ -347,13 +346,13 @@ $app->post('/edit', function ($request, $response, $args) {
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');
     // $mailPersonne = 'hugo.leandri@2018.icam.fr';
-    
+
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
 
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
     $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
-    if ($retourSecure !== true) return $retourSecure;  
+    if ($retourSecure !== true) return $retourSecure;
 
     // On continue
     $prixPromo = getPrixPromo($gingerUserCard);
@@ -380,7 +379,7 @@ $app->post('/edit', function ($request, $response, $args) {
         $errors = checkUserFieldsIntegrity($guest, $curResaGuest);
         if (!empty($errors)) $_SESSION['formErrors']['resa']['invites'][$k] = $errors;
     }
-    if (isset($_SESSION['formErrors'])){   
+    if (isset($_SESSION['formErrors'])){
         $this->flash->addMessage('warning', 'Vous avez des erreurs dans le formulaire.');
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
     }
@@ -467,12 +466,12 @@ $app->post('/edit', function ($request, $response, $args) {
                         echo "<p>UPDATE des champs ".json_encode($updatedFields)."</p>";
                         $statusFormSubmition['updateFields']['data'][] = array_merge($guestData, array('updatedFields'=>$updatedFields));
                         $statusFormSubmition['updateFields']['msg'][] = 'MAJ champs'.json_encode($updatedFields).' pour '.$guestData['prenom'].' '.$guestData['nom'];
-                        
+
                     }else echo "<p>En fait non rien à mettre à jour !</p>";
                 }
 
             }
-        }        
+        }
     }
 
     if (!empty($Reservation->statusMsg['insertGuest'])) {
@@ -536,7 +535,7 @@ $app->post('/edit', function ($request, $response, $args) {
         echo ", résa buffets".$Reservation->buffets;
         $placesRestantes = $Reservation->getQuotasRestant($stats, $quotas);
         echo "<p>places restantes:".json_encode($placesRestantes)."</p>";
-        
+
         if ( (($Reservation->soirees > 0 && $placesRestantes['soirees'] >= 0) || $Reservation->soirees == 0)
             && (($Reservation->repas > 0 && $placesRestantes['repas'] >= 0) || $Reservation->repas == 0)
             && (($Reservation->buffets > 0 && $placesRestantes['buffets'] >= 0) || $Reservation->buffets == 0) ) {
@@ -652,7 +651,7 @@ $app->get('/login', function ($request, $response, $args) {
             }
         }
         try {
-            $result = $payutcClient->loginApp(array("key"=>$this->get('settings')['PayIcam']['payutc_key']));     
+            $result = $payutcClient->loginApp(array("key"=>$this->get('settings')['PayIcam']['payutc_key']));
         } catch (\JsonClient\JsonException $e) {
             $this->flash->addMessage('danger', "error login application");
             return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
