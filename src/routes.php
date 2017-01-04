@@ -129,28 +129,16 @@ function getPrixPromo($gingerUserCard){
     return $prixPromo;
 }
 
-function parseGuestData($guest){
-    if (isset($guest['id'])) $guest['id'] = intval($guest['id']);
-    if (isset($guest['is_icam'])) $guest['is_icam'] = intval($guest['is_icam']);
-    if (isset($guest['sexe'])) $guest['sexe'] = intval($guest['sexe']);
-    if (isset($guest['bracelet_id'])) $guest['bracelet_id'] = intval($guest['bracelet_id']);
-    if (isset($guest['repas'])) $guest['repas'] = intval($guest['repas']);
-    if (isset($guest['buffet'])) $guest['buffet'] = intval($guest['buffet']);
-    if (isset($guest['tickets_boisson'])) $guest['tickets_boisson'] = intval($guest['tickets_boisson']);
-    if (isset($guest['price'])) $guest['price'] = floatval($guest['price']);
-    return $guest;
-}
-
 function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB){
     $UserGuests = array();
     if(count($UserReservation) == 1){ // il y avait déjà une réservation pour cet utilisateur
-        $UserReservation = parseGuestData(current($UserReservation));
+        $UserReservation = \PayIcam\Reservation::parseGuestData(current($UserReservation));
         $UserId = $UserReservation['id'];
         $UserGuests = $DB->query('SELECT * FROM icam_has_guest
                                     LEFT JOIN guests ON guest_id = id
                                   WHERE icam_id = :icam_id', array('icam_id' => $UserId));
         foreach ($UserGuests as $k => $v) {
-            $UserGuests[$k] = parseGuestData($v);
+            $UserGuests[$k] = \PayIcam\Reservation::parseGuestData($v);
         }
     }else{ // Nouvelle réservation
         $UserReservation = array(
@@ -233,13 +221,13 @@ $app->get('/edit/', function ($request, $response, $args) {
 // Traitement du formulaire //
 //////////////////////////////
 function mergeUserReservations($array1, $array2, $prixPromo){
-    $retour = parseGuestData($array1['resa']);
-    $icamValues2 = parseGuestData($array2['resa']);
+    $retour = \PayIcam\Reservation::parseGuestData($array1['resa']);
+    $icamValues2 = \PayIcam\Reservation::parseGuestData($array2['resa']);
     $icamGuests2 = $array2['resa']['invites'];
     unset($icamValues2['invites']);
     $retour = array_merge($retour, $icamValues2);
     foreach ($icamGuests2 as $k => $guest) {
-        $retour['invites'][$k] = isset($retour['invites'][$k]) ? array_merge($retour['invites'][$k], parseGuestData($guest) ) : parseGuestData($guest) ;
+        $retour['invites'][$k] = isset($retour['invites'][$k]) ? array_merge($retour['invites'][$k], \PayIcam\Reservation::parseGuestData($guest) ) : \PayIcam\Reservation::parseGuestData($guest) ;
     }
     return array('resa'=>$retour);
 }
@@ -288,6 +276,7 @@ function getIcamData($gingerUserCard, $prixPromo, $resa, $oldResa=""){
         'nom' => $gingerUserCard->nom,
         'prenom' => $gingerUserCard->prenom,
         'is_icam' => 1,
+        'paiement' => $resa['paiement'],
         'telephone' => $resa['telephone'],
         'promo' => $gingerUserCard->promo,
         'email' => $gingerUserCard->mail,
@@ -307,6 +296,7 @@ function getGuestData($guest, $prixPromo, $oldResa=""){
         'nom' => $guest['nom'],
         'prenom' => $guest['prenom'],
         'is_icam' => 0,
+        'paiement' => $guest['paiement'],
         'sexe' => guessSexe($guest['prenom']),
         'repas' => getBoolIntValues('repas', $guest, $oldResa, $prixPromo['prixInvite']['repas']),
         'buffet' => getBoolIntValues('buffet', $guest, $oldResa, $prixPromo['prixInvite']['buffet']),
