@@ -22,8 +22,8 @@ class Participant {
     );
     public static $plage_horaire_quotas = array(
     	'17h30-20h'=>500, // bleu clair  >2000
-	    '21h-21h45'=>1000, // Bordeaux    1500-2000
-	    '21h45-22h30'=>1000, // bleue foncé 0-1000
+	    '21h-21h45'=>1500, // Bordeaux    1500-2000
+	    '21h45-22h30'=>1500, // bleue foncé 0-1000
 	    '22h30-23h'=>650 // vert vert 1000-1500
     );
 
