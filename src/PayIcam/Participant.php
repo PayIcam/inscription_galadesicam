@@ -5,7 +5,7 @@ namespace PayIcam;
 /**
 * Classe des participants au Gala
 */
-class Participant{
+class Participant {
     public static $plage_horaire_entrees = array(
 	    '17h30-19h30'=>'17h30-19h30: Conférence',
 	    '19h30-20h'=>'19h30-20h: Diner',

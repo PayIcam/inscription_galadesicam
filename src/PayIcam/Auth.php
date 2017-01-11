@@ -4,10 +4,10 @@ namespace PayIcam;
 
 
 class Auth{
-    
+
     private $roles;
 
-    function __construct(){
+    function __construct() {
         global $DB;
         $this->roles = array(
             array('id'=>0, "name"=>"Membre", 'slug'=> "member", 'level'=>0),
@@ -17,7 +17,7 @@ class Auth{
         );
     }
 
-    function loginUsingCas($ticket, $service){
+    function loginUsingCas($ticket, $service) {
         global $DB;
         global $payutcClient;
         require 'class/Cas.class.php';
@@ -39,7 +39,7 @@ class Auth{
             );
             return true;
         } catch (Exception $e) {
-            if (strpos($e, 'UserNotFound') !== false ){
+            if (strpos($e, 'UserNotFound') !== false ) {
                 header('Location:../casper');exit;
             }
             Functions::setFlash($e->getMessage(),'danger');
@@ -47,91 +47,91 @@ class Auth{
         }
     }
 
-    public function logOut(){
+    public function logOut() {
         global $payutcClient;
         $status = $payutcClient->getStatus();
         if($status->user) {
             $payutcClient->logout();
         }
-        $service = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . "{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}"; 
+        $service = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . "{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
         $casUrl = $payutcClient->getCasUrl()."logout?url=".urlencode($service);
         $_SESSION = array();
         session_destroy();
 
         return $casUrl;
     }
-    
+
     /**
      * Autorise un rang à accéder à une page, redirige vers forbidden sinon
      * */
-    function allow($rang){
+    function allow($rang) {
         $roles = $this->getLevels();
-        if(!$this->getUserField('slug')){
-            $this->forbidden(); 
-        }else{
-            if($roles[$rang] > $this->getUserField('level')){
-                $this->forbidden(); 
-            }else{
+        if(!$this->getUserField('slug')) {
+            $this->forbidden();
+        } else {
+            if($roles[$rang] > $this->getUserField('level')) {
+                $this->forbidden();
+            } else {
                 return true;
             }
         }
     }
 
-    function hasRole($rang){
+    function hasRole($rang) {
         $roles = $this->getLevels();
-        if(!$this->getUserField('slug')){
+        if(!$this->getUserField('slug')) {
             return false;
-        }else{
-            if($roles[$rang] > $this->getUserField('level')){
+        } else {
+            if($roles[$rang] > $this->getUserField('level')) {
                 return false;
-            }else{
+            } else {
                 return true;
             }
         }
     }
-    
+
     /**
      * Récupère une info utilisateur
      ***/
-    function getUserField($field){
-        if($field == 'role') $field = 'slug'; 
-        if(isset($_SESSION['Auth'][$field])){
+    function getUserField($field) {
+        if($field == 'role') $field = 'slug';
+        if(isset($_SESSION['Auth'][$field])) {
             return $_SESSION['Auth'][$field];
-        }else{
-            return false; 
+        } else {
+            return false;
         }
     }
-    
+
     /**
      * Récupère une info utilisateur
      ***/
-    function getUser(){
+    function getUser() {
         return $_SESSION['Auth'];
     }
-    
+
     /**
      * Redirige un utilisateur
      * */
-    function forbidden(){
+    function forbidden() {
         Functions::setFlash('<strong>Identification requise</strong> Vous ne pouvez accéder à cette page.','danger');
         header('Location:connection.php'.((!empty($_GET['ticket']))?'?ticket='.$_GET['ticket']:''));exit;
     }
 
     // -------------------- Security & Token functions -------------------- //
-    // public static function generateToken($nom = ''){
+    // public static function generateToken($nom = '') {
     //     $token = md5(uniqid(rand(147,1753), true));
     //     $_SESSION['tokens'][$nom.'_token'] = $token;
     //     $_SESSION['tokens'][$nom.'_token_time'] = time();
     //     return $token;
     // }
 
-    // public static function validateToken($token, $nom = '', $temps = 600, $referer = ''){
-    //     if (empty($referer)){
+    // public static function validateToken($token, $nom = '', $temps = 600, $referer = '') {
+    //     if (empty($referer)) {
     //         $referer = Config::get('accueil-payicam').basename($_SERVER['REQUEST_URI']);
     //     }
     //     if(isset($_SESSION['tokens'][$nom.'_token']) && isset($_SESSION['tokens'][$nom.'_token_time']) && !empty($token))
     //         if($_SESSION['tokens'][$nom.'_token'] == $token)
-    //             if($_SESSION['tokens'][$nom.'_token_time'] >= (time() - $temps)){
+    //             if($_SESSION['tokens'][$nom.'_token_time'] >= (time() - $temps)) {
     //                 if(!empty($_SERVER['HTTP_REFERER']) && dirname($_SERVER['HTTP_REFERER']) == dirname($referer))
     //                     return true;
     //                 elseif(empty($_SERVER['HTTP_REFERER']))
@@ -141,13 +141,13 @@ class Auth{
     // }
 
     // -------------------- isXXX functions -------------------- //
-    function isLogged(){ // vérification de de l'existence d'une session "Auth", d'une session ouverte
+    function isLogged() { // vérification de de l'existence d'une session "Auth", d'une session ouverte
         if ($this->getUserField('level') !== false && $this->getUserField('level') >= 0)
             return true;
         else
             return false;
     }
-    function isAdmin(){ //vérification que l'utilisateur loggué est administrateur
+    function isAdmin() { //vérification que l'utilisateur loggué est administrateur
         if ($this->getUserField('role') == 'admin')
             return true;
         else
@@ -155,33 +155,33 @@ class Auth{
     }
 
     // -------------------- Getters -------------------- //
-    public function getLevels($key = 'slug'){
+    public function getLevels($key = 'slug') {
         global $DB;
         if ($key != 'slug' || $key != 'id')
             $key = 'slug';
 
-        $roles = array(); 
-        foreach($this->roles as $d){
-            $roles[$d[$key]] = $d['level']; 
+        $roles = array();
+        foreach($this->roles as $d) {
+            $roles[$d[$key]] = $d['level'];
         }
         return $roles;
     }
-    public function getRoles($key = 'id'){
+    public function getRoles($key = 'id') {
         global $DB;
         if ($key != 'slug' || $key != 'id')
             $key = 'id';
 
-        $roles = array(); 
-        foreach($this->roles as $d){
-            $roles[$d[$key]] = $d['name']; 
+        $roles = array();
+        foreach($this->roles as $d) {
+            $roles[$d[$key]] = $d['name'];
         }
         return $roles;
     }
-    public function getRole($key){
+    public function getRole($key) {
         if (isset($this->roles[$key])) {
             return $this->roles[$key];
-        }else{ // C'est surement son slug
-            foreach($this->roles as $d){
+        } else { // C'est surement son slug
+            foreach($this->roles as $d) {
                 if ($d['slug'] == $key) {
                     return $d;
                 }
@@ -189,7 +189,7 @@ class Auth{
             return null;
         }
     }
-    public function getRoleName($id){
+    public function getRoleName($id) {
         $role = $this->getRole($id);
         return $role['name'];
     }

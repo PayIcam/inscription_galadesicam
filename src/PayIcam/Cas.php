@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 include('class/httpful.phar');
 
@@ -7,13 +7,13 @@ namespace PayIcam;
 class Cas{
     protected $url;
     protected $timeout;
-    
-    public function __construct($url, $timeout=10){
+
+    public function __construct($url, $timeout=10) {
         $this->url = $url;
         $this->timeout = $timeout;
     }
-    
-    public function authenticate($ticket, $service){
+
+    public function authenticate($ticket, $service) {
         $r = \Httpful\Request::get($this->getValidateUrl($ticket, $service))
           ->sendsXml()
           ->timeoutIn($this->timeout)
@@ -25,12 +25,12 @@ class Cas{
             echo "Return cannot be parsed : '{$r->body}'",  $e->getMessage(), "\n";
             // return (string)"Return cannot be parsed";
         }
-        
+
         $namespaces = $xml->getNamespaces();
-        
+
         $serviceResponse = $xml->children($namespaces['cas']);
         $user = $serviceResponse->authenticationSuccess->user;
-        
+
         if ($user) {
             return (string)$user; // cast simplexmlelement to string
         }
@@ -49,7 +49,7 @@ class Cas{
         // never reach there
     }
 
-    public function logout(){
+    public function logout() {
         $r = \Httpful\Request::get($this->url."logout")
           ->sendsXml()
           ->timeoutIn($this->timeout)
@@ -62,8 +62,8 @@ class Cas{
             return false;
         }
     }
-    
-    public function getValidateUrl($ticket, $service){
+
+    public function getValidateUrl($ticket, $service) {
         return $this->url."serviceValidate?ticket=".urlencode($ticket)."&service=".urlencode($service);
     }
 }

@@ -19,7 +19,7 @@ class RouteHelper {
     public $pageName;
     public $webSiteTitle;
 
-    function __construct($app, $request, $pageName){
+    function __construct($app, $request, $pageName) {
         $this->app = $app;
 
         $this->publicPath = $app->get('settings')['public_path'];
@@ -33,13 +33,13 @@ class RouteHelper {
         $this->webSiteTitle = $app->get('settings')['webSiteTitle'];
     }
 
-    public function getPathFor($page=''){
+    public function getPathFor($page='') {
         return $this->curPageBasePath . '/' . $page;
     }
 
-    public function getPageTitle(){
+    public function getPageTitle() {
         return $this->pageName . ' - ' . $this->webSiteTitle;
     }
 
-    
+
 }

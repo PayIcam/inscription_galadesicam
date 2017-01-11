@@ -13,8 +13,8 @@ $app->add(function ($request, $response, $next) {
             $this->flash->addMessage('info', "Vous devez être connecté pour accéder au reste de l'application");
             return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
         }
-        if (!empty($status->user)){
-            if (empty($status->application) || isset($status->application->app_url) && strpos($status->application->app_url, 'inscription_gala') === false){ // il était connecté en tant qu'icam mais l'appli non
+        if (!empty($status->user)) {
+            if (empty($status->application) || isset($status->application->app_url) && strpos($status->application->app_url, 'inscription_gala') === false) { // il était connecté en tant qu'icam mais l'appli non
                 try {
                     $payutcClient->loginApp(array("key"=>$this->get('settings')['PayIcam']['payutc_key']));
                     $status = $payutcClient->getStatus();
@@ -33,7 +33,7 @@ $app->add(function ($request, $response, $next) {
             }
         }
     }
-    
+
     // $response->getBody()->write('BEFORE');
     $response = $next($request, $response);
     // $response->getBody()->write('AFTER');
