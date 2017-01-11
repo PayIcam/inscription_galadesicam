@@ -245,6 +245,7 @@ class Reservation{
 
         $guest_id = $guest['guest_id'];
         unset($guest['id']);
+        unset($guest['bracelet_id']);
         unset($guest['guest_id']);
         unset($guest['icam_id']);
         unset($guest['reservation_id']);
