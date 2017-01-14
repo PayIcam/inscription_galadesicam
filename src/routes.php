@@ -87,10 +87,11 @@ $app->get('/', function ($request, $response, $args) {
     $userResaCount = count($UserReservation);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId
 
+    extract(getStatsQuotas());//stats & quotas
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
     $editLink = $this->router->pathFor('edit');
-    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'newResa', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'RouteHelper', $args));
+    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'newResa', 'UserGuests', 'stats', 'quotas', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'RouteHelper', $args));
 
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('home');

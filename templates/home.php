@@ -3,9 +3,42 @@
     <div class="col-sm-6">
         <h3>Horaires:</h3>
         <ul>
-            <?php foreach (\PayIcam\Participant::$plage_horaire_entrees as $key => $plage): ?>
-                <li><?= $plage ?></li>
-            <?php endforeach ?>
+            <li>
+                17h30-19h30: Conférence
+                <?php if ($quotas['buffet'] - $stats['buffetsG'] <= 0): ?>
+                    <span class="label label-danger">complet</span>
+                <?php endif ?>
+            </li>
+            <li>
+                19h30-20h: Diner
+                <?php if ($quotas['repas'] - $stats['repasG'] <= 0): ?>
+                    <span class="label label-danger">complet</span>
+                <?php endif ?>
+            </li>
+            <div>
+                <strong>Soirée:</strong>
+                <?php if ($quotas['soiree'] - $stats['soireesG'] <= 0): ?>
+                    <span class="label label-danger">complet</span>
+                <?php endif ?>
+            </div>
+            <li>
+                21h-21h45: 1er créneau
+                <?php if ($quotas['creneau_21h_21h45'] - $stats['creneau_21h_21h45'] <= 0): ?>
+                    <span class="label label-danger">complet</span>
+                <?php endif ?>
+            </li>
+            <li>
+                21h45-22h30: 2ème créneau
+                <?php if ($quotas['creneau_21h45_22h30'] - $stats['creneau_21h45_22h30'] <= 0): ?>
+                    <span class="label label-danger">complet</span>
+                <?php endif ?>
+            </li>
+            <li>
+                22h30-23h: 3ème créneau
+                <?php if ($quotas['creneau_22h30_23h'] - $stats['creneau_22h30_23h'] <= 0): ?>
+                    <span class="label label-danger">complet</span>
+                <?php endif ?>
+            </li>
         </ul>
     </div>
 </div>
