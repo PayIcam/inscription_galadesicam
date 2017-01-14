@@ -14,17 +14,17 @@ class Participant {
 	    '22h30-23h'=>'22h30-23h: 3ème créneau'
 	);
     public static $plage_horaire_couleurs = array(
-    	'17h30-19h30'=>'#000', // noir
+    	'17h30-19h30'=>'#000', // noir 				0-700
     	'19h30-20h'=>'#000', // noir  >2000
-	    '21h-21h45'=>'#670490', // Bordeaux    1500-2000
-	    '21h45-22h30'=>'#0F129A', // bleue foncé 0-1000
-	    '22h30-23h'=>'#137911' // vert vert 1000-1500
+	    '21h-21h45'=>'#670490', // Bordeaux    		701-1500
+	    '21h45-22h30'=>'#0F129A', // bleue foncé 	1501-2300
+	    '22h30-23h'=>'#137911' // vert vert  		2301-3000
     );
     public static $plage_horaire_quotas = array(
-    	'17h30-20h'=>500, // bleu clair  >2000
-	    '21h-21h45'=>1500, // Bordeaux    1500-2000
-	    '21h45-22h30'=>1500, // bleue foncé 0-1000
-	    '22h30-23h'=>650 // vert vert 1000-1500
+    	'17h30-20h'=>500, // bleu clair  	0-700
+	    '21h-21h45'=>925, // Bordeaux    	701-1500
+	    '21h45-22h30'=>925, // bleue foncé  1501-2300
+	    '22h30-23h'=>650 // vert vert 		2301-3000
     );
 
 	public static $promos = array(
@@ -85,7 +85,7 @@ class Participant {
 				'prixIcam' => array("repas" => 20, "buffet" => 3, "soiree" => 22),
 				'prixInvite' => array("repas" => 20, "buffet" => 3, "soiree" => 22)),
 		"Parents" => array('nbInvites' => 1,
-				'prixIcam' => array("repas" => 20, "buffet" => 0, "soiree" => 22),
+				'prixIcam' => array("repas" => 20, "buffet" => 3, "soiree" => 22),
 				'prixInvite' => array("repas" => NULL, "buffet" => NULL, "soiree" => NULL)),
 		"Artistes" => array('nbInvites' => 1,
 				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soiree" => 0),

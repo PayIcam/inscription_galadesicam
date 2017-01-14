@@ -24,11 +24,21 @@ $app->get('/about', function ($request, $response, $args) {
 function getStatsQuotas() {
     global $DB, $settings, $quotas;
     $stats = $DB->queryFirst("SELECT * FROM
-        (SELECT ifnull(SUM( r.soirees ), 0) soireesW, ifnull(SUM( r.repas ), 0) repasW, ifnull(SUM( r.buffets ), 0) buffetsW
+        (SELECT SUM( r.soirees ) soireesW,
+                SUM( r.repas ) repasW,
+                SUM( r.buffets ) buffetsW
             FROM reservations_payicam AS r WHERE r.status = 'W') rW ,
         -- (SELECT ifnull(SUM( r.soirees ), 0) soireesV, ifnull(SUM( r.repas ), 0) repasV, ifnull(SUM( r.buffets ), 0) buffetsV
             -- FROM reservations_payicam AS r WHERE r.status = 'V') rV ,
-        (SELECT COUNT( id ) soireesG , SUM( repas ) repasG , SUM( buffet ) buffetsG FROM guests) g ");
+        (SELECT COUNT( id ) soireesG,
+                SUM( repas ) repasG,
+                SUM( buffet ) buffetsG,
+                count(CASE WHEN plage_horaire_entrees = '17h30-19h30' THEN 1 ELSE null END) creneau_17h30_19h30,
+                count(CASE WHEN plage_horaire_entrees = '19h30-20h' THEN 1 ELSE null END) creneau_19h30_20h,
+                count(CASE WHEN plage_horaire_entrees = '21h-21h45' THEN 1 ELSE null END) creneau_21h_21h45,
+                count(CASE WHEN plage_horaire_entrees = '21h45-22h30' THEN 1 ELSE null END) creneau_21h45_22h30,
+                count(CASE WHEN plage_horaire_entrees = '22h30-23h' THEN 1 ELSE null END) creneau_22h30_23h
+            FROM guests) g ");
     foreach ($stats as $k => $v)
         $stats[$k] = intval($v);
     return compact('stats', 'quotas');
@@ -154,7 +164,7 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
             'repas' => 0,
             'buffet' => 0,
             'tickets_boisson' => 0,
-            'plage_horaire_entrees' => '21h-21h45',
+            'plage_horaire_entrees' => '',
             'image' => $gingerUserCard->img_link
         );
         $UserId = -1;
@@ -523,12 +533,17 @@ $app->post('/edit', function ($request, $response, $args) {
         echo "résa soirees".$Reservation->soirees;
         echo ", résa repas".$Reservation->repas;
         echo ", résa buffets".$Reservation->buffets;
+        echo ", Reservation > creneauxEntrees".json_encode($Reservation->creneauxEntrees);
         $placesRestantes = $Reservation->getQuotasRestant($stats, $quotas);
         echo "<p>places restantes:".json_encode($placesRestantes)."</p>";
 
-        if ( (($Reservation->soirees > 0 && $placesRestantes['soirees'] >= 0) || $Reservation->soirees == 0)
-            && (($Reservation->repas > 0 && $placesRestantes['repas'] >= 0) || $Reservation->repas == 0)
-            && (($Reservation->buffets > 0 && $placesRestantes['buffets'] >= 0) || $Reservation->buffets == 0) ) {
+        if (   ($Reservation->soirees > 0 && $placesRestantes['soirees'] >= 0 || $Reservation->soirees == 0)
+            && ($Reservation->repas > 0 && $placesRestantes['repas'] >= 0 || $Reservation->repas == 0)
+            && ($Reservation->buffets > 0 && $placesRestantes['buffets'] >= 0 || $Reservation->buffets == 0)
+            && ($Reservation->creneauxEntrees['21h-21h45'] > 0 && $placesRestantes['creneau_21h_21h45'] >= 0 || $Reservation->creneauxEntrees['21h-21h45'] == 0)
+            && ($Reservation->creneauxEntrees['21h45-22h30'] > 0 && $placesRestantes['creneau_21h45_22h30'] >= 0 || $Reservation->creneauxEntrees['21h45-22h30'] == 0)
+            && ($Reservation->creneauxEntrees['22h30-23h'] > 0 && $placesRestantes['creneau_22h30_23h'] >= 0 || $Reservation->creneauxEntrees['22h30-23h'] == 0)
+        ) {
             $Reservation->save();
             return $response->withStatus(303)->withHeader('Location', $Reservation->tra_url_payicam);
             echo "<p><strong>Votre réservation est prête à être soumise</strong>, vous allez être redirigé sur PayIcam pour effectuer le paiement:</p>";
@@ -537,11 +552,17 @@ $app->post('/edit', function ($request, $response, $args) {
             $msg = "";
             $msg .= "<p>Votre réservation était prête à être soumise... <br><strong>MAIS</strong> vous n'avez pas été assez vite et certains des quotas ont été atteints:</p>";
             if ($placesRestantes['soirees'] < 0) {
-                $msg .= "<p>Plus de places à la soirée ne sont disponibles</p>";
+                $msg .= "<p>Plus de places à la soirée</p>";
             }if ($placesRestantes['repas'] < 0) {
-                $msg .= "<p>Plus de places pour le repas ne sont disponibles</p>";
+                $msg .= "<p>Plus de places pour le repas</p>";
             }if ($placesRestantes['buffets'] < 0) {
-                $msg .= "<p>Plus de places pour la conférence ne sont disponibles</p>";
+                $msg .= "<p>Plus de places pour la conférence</p>";
+            }if ($placesRestantes['creneau_21h_21h45'] < 0) {
+                $msg .= "<p>Plus de places pour le créneau 21h - 21h45</p>";
+            }if ($placesRestantes['creneau_21h45_22h30'] < 0) {
+                $msg .= "<p>Plus de places pour le créneau 21h45 - 22h30</p>";
+            }if ($placesRestantes['creneau_22h30_23h'] < 0) {
+                $msg .= "<p>Plus de places pour le créneau 22h - 0_23h</p>";
             }
             $this->flash->addMessage('danger', $msg);
             echo $msg;

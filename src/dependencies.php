@@ -48,13 +48,21 @@ $isAdminFondation = $payutcClient->isAdmin();
 $confSQL = $settings['settings']['confSQL'];
 $DB = new \PayIcam\DB($confSQL['sql_host'],$confSQL['sql_user'],$confSQL['sql_pass'],$confSQL['sql_db']);
 
-$canWeRegisterNewGuests = 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'inscriptions'))));
-$canWeEditOurReservation = 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'modifications_places'))));
+$res = $DB->query("SELECT name, value FROM configs");
+$configsDB = [];
+foreach ($res as $row)
+    $configsDB[$row['name']] = $row['value'];
+
+$canWeRegisterNewGuests = (boolean)$configsDB['inscriptions'];
+$canWeEditOurReservation = (boolean)$configsDB['modifications_places'];
 
 $quotas = array(
-    'soiree' => 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'quota_soirees')))),
-    'repas' => 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'quota_repas')))),
-    'buffet' => 1*(current($DB->queryFirst('SELECT value FROM configs WHERE name = :name', array('name'=>'quota_conferences'))))
+    'soiree' => (int)$configsDB['quota_soirees'],
+    'repas' => (int)$configsDB['quota_repas'],
+    'buffet' => (int)$configsDB['quota_conferences'],
+    'creneau_21h_21h45' => (int)$configsDB['quota_entree_21h_21h45'],
+    'creneau_21h45_22h30' => (int)$configsDB['quota_entree_21h45_22h30'],
+    'creneau_22h30_23h' => (int)$configsDB['quota_entree_22h30_23h']
 );
 
 // Sécurité que des icam

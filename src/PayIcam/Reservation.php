@@ -10,6 +10,7 @@ class Reservation{
     private $repas;
     private $buffets;
     private $articles;
+    private $creneauxEntrees;
     private $date_option;
     private $date_paiement;
     private $status;
@@ -33,6 +34,11 @@ class Reservation{
         global $DB;
 
         $this->app = $app;
+        $this->creneauxEntrees = [
+            '21h-21h45' => 0,
+            '21h45-22h30' => 0,
+            '22h30-23h' => 0
+        ];
         $this->gingerUserCard = $gingerUserCard;
         $this->prixPromo = $prixPromo;
         $this->articlesPayIcam = $articlesPayIcam;
@@ -111,6 +117,11 @@ class Reservation{
         else { $msg = 'Invité : '; }
         $msg .= $data['prenom'].' '.$data['nom']. ', ';
 
+        if ($data['repas'] && $data['buffet'])
+            $data['plage_horaire_entrees'] = '17h30-19h30';
+        else if ($data['repas'])
+            $data['plage_horaire_entrees'] = '19h30-20h';
+
         if ($updatedFields === false ) { // INSERT
             $options = array('1 soirée');
             $this->soirees += 1;
@@ -123,6 +134,9 @@ class Reservation{
                 $this->addArticle('tickets_boisson', $data['is_icam'], intval($data['tickets_boisson']/10)); }
             $this->price += $data['price'];
             $msg = 'Ajout' . $msg .'pour '. $data['price'].'€ ['.implode(', ', $options).']';
+            var_dump($data['plage_horaire_entrees']);
+            if (isset($this->creneauxEntrees[$data['plage_horaire_entrees']]))
+                $this->creneauxEntrees[$data['plage_horaire_entrees']] ++;
         } else { // MAJ options
             if (in_array('price', $updatedFields)) {
                 $prix = 0;
@@ -142,13 +156,17 @@ class Reservation{
             }
         }
         if ($updatedFields === false) {
-            if ($data['is_icam']) $this->statusMsg['insertIcam'] = $msg;
-            else $this->statusMsg['insertGuest'][] = $msg;
-        } else {
+            if ($data['is_icam'])
+                $this->statusMsg['insertIcam'] = $msg;
+            else
+                $this->statusMsg['insertGuest'][] = $msg;
+        } else
             $this->statusMsg['updateOptions'][] = $msg;
-        }
-        if ($data['is_icam']) { $this->icamData = $data; }
-        else { $this->guestsData[] = $data; }
+
+        if ($data['is_icam'])
+            $this->icamData = $data;
+        else
+            $this->guestsData[] = $data;
     }
 
     public function addArticle($type, $is_icam, $nb=1) {
@@ -299,7 +317,10 @@ class Reservation{
         $soirees = $quotas['soiree'] - ($stats['soireesG']+$stats['soireesW']+$this->soirees);
         $repas = $quotas['repas'] - ($stats['repasG']+$stats['repasW']+$this->repas);
         $buffets = $quotas['buffet'] - ($stats['buffetsG']+$stats['buffetsW']+$this->buffets);
-        return compact('soirees', 'repas', 'buffets');
+        $creneau_21h_21h45 = $quotas['creneau_21h_21h45'] - ($stats['creneau_21h_21h45']+$this->creneauxEntrees['21h-21h45']);
+        $creneau_21h45_22h30 = $quotas['creneau_21h45_22h30'] - ($stats['creneau_21h45_22h30']+$this->creneauxEntrees['21h45-22h30']);
+        $creneau_22h30_23h = $quotas['creneau_22h30_23h'] - ($stats['creneau_22h30_23h']+$this->creneauxEntrees['22h30-23h']);
+        return compact('soirees', 'repas', 'buffets', 'creneau_21h_21h45', 'creneau_21h45_22h30', 'creneau_22h30_23h');
     }
 
     public static function parseGuestData($guest) {
