@@ -41,6 +41,7 @@
           <ul class="nav navbar-nav navbar-right">
             <li><a href="<?= $RouteHelper->getPathFor('logout') ?>">Déconnexion</a></li>
           </ul>
+          <p class="navbar-text navbar-right"><em><?= $Auth->getUserField('firstname') ?> <?= $Auth->getUserField('lastname') ?></em></p>
           <?php endif ?>
         </div><!-- /.nav-collapse -->
       </div><!-- /.container -->

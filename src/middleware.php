@@ -5,7 +5,7 @@
 
 // sécuriser l'application
 $app->add(function ($request, $response, $next) {
-    global $status, $payutcClient, $gingerUserCard, $gingerClient, $Auth;
+    global $status, $payutcClient, $gingerUserCard, $gingerClient, $Auth, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
     if (!in_array($request->getUri()->getPath(), ['about', 'login', 'callback'])) {
         if((!isset($status) || !$status->user)) {
@@ -27,9 +27,15 @@ $app->add(function ($request, $response, $next) {
             $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
             if (empty($gingerUserCard)) { // l'utilisateur n'avait jamais été ajouté à Ginger O.o
                 $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
-            }if (empty($gingerUserCard)) { // l'utilisateur n'a pas un mail icam valide // on ne devrait jamais avoir cette erreur car on passe par payutc et lui a besoin d'avoir ginger qui marche ... je crois ...
+            }
+            if (empty($gingerUserCard)) { // l'utilisateur n'a pas un mail icam valide // on ne devrait jamais avoir cette erreur car on passe par payutc et lui a besoin d'avoir ginger qui marche ... je crois ...
                 $this->flash->addMessage('warning', "Votre Mail Icam n'est pas reconnu par Ginger...");
                 return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
+            }
+            // On autorise les personnes de la promo organisatrice de pouvoir s'inscrire anyway
+            if (!empty($gingerUserCard->promo) && $gingerUserCard->promo==119) {
+                $canWeRegisterNewGuests = 1;
+                $canWeEditOurReservation = 1;
             }
         }
     }

@@ -68,3 +68,6 @@ $quotas = array(
 // Sécurité que des icam
 $status = $payutcClient->getStatus();
 $gingerUserCard = null;
+
+// $_SESSION['Auth']['email'] = "gregoire.dervaux@2019.icam.fr";
+// $_SESSION['Auth']['email'] = "gregoire.giraud@2020.icam.fr";
