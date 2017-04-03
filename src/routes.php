@@ -49,7 +49,7 @@ $app->get('/', function ($request, $response, $args) {
 
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Accueil');
-    $emailContactGala = $this->get('settings')['emailContactGala'];
+    $emailContactSpring = $this->get('settings')['emailContactSpring'];
 
     // Sample log message
     // $this->logger->info("Slim-Skeleton '/' index");
@@ -91,7 +91,7 @@ $app->get('/', function ($request, $response, $args) {
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
     $editLink = $this->router->pathFor('edit');
-    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'newResa', 'UserGuests', 'stats', 'quotas', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'RouteHelper', $args));
+    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'newResa', 'UserGuests', 'stats', 'quotas', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactSpring', 'editLink', 'RouteHelper', $args));
 
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('home');
@@ -99,7 +99,7 @@ $app->get('/', function ($request, $response, $args) {
 ////////////////////////////////////////////
 // Routes pour l'édition des réservations //
 ////////////////////////////////////////////
-function secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $app, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala) {
+function secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $app, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactSpring) {
     if (!$Auth->isLogged() || empty($status->user) || empty($status->application)) {
         if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']);
         $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
@@ -111,17 +111,17 @@ function secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $app
     }
     if (count($UserReservation) > 1) {
         $app->flash->addMessage('danger', 'Nous avons plusieurs réservations enregistrées à votre email...<br>
-            <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Contactez nous</a> svp !');
+            <a href="mailto:'.$emailContactSpring.'" title="'.$emailContactSpring.'">Contactez nous</a> svp !');
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     } elseif (!$canWeRegisterNewGuests && count($UserReservation) == 0) {
-        $app->flash->addMessage('warning', 'De nouvelles réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Gala</a>');
+        $app->flash->addMessage('warning', 'De nouvelles réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactSpring.'" title="'.$emailContactSpring.'">Gala</a>');
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     } elseif (!$canWeEditOurReservation && $canWeRegisterNewGuests && count($UserReservation) == 1) {
         // On a pas le droit de modifier les infos que l'on a soumis, par contre on peut qd mm ajouter de nouveaux invités!
-        $app->flash->addMessage('warning', 'Les modifications des réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Gala</a>');
+        $app->flash->addMessage('warning', 'Les modifications des réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactSpring.'" title="'.$emailContactSpring.'">Gala</a>');
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     } elseif (!$canWeEditOurReservation && !$canWeRegisterNewGuests && count($UserReservation) == 1) {
-        $app->flash->addMessage('warning', 'Les inscriptions sont closes, on se retrouve au Gala.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactGala.'" title="'.$emailContactGala.'">Gala</a>');
+        $app->flash->addMessage('warning', 'Les inscriptions sont closes, on se retrouve au Gala.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactSpring.'" title="'.$emailContactSpring.'">Gala</a>');
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     }
     return true;
@@ -189,7 +189,7 @@ $app->get('/edit', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
-    $emailContactGala = $this->get('settings')['emailContactGala'];
+    $emailContactSpring = $this->get('settings')['emailContactSpring'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
 
@@ -201,7 +201,7 @@ $app->get('/edit', function ($request, $response, $args) {
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
 
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
-    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
+    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactSpring);
     if ($retourSecure !== true) return $retourSecure;
 
     // On continue
@@ -221,7 +221,7 @@ $app->get('/edit', function ($request, $response, $args) {
 
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
-    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'Form', 'prixPromo', 'gingerUserCard', $args));
+    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactSpring', 'editLink', 'Form', 'prixPromo', 'gingerUserCard', $args));
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('edit');
 $app->get('/edit/', function ($request, $response, $args) {
@@ -340,7 +340,7 @@ $app->post('/edit', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
-    $emailContactGala = $this->get('settings')['emailContactGala'];
+    $emailContactSpring = $this->get('settings')['emailContactSpring'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
 
@@ -352,7 +352,7 @@ $app->post('/edit', function ($request, $response, $args) {
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
 
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
-    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala);
+    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactSpring);
     if ($retourSecure !== true) return $retourSecure;
 
     // On continue

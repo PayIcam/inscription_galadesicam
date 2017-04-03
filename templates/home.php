@@ -1,48 +1,3 @@
-<h2 class="page-header">Précisions pour le soir même:</h2>
-<div class="row">
-    <div class="col-sm-6">
-        <h3>Horaires:</h3>
-        <ul>
-            <li>
-                17h30-19h30: Conférence
-                <?php if ($quotas['buffet'] - $stats['buffetsG'] <= 0): ?>
-                    <span class="label label-danger">complet</span>
-                <?php endif ?>
-            </li>
-            <li>
-                19h30-20h: Diner
-                <?php if ($quotas['repas'] - $stats['repasG'] <= 0): ?>
-                    <span class="label label-danger">complet</span>
-                <?php endif ?>
-            </li>
-            <div>
-                <strong>Soirée:</strong>
-                <?php if ($quotas['soiree'] - $stats['soireesG'] <= 0): ?>
-                    <span class="label label-danger">complet</span>
-                <?php endif ?>
-            </div>
-            <li>
-                21h-21h45: 1er créneau
-                <?php if ($quotas['creneau_21h_21h45'] - $stats['creneau_21h_21h45'] <= 0): ?>
-                    <span class="label label-danger">complet</span>
-                <?php endif ?>
-            </li>
-            <li>
-                21h45-22h30: 2ème créneau
-                <?php if ($quotas['creneau_21h45_22h30'] - $stats['creneau_21h45_22h30'] <= 0): ?>
-                    <span class="label label-danger">complet</span>
-                <?php endif ?>
-            </li>
-            <li>
-                22h30-23h: 3ème créneau
-                <?php if ($quotas['creneau_22h30_23h'] - $stats['creneau_22h30_23h'] <= 0): ?>
-                    <span class="label label-danger">complet</span>
-                <?php endif ?>
-            </li>
-        </ul>
-    </div>
-</div>
-
 <?php if (!empty($newResa)) { ?>
     <p class="alert alert-warning">
         Vous avez bien soumis une réservation mais vous ne l'avez pas encore réglée.<br>
@@ -56,7 +11,7 @@
         Vous n'avez pas encore de réservation,<br>
         mais vous pouvez encore vous enregistrer:
     </p>
-    <p><a href="<?= $editLink ?>" class="btn btn-primary">S'inscrire au Gala</a></p>
+    <p><a href="<?= $editLink ?>" class="btn btn-primary">S'inscrire au Spring</a></p>
 <?php } elseif ($userResaCount == 0) { ?>
     <p>
         Vous n'avez pas eu le temps de prendre votre réservation ...<br>
@@ -65,7 +20,7 @@
     </p>
 <?php } elseif($userResaCount > 1){ ?>
     <p>Nous avons plusieurs réservations enregistrées à votre email...<br>
-        <a href="mailto:<?= $emailContactGala ?>">Contactez nous</a> svp !</p>
+        <a href="mailto:<?= $emailContactSpring ?>">Contactez nous</a> svp !</p>
 <?php } ?>
 <?php if(!empty($newResa)){ ?>
     <h2 class="page-header">
@@ -136,7 +91,7 @@
 <?php if($userResaCount == 1){ ?>
     <h2 class="page-header">
         Votre réservation actuelle:
-        <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && empty($newResa))?'':' title="Vous ne pouvez pas ou plus éditer vos réservations. On se retrouve au Gala." disabled="disabled"' ?>>Modifier mes achats</a></small>
+        <small><a href="<?= ($canWeEditOurReservation)?$editLink:'#' ?>" class="btn btn-primary" <?= ($canWeEditOurReservation && empty($newResa))?'':' title="Vous ne pouvez pas ou plus éditer vos réservations. On se retrouve au Spring." disabled="disabled"' ?>>Modifier mes achats</a></small>
     </h2>
     <h3>Vous:</h3>
     <dl class="dl-horizontal">

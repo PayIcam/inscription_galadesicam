@@ -2,7 +2,8 @@
 
   <footer class="footer">
       <p class="clearfix">
-          &copy; 2015, PayIcam, Antoine <em>(115)</em> - <a href="../" title="Retour PayIcam">Retour PayIcam</a></p>
+          Pour toute question, contactez nous! <a href="mailto:spring.icam@gmail.com"> spring.icam@gmail.com</a> <br>
+          &copy; 2017, PayIcam, Guillaume <em>(119)</em>, Grégoire <em>(119)</em>, Antoine <em>(115)</em> - <a href="../" title="Retour PayIcam">Retour PayIcam</a></p>
       </p>
   </footer>
 

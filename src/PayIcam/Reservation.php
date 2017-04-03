@@ -7,10 +7,7 @@ class Reservation{
 
     private $id;
     private $soirees;
-    private $repas;
-    private $buffets;
     private $articles;
-    private $creneauxEntrees;
     private $date_option;
     private $date_paiement;
     private $status;
@@ -34,11 +31,6 @@ class Reservation{
         global $DB;
 
         $this->app = $app;
-        $this->creneauxEntrees = [
-            '21h-21h45' => 0,
-            '21h45-22h30' => 0,
-            '22h30-23h' => 0
-        ];
         $this->gingerUserCard = $gingerUserCard;
         $this->prixPromo = $prixPromo;
         $this->articlesPayIcam = $articlesPayIcam;
@@ -46,8 +38,6 @@ class Reservation{
         if (is_array($data) && !empty($data['id'])) { // On a déjà le contenu d'une résa
             $this->id = intval($data['id']);
             $this->soirees = intval($data['soirees']);
-            $this->repas = intval($data['repas']);
-            $this->buffets = intval($data['buffets']);
             $this->articles = json_decode($data['articles']);
             $this->date_option = $data['date_option'];
             $this->date_paiement = $data['date_paiement'];
@@ -61,8 +51,6 @@ class Reservation{
         } else {
             $this->login = $data;
             $this->soirees = 0;
-            $this->repas = 0;
-            $this->buffets = 0;
             $this->price = 0;
             $this->articles = array();
             $this->date_option = date('Y-m-d H:i:s');
@@ -117,21 +105,10 @@ class Reservation{
         else { $msg = 'Invité : '; }
         $msg .= $data['prenom'].' '.$data['nom']. ', ';
 
-        if ($data['repas'] && $data['buffet'])
-            $data['plage_horaire_entrees'] = '17h30-19h30';
-        else if ($data['repas'])
-            $data['plage_horaire_entrees'] = '19h30-20h';
-
         if ($updatedFields === false ) { // INSERT
             $options = array('1 soirée');
             $this->soirees += 1;
             $this->addArticle('soiree', $data['is_icam']);
-            if($data['repas']) { $this->repas += 1; $options[] = '1 repas';
-                $this->addArticle('repas', $data['is_icam']); }
-            if($data['buffet']) { $this->buffets += 1; $options[] = '1 buffet';
-                $this->addArticle('buffet', $data['is_icam']); }
-            if($data['tickets_boisson']) { $options[] = $data['tickets_boisson'].' tickets';
-                $this->addArticle('tickets_boisson', $data['is_icam'], intval($data['tickets_boisson']/10)); }
             $this->price += $data['price'];
             $msg = 'Ajout' . $msg .'pour '. $data['price'].'€ ['.implode(', ', $options).']';
             var_dump($data['plage_horaire_entrees']);
@@ -222,8 +199,6 @@ class Reservation{
         $data = array(
             'login' => $this->login,
             'soirees' => $this->soirees,
-            'repas' => $this->repas,
-            'buffets' => $this->buffets,
             'price' => $this->price,
             'articles' => json_encode($this->articles),
             'date_option' => $this->date_option,
@@ -315,12 +290,7 @@ class Reservation{
 
     public function getQuotasRestant($stats, $quotas) {
         $soirees = $quotas['soiree'] - ($stats['soireesG']+$stats['soireesW']+$this->soirees);
-        $repas = $quotas['repas'] - ($stats['repasG']+$stats['repasW']+$this->repas);
-        $buffets = $quotas['buffet'] - ($stats['buffetsG']+$stats['buffetsW']+$this->buffets);
-        $creneau_21h_21h45 = $quotas['creneau_21h_21h45'] - ($stats['creneau_21h_21h45']+$this->creneauxEntrees['21h-21h45']);
-        $creneau_21h45_22h30 = $quotas['creneau_21h45_22h30'] - ($stats['creneau_21h45_22h30']+$this->creneauxEntrees['21h45-22h30']);
-        $creneau_22h30_23h = $quotas['creneau_22h30_23h'] - ($stats['creneau_22h30_23h']+$this->creneauxEntrees['22h30-23h']);
-        return compact('soirees', 'repas', 'buffets', 'creneau_21h_21h45', 'creneau_21h45_22h30', 'creneau_22h30_23h');
+        return compact('soirees');
     }
 
     public static function parseGuestData($guest) {
@@ -329,12 +299,8 @@ class Reservation{
         if (isset($guest['sexe'])) $guest['sexe'] = intval($guest['sexe']);
         if (isset($guest['bracelet_id'])) $guest['bracelet_id'] = intval($guest['bracelet_id']);
             if (empty($guest['bracelet_id'])) $guest['bracelet_id'] = 0;
-        if (isset($guest['repas'])) $guest['repas'] = intval($guest['repas']);
-        if (isset($guest['buffet'])) $guest['buffet'] = intval($guest['buffet']);
-        if (isset($guest['tickets_boisson'])) $guest['tickets_boisson'] = intval($guest['tickets_boisson']);
         if (isset($guest['price'])) $guest['price'] = floatval($guest['price']);
-        if (isset($guest['plage_horaire_entrees']) && !in_array($guest['plage_horaire_entrees'], array_keys(\PayIcam\Participant::$plage_horaire_entrees)))
-            $guest['plage_horaire_entrees'] = '21h-21h45';
+
         return $guest;
     }
 

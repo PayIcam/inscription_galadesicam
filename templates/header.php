@@ -30,7 +30,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="<?= $RouteHelper->getPathFor() ?>">Gala des Icam 119</a>
+          <a class="navbar-brand" href="<?= $RouteHelper->getPathFor() ?>">Spring Festival</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
