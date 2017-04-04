@@ -33,10 +33,10 @@ $app->add(function ($request, $response, $next) {
                 return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
             }
             // On autorise les personnes de la promo organisatrice de pouvoir s'inscrire anyway
-            if (!empty($gingerUserCard->promo) && $gingerUserCard->promo==119) {
-                $canWeRegisterNewGuests = 1;
-                $canWeEditOurReservation = 1;
-            }
+            // if (!empty($gingerUserCard->promo) && $gingerUserCard->promo==119) {
+            //     $canWeRegisterNewGuests = 1;
+            //     $canWeEditOurReservation = 1;
+            // }
         }
     }
 

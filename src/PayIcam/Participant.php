@@ -63,6 +63,9 @@ class Participant {
 		'2017' => array('nbInvites' => 1,
 				'prixIcam' => array("soiree" => 15),
 				'prixInvite' => array("soiree" => 15)),
+		'Ingenieur' => array('nbInvites' => 1,
+				'prixIcam' => array("soiree" => 15),
+				'prixInvite' => array("soiree" => 15))
 	);
 
     public static $paiement = array('espece'=>'En espèces','CB'=>'Carte bancaire','cheque'=>'Par Chèque','Pumpkin'=>'Avec Pumpkin','PayIcam'=>'Avec PayIcam');
