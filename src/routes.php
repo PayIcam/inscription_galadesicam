@@ -24,20 +24,9 @@ $app->get('/about', function ($request, $response, $args) {
 function getStatsQuotas() {
     global $DB, $settings, $quotas;
     $stats = $DB->queryFirst("SELECT * FROM
-        (SELECT SUM( r.soirees ) soireesW,
-                SUM( r.repas ) repasW,
-                SUM( r.buffets ) buffetsW
+        (SELECT SUM( r.soirees ) soireesW
             FROM reservations_payicam AS r WHERE r.status = 'W') rW ,
-        -- (SELECT ifnull(SUM( r.soirees ), 0) soireesV, ifnull(SUM( r.repas ), 0) repasV, ifnull(SUM( r.buffets ), 0) buffetsV
-            -- FROM reservations_payicam AS r WHERE r.status = 'V') rV ,
-        (SELECT COUNT( id ) soireesG,
-                SUM( repas ) repasG,
-                SUM( buffet ) buffetsG,
-                count(CASE WHEN plage_horaire_entrees = '17h30-19h30' THEN 1 ELSE null END) creneau_17h30_19h30,
-                count(CASE WHEN plage_horaire_entrees = '19h30-20h' THEN 1 ELSE null END) creneau_19h30_20h,
-                count(CASE WHEN plage_horaire_entrees = '21h-21h45' THEN 1 ELSE null END) creneau_21h_21h45,
-                count(CASE WHEN plage_horaire_entrees = '21h45-22h30' THEN 1 ELSE null END) creneau_21h45_22h30,
-                count(CASE WHEN plage_horaire_entrees = '22h30-23h' THEN 1 ELSE null END) creneau_22h30_23h
+        (SELECT COUNT( id ) soireesG
             FROM guests) g ");
     foreach ($stats as $k => $v)
         $stats[$k] = intval($v);
@@ -49,7 +38,7 @@ $app->get('/', function ($request, $response, $args) {
 
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Accueil');
-    $emailContactSpring = $this->get('settings')['emailContactSpring'];
+    $emailContact = $this->get('settings')['emailContact'];
 
     // Sample log message
     // $this->logger->info("Slim-Skeleton '/' index");
@@ -86,12 +75,11 @@ $app->get('/', function ($request, $response, $args) {
     }
     $userResaCount = count($UserReservation);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId
-
-    extract(getStatsQuotas());//stats & quotas
+    //extract(getStatsQuotas());//stats & quotas
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
     $editLink = $this->router->pathFor('edit');
-    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'newResa', 'UserGuests', 'stats', 'quotas', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactSpring', 'editLink', 'RouteHelper', $args));
+    $this->renderer->render($response, 'home.php', compact('userResaCount', 'UserReservation', 'newResa', 'UserGuests', 'stats', 'quotas', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContact', 'editLink', 'RouteHelper', $args));
 
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('home');
@@ -99,10 +87,10 @@ $app->get('/', function ($request, $response, $args) {
 ////////////////////////////////////////////
 // Routes pour l'édition des réservations //
 ////////////////////////////////////////////
-function secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $app, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactSpring) {
+function secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $app, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContact) {
     if (!$Auth->isLogged() || empty($status->user) || empty($status->application)) {
         if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']);
-        $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
+        $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Spring Festival");
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('about'));
     }
     if (count($UserWaitingResa) >= 1) {$count = count($UserWaitingResa);
@@ -111,17 +99,17 @@ function secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $app
     }
     if (count($UserReservation) > 1) {
         $app->flash->addMessage('danger', 'Nous avons plusieurs réservations enregistrées à votre email...<br>
-            <a href="mailto:'.$emailContactSpring.'" title="'.$emailContactSpring.'">Contactez nous</a> svp !');
+            <a href="mailto:'.$emailContact.'" title="'.$emailContact.'">Contactez nous</a> svp !');
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     } elseif (!$canWeRegisterNewGuests && count($UserReservation) == 0) {
-        $app->flash->addMessage('warning', 'De nouvelles réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactSpring.'" title="'.$emailContactSpring.'">Gala</a>');
+        $app->flash->addMessage('warning', 'De nouvelles réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContact.'" title="'.$emailContact.'">Spring</a>');
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     } elseif (!$canWeEditOurReservation && $canWeRegisterNewGuests && count($UserReservation) == 1) {
         // On a pas le droit de modifier les infos que l'on a soumis, par contre on peut qd mm ajouter de nouveaux invités!
-        $app->flash->addMessage('warning', 'Les modifications des réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactSpring.'" title="'.$emailContactSpring.'">Gala</a>');
+        $app->flash->addMessage('warning', 'Les modifications des réservations ne sont plus autorisées.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContact.'" title="'.$emailContact.'">Spring</a>');
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     } elseif (!$canWeEditOurReservation && !$canWeRegisterNewGuests && count($UserReservation) == 1) {
-        $app->flash->addMessage('warning', 'Les inscriptions sont closes, on se retrouve au Gala.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContactSpring.'" title="'.$emailContactSpring.'">Gala</a>');
+        $app->flash->addMessage('warning', 'Les inscriptions sont closes, on se retrouve au Spring.<br> Si vous avez un problème, vous pouvez encore contacter le <a href="mailto:'.$emailContact.'" title="'.$emailContact.'">Spring</a>');
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('home'));
     }
     return true;
@@ -162,8 +150,6 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
             'paiement' => 'PayIcam',
             'inscription' => 0,
             'price' => 0,
-            'repas' => 0,
-            'buffet' => 0,
             'tickets_boisson' => 0,
             'plage_horaire_entrees' => '',
             'image' => $gingerUserCard->img_link
@@ -173,12 +159,11 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
     // var_dump($prixPromo['nbInvites']);
     // var_dump(count($UserGuests));
     if ($prixPromo['nbInvites'] - count($UserGuests) > 0) {
-        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0, 'plage_horaire_entrees' => '');
+        $emptyUser = array('price' => 0, 'tickets_boisson' => 0, 'is_icam' => 0, 'plage_horaire_entrees' => '');
         for ($i=0; $i < ($prixPromo['nbInvites'] - count($UserGuests) +1); $i++) {
             // echo "<p>".$i."</p>";
             $UserGuests[] = $emptyUser;
-        }
-        $emptyUser['repas'] = 1; // Pour montrer que le tableau en php ne se comporte pas comme un objet comme dans python ou js.
+        }// Pour montrer que le tableau en php ne se comporte pas comme un objet comme dans python ou js.
     }
     $dataResaForm = array('resa' => array_merge($UserReservation, array('invites'=>$UserGuests)));
     return compact('UserGuests', 'UserReservation', 'UserId', 'dataResaForm');
@@ -189,7 +174,7 @@ $app->get('/edit', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
-    $emailContactSpring = $this->get('settings')['emailContactSpring'];
+    $emailContact = $this->get('settings')['emailContact'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
 
@@ -201,7 +186,7 @@ $app->get('/edit', function ($request, $response, $args) {
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
 
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
-    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactSpring);
+    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContact);
     if ($retourSecure !== true) return $retourSecure;
 
     // On continue
@@ -221,7 +206,7 @@ $app->get('/edit', function ($request, $response, $args) {
 
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
-    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactSpring', 'editLink', 'Form', 'prixPromo', 'gingerUserCard', $args));
+    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContact', 'editLink', 'Form', 'prixPromo', 'gingerUserCard', $args));
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('edit');
 $app->get('/edit/', function ($request, $response, $args) {
@@ -277,8 +262,6 @@ function getBoolIntValues($field, $newResa, $curResa, $price=false) {
 }
 function getPrice($resa, $typeUser, $prixPromo) {
     $prix = $prixPromo[$typeUser]['soiree'];
-    $prix += ($resa['repas'])?$prixPromo[$typeUser]['repas']:0;
-    $prix += ($resa['buffet'])?$prixPromo[$typeUser]['buffet']:0;
     $prix += ($resa['tickets_boisson'])?$resa['tickets_boisson'] * 0.9 :0;
     return $prix;
 }
@@ -292,8 +275,6 @@ function getIcamData($gingerUserCard, $prixPromo, $resa, $oldResa="") {
         'promo' => $gingerUserCard->promo,
         'email' => $gingerUserCard->mail,
         'sexe' => $gingerUserCard->sexe,
-        'repas' => getBoolIntValues('repas', $resa, $oldResa, $prixPromo['prixIcam']['repas']),
-        'buffet' => getBoolIntValues('buffet', $resa, $oldResa, $prixPromo['prixIcam']['buffet']),
         'tickets_boisson' => intval($resa['tickets_boisson']),
         'plage_horaire_entrees' => $resa['plage_horaire_entrees'],
         'image' => $gingerUserCard->img_link
@@ -309,8 +290,6 @@ function getGuestData($guest, $prixPromo, $oldResa="") {
         'is_icam' => 0,
         'paiement' => $guest['paiement'],
         'sexe' => guessSexe($guest['prenom']),
-        'repas' => getBoolIntValues('repas', $guest, $oldResa, $prixPromo['prixInvite']['repas']),
-        'buffet' => getBoolIntValues('buffet', $guest, $oldResa, $prixPromo['prixInvite']['buffet']),
         'plage_horaire_entrees' => $guest['plage_horaire_entrees'],
         'tickets_boisson' => intval($guest['tickets_boisson'])
     );
@@ -319,8 +298,6 @@ function getGuestData($guest, $prixPromo, $oldResa="") {
     return $guestData;
 }
 function sumUpNewOptions($newResa, $curResa, $options) {
-    $prix += ($newResa['repas'])?$prixPromo[$typeUser]['repas']:0;
-    $prix += ($newResa['buffet'])?$prixPromo[$typeUser]['buffet']:0;
     $prix += ($newResa['tickets_boisson'])?$resa['tickets_boisson'] * 0.9 :0;
     return $options;
 }
@@ -340,7 +317,7 @@ $app->post('/edit', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
-    $emailContactSpring = $this->get('settings')['emailContactSpring'];
+    $emailContact = $this->get('settings')['emailContact'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
 
@@ -352,7 +329,7 @@ $app->post('/edit', function ($request, $response, $args) {
     $UserWaitingResa = $DB->query('SELECT * FROM reservations_payicam WHERE login = :login AND status = "W"', array('login' => $mailPersonne));
 
     //Sécurité, on vérifie plusieurs cas où il faudrait rediriger l'utilisateur
-    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactSpring);
+    $retourSecure = secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $this, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContact);
     if ($retourSecure !== true) return $retourSecure;
 
     // On continue
@@ -423,11 +400,6 @@ $app->post('/edit', function ($request, $response, $args) {
         if ($icamData['price'] > $UserReservation['price'] ) {
             echo "<p>Oh on a de nouvelles options $$ !</p>";
             $updatedFields = getUpdatedFields($icamData, $UserReservation);
-            if (in_array('repas', $updatedFields) || in_array('buffet', $updatedFields) || in_array('tickets_boisson', $updatedFields)) {
-                $Reservation->addGuest($icamData, $updatedFields, $UserReservation['price']);
-            } else {
-                echo "<p>Euhm. vous avez un prix spécial ! ça devrait être".$icamData['price']." au lieu de ".$UserReservation['price']."</p>";
-            }
         } else {
             $updatedFields = getUpdatedFields($icamData, $UserReservation);
             if (!empty($updatedFields)) {
@@ -456,11 +428,6 @@ $app->post('/edit', function ($request, $response, $args) {
                 if ($guestData['price'] > $UserGuests[$k]['price'] ) {
                     echo "<p>Oh on a de nouvelles options $$ !</p>";
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
-                    if (in_array('repas', $updatedFields) || in_array('buffet', $updatedFields) || in_array('tickets_boisson', $updatedFields)) {
-                        $Reservation->addGuest($guestData, $updatedFields, $UserGuests[$k]['price']);
-                    } else {
-                        echo "<p>Euhm. vous avez un prix spécial ! ça devrait être".$guestData['price']." au lieu de ".$UserGuests[$k]['price']."</p>";
-                    }
                 } else {
                     $updatedFields = getUpdatedFields($guestData, $UserGuests[$k]);
                     if (!empty($updatedFields)) {
@@ -504,7 +471,7 @@ $app->post('/edit', function ($request, $response, $args) {
                 $data['id'] = $guest['id'];
                 $DB->query("UPDATE guests SET ".implode(', ', $updatedFields)." WHERE id = :id", $data);
             }
-            $this->flash->addMessage('success', 'Les champs ont bien été mit à jours.');//implode('<br>', $statusFormSubmition['updateFields']['msg'])
+            $this->flash->addMessage('success', 'Les champs ont bien été mis à jour.');//implode('<br>', $statusFormSubmition['updateFields']['msg'])
             if (!isset($statusFormSubmition['updateOptions']) && !isset($statusFormSubmition['insertGuest'])) {
                 unset($_SESSION['newResa']);
                 return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
@@ -531,19 +498,11 @@ $app->post('/edit', function ($request, $response, $args) {
         extract(getStatsQuotas());// stats, quotas
         echo "<p>stats gala:".json_encode($stats)."</p>";
         echo "<p>quotas:".json_encode($quotas)."</p>";
-        echo "résa soirees".$Reservation->soirees;
-        echo ", résa repas".$Reservation->repas;
-        echo ", résa buffets".$Reservation->buffets;
-        echo ", Reservation > creneauxEntrees".json_encode($Reservation->creneauxEntrees);
+        echo "résa soirees".$Reservation->soitempe.json_encode($Reservation->creneauxEntrees);
         $placesRestantes = $Reservation->getQuotasRestant($stats, $quotas);
         echo "<p>places restantes:".json_encode($placesRestantes)."</p>";
 
-        if (   ($Reservation->soirees > 0 && $placesRestantes['soirees'] >= 0 || $Reservation->soirees == 0)
-            && ($Reservation->repas > 0 && $placesRestantes['repas'] >= 0 || $Reservation->repas == 0)
-            && ($Reservation->buffets > 0 && $placesRestantes['buffets'] >= 0 || $Reservation->buffets == 0)
-            && ($Reservation->creneauxEntrees['21h-21h45'] > 0 && $placesRestantes['creneau_21h_21h45'] >= 0 || $Reservation->creneauxEntrees['21h-21h45'] == 0)
-            && ($Reservation->creneauxEntrees['21h45-22h30'] > 0 && $placesRestantes['creneau_21h45_22h30'] >= 0 || $Reservation->creneauxEntrees['21h45-22h30'] == 0)
-            && ($Reservation->creneauxEntrees['22h30-23h'] > 0 && $placesRestantes['creneau_22h30_23h'] >= 0 || $Reservation->creneauxEntrees['22h30-23h'] == 0)
+        if (  ($Reservation->soirees > 0 && $placesRestantes['soirees'] >= 0 || $Reservation->soirees == 0)
         ) {
             $Reservation->save();
             return $response->withStatus(303)->withHeader('Location', $Reservation->tra_url_payicam);
@@ -553,17 +512,7 @@ $app->post('/edit', function ($request, $response, $args) {
             $msg = "";
             $msg .= "<p>Votre réservation était prête à être soumise... <br><strong>MAIS</strong> vous n'avez pas été assez vite et certains des quotas ont été atteints:</p>";
             if ($placesRestantes['soirees'] < 0) {
-                $msg .= "<p>Plus de places à la soirée</p>";
-            }if ($placesRestantes['repas'] < 0) {
-                $msg .= "<p>Plus de places pour le repas</p>";
-            }if ($placesRestantes['buffets'] < 0) {
-                $msg .= "<p>Plus de places pour la conférence</p>";
-            }if ($placesRestantes['creneau_21h_21h45'] < 0) {
-                $msg .= "<p>Plus de places pour le créneau 21h - 21h45</p>";
-            }if ($placesRestantes['creneau_21h45_22h30'] < 0) {
-                $msg .= "<p>Plus de places pour le créneau 21h45 - 22h30</p>";
-            }if ($placesRestantes['creneau_22h30_23h'] < 0) {
-                $msg .= "<p>Plus de places pour le créneau 22h - 0_23h</p>";
+                $msg .= "<p>Plus de places à la soirée</p>".$placesRestantes['soirees'];
             }
             $this->flash->addMessage('danger', $msg);
             echo $msg;
@@ -586,7 +535,7 @@ $app->get('/cancel', function ($request, $response, $args) {
     if (count($UserWaitingResa) >= 1) {
         $DB->query("UPDATE reservations_payicam SET status = 'A' WHERE login = :login AND status = 'W'", ['login'=>$mailPersonne]);
     }
-    $this->flash->addMessage('info', "Vous avez bien annulé votre réservation au Gala");
+    $this->flash->addMessage('info', "Vous avez bien annulé votre réservation au Spring");
     return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('home'));
 })->setName('cancel');
 
@@ -599,7 +548,7 @@ $app->get('/callback', function ($request, $response, $args) {
         foreach ($UserWaitingResa as $resa) {
             try {
                 $transaction = $payutcClient->getTransactionInfo(array("fun_id" => $fun_id, "tra_id" => $resa['tra_id_payicam']));
-                if($transaction->status != $resa['status']) {
+                if ($transaction->status != $resa['status']) {
                     $Reservation = new \PayIcam\Reservation($resa, null, null, $this->get('settings')['articlesPayIcam'], $this);
                     $Reservation->updateStatus($transaction->status);
                     if ($transaction->status == 'V') {
@@ -608,9 +557,6 @@ $app->get('/callback', function ($request, $response, $args) {
                     } else {
                         $this->flash->addMessage('info', "Le status de votre réservation a été mis à jour de ".$curResa['status'].' vers '.$transaction->status);
                     }
-
-                    $data = ['status'=>$transaction->status, 'date_paiement'=>date("Y-m-d H:i:s"), 'id'=>$resa['id']];
-                    $DB->query("UPDATE reservations_payicam SET status = :status, date_paiement = :date_paiement WHERE id = :id", $data);
                     if ($Auth->getUserField('email') == $resa['login']) {
                         $this->flash->addMessage('info', "Le status de votre réservation a été mis à jour de ".$resa['status'].' vers '.$transaction->status);
                     }

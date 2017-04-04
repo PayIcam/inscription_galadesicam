@@ -15,8 +15,8 @@ return [
         ],
 
         'public_path' => 'public/',
-        'webSiteTitle' => 'Inscriptions Gala des Icam 119',
-        'emailContactGala' => 'galadesicam@icam.fr',
+        'webSiteTitle' => 'Spring Festival',
+        'emailContact' => 'spring.icam@gmail.com',
 
         'PayIcam' => [
             'payutc_server' => 'http://payicam.dev/server/web/', // URL du serveur payutc (avec le / final)
@@ -33,20 +33,12 @@ return [
         ],
 
         'quotas' => [
-            'soiree'=>2500,
-            'repas'=>300,
-            'conference'=>280
+            'soiree'=>800
         ],
-        'fun_id'=>5,
+        'fun_id'=>6,
 
         'articlesPayIcam' => [
-            ['id' => 175, 'fun_id'=>5, 'price' => 20, 'quotas'=>2500, 'type' => 'soiree', 'cat_id'=>174, 'nom' => 'Soirée prix Icam'],
-            ['id' => 176, 'fun_id'=>5, 'price' => 22, 'quotas'=>2500, 'type' => 'soiree', 'cat_id'=>174, 'nom' => 'Soirée prix ingé'],
-            ['id' => 177, 'fun_id'=>5, 'price' => 0, 'quotas'=>2500, 'type' => 'soiree', 'cat_id'=>174, 'nom' => 'Soirée prix VIP'],
-            ['id' => 178, 'fun_id'=>5, 'price' => 20, 'quotas'=>300, 'type' => 'repas', 'cat_id'=>174, 'nom' => 'Repas'],
-            ['id' => 179, 'fun_id'=>5, 'price' => 3, 'quotas'=>280, 'type' => 'buffet', 'cat_id'=>174, 'nom' => 'Conférence prix icam'],
-            ['id' => 180, 'fun_id'=>5, 'price' => 3, 'quotas'=>280, 'type' => 'buffet', 'cat_id'=>174, 'nom' => 'Conférence prix ingé'],
-            ['id' => 181, 'fun_id'=>5, 'price' => 10, 'quotas'=>9999, 'type' => 'tickets_boisson', 'cat_id'=>174, 'nom' => '10 tickets boisson']
+            ['id' => 71, 'fun_id'=>6, 'price' => 15, 'quotas'=>800, 'type' => 'soiree', 'cat_id'=>70, 'nom' => 'Inscription en ligne']
         ]
 
     ]

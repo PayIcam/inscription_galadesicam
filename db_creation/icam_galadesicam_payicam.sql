@@ -28,8 +28,6 @@ CREATE TABLE IF NOT EXISTS `guests_payicam` (
   `reservation_id` int(11) NOT NULL,
   `nom` varchar(155) DEFAULT NULL,
   `prenom` varchar(155) DEFAULT NULL,
-  `repas` tinyint(1) DEFAULT '0',
-  `buffet` tinyint(1) NOT NULL,
   `is_icam` tinyint(1) DEFAULT NULL,
   `promo` varchar(45) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
@@ -55,8 +53,6 @@ DROP TABLE IF EXISTS `reservations_payicam`;
 CREATE TABLE IF NOT EXISTS `reservations_payicam` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `soirees` int(11) NOT NULL DEFAULT '0',
-  `repas` int(11) NOT NULL DEFAULT '0',
-  `buffets` int(11) NOT NULL DEFAULT '0',
   `articles` text NOT NULL,
   `date_option` datetime NOT NULL,
   `date_paiement` datetime NOT NULL,
