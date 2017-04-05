@@ -148,7 +148,7 @@ class Auth{
             return false;
     }
     function isAdmin() { //vérification que l'utilisateur loggué est administrateur
-        if ($this->getUserField('role') == 'admin')
+        if ($this->getUserField('role') == 'admin' || $this->getUserField('role') == 'super-admin')
             return true;
         else
             return false;

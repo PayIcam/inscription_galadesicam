@@ -18,6 +18,58 @@ $app->get('/about', function ($request, $response, $args) {
     return $this->renderer->render($response, 'footer.php', compact('Auth', 'RouteHelper', $args));
 })->setName('about');
 
+// Page admin configuration
+$app->get('/admin_config', function ($request, $response, $args) {
+    global $DB, $Auth, $payutcClient;
+
+    if (!$Auth->isAdmin())
+        return $response->withStatus(301)->withHeader('Location', $this->router->pathFor('home'));
+
+    $flash = $this->flash;
+    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Admin Configuration');
+
+    $res = $DB->query('SELECT * FROM configs');
+    $configs = [];
+    foreach ($res as $row)
+        $configs[$row['name']] = $row['value'];
+
+    $editLink = $this->router->pathFor('admin_config');
+    $this->renderer->render($response, 'header.php', compact('Auth', 'flash', 'RouteHelper', $args));
+    $this->renderer->render($response, 'admin_config.php', compact('Auth', 'RouteHelper', 'configs', 'editLink', $args));
+    return $this->renderer->render($response, 'footer.php', compact('Auth', 'RouteHelper', $args));
+})->setName('admin_config');
+$app->post('/admin_config', function ($request, $response, $args) {
+    global $DB, $Auth, $payutcClient;
+
+    if (!$Auth->isAdmin())
+        return $response->withStatus(301)->withHeader('Location', $this->router->pathFor('home'));
+
+    $flash = $this->flash;
+    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Admin Configuration');
+
+    $res = $DB->query('SELECT * FROM configs');
+    $configs = [];
+    foreach ($res as $row)
+        $configs[$row['name']] = $row['value'];
+
+    $update = [];
+    $post = $request->getParsedBody();
+    foreach ($configs as $key => $value) {
+        if (in_array($key, ['authentification', 'maintenance', 'websitename']))
+            continue;
+        if (isset($post[$key])) {
+            if (in_array($key, ['authentification', 'inscriptions', 'maintenance', 'modifications_places'])) {
+                $post[$key] = !empty($post[$key])*1;
+                $value *= 1;
+            }
+            if ($post[$key] != $value)
+                $DB->query("UPDATE configs SET value = :value WHERE name = :key", ['key' => $key, 'value' => $post[$key]]);
+        } else if (in_array($key, ['authentification', 'inscriptions', 'maintenance', 'modifications_places']) && $value*1 != 0)
+            $DB->query("UPDATE configs SET value = :value WHERE name = :key", ['key' => $key, 'value' => 0]);
+    }
+    return $response->withStatus(301)->withHeader('Location', $this->router->pathFor('admin_config'));
+})->setName('admin_config');
+
 /////////////////
 // Espace Icam //
 /////////////////
