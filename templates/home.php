@@ -80,7 +80,7 @@
     <?php } // endelse ?>
     <?php endif ?>
 
-// <?php } ?>
+<?php } ?>
 <?php if ($userResaCount == 1 && !empty($newResa)): ?>
     <hr>
 <?php endif ?>
