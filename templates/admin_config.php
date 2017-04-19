@@ -21,3 +21,6 @@
         <button class="btn btn-primary" type="submit">Sauvegarder</button>
     </div>
 </form>
+
+<h2>Export invités</h2>
+<a href="<?= $exportLink ?>" class="btn btn-primary">Export participants</a>
