@@ -33,10 +33,12 @@ $app->get('/admin_config', function ($request, $response, $args) {
     foreach ($res as $row)
         $configs[$row['name']] = $row['value'];
 
+    $countParticipants = $DB->queryFirst('SELECT count(*) total, count(case when is_icam = 1 then 1 else null end) icam, count(case when is_icam != 1 then 1 else null end) guest FROM guests');
+
     $editLink = $this->router->pathFor('admin_config');
     $exportLink = $this->router->pathFor('admin_export_participants');
     $this->renderer->render($response, 'header.php', compact('Auth', 'flash', 'RouteHelper', $args));
-    $this->renderer->render($response, 'admin_config.php', compact('Auth', 'RouteHelper', 'configs', 'editLink', 'exportLink', $args));
+    $this->renderer->render($response, 'admin_config.php', compact('Auth', 'RouteHelper', 'configs', 'editLink', 'exportLink', 'countParticipants', $args));
     return $this->renderer->render($response, 'footer.php', compact('Auth', 'RouteHelper', $args));
 })->setName('admin_config');
 $app->get('/admin_export_participants', function ($request, $response, $args) {

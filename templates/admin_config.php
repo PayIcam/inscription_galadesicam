@@ -22,5 +22,5 @@
     </div>
 </form>
 
-<h2>Export invités</h2>
-<a href="<?= $exportLink ?>" class="btn btn-primary">Export participants</a>
+<h2 class="page-header">Export <?= $countParticipants['total'] ?> participants <small><?= $countParticipants['icam'] ?> icam, <?= $countParticipants['guest'] ?> invités</small></h2>
+<a href="<?= $exportLink ?>" class="btn btn-info">Export participants</a>
