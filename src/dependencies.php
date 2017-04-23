@@ -57,10 +57,7 @@ $canWeRegisterNewGuests = (boolean)$configsDB['inscriptions'];
 $canWeEditOurReservation = (boolean)$configsDB['modifications_places'];
 
 $quotas = array(
-    'soiree' => (int)$configsDB['quota_soirees'],
-    'creneau_21h_21h45' => (int)$configsDB['quota_entree_21h_21h45'],
-    'creneau_21h45_22h30' => (int)$configsDB['quota_entree_21h45_22h30'],
-    'creneau_22h30_23h' => (int)$configsDB['quota_entree_22h30_23h']
+    'soiree' => (int)$configsDB['quota_soirees']
 );
 
 // Sécurité que des icam

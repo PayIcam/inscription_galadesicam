@@ -39,6 +39,9 @@
           </ul>
           <?php if ($Auth->isLogged()): ?>
           <ul class="nav navbar-nav navbar-right">
+            <?php if ($Auth->isAdmin()): ?>
+            <li><a href="<?= $RouteHelper->getPathFor('admin_config') ?>">Admin</a></li>
+            <?php endif ?>
             <li><a href="<?= $RouteHelper->getPathFor('logout') ?>">Déconnexion</a></li>
           </ul>
           <p class="navbar-text navbar-right"><em><?= $Auth->getUserField('firstname') ?> <?= $Auth->getUserField('lastname') ?></em></p>
