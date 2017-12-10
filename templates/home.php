@@ -50,7 +50,7 @@
         Vous n'avez pas encore de réservation,<br>
         mais vous pouvez encore vous enregistrer:
     </p>
-    <p><a href="<?= $editLink ?>" class="btn btn-primary">S'inscrire au Gala</a></p>
+    <p><a data-toggle="modal" data-target="#myModal" class="btn btn-primary">S'inscrire au Gala</a></p>
 <?php } elseif ($userResaCount == 0) { ?>
     <p>
         Vous n'avez pas eu le temps de prendre votre réservation ...<br>
@@ -61,6 +61,58 @@
     <p>Nous avons plusieurs réservations enregistrées à votre email...<br>
         <a href="mailto:<?= $emailContactGala ?>">Contactez nous</a> svp !</p>
 <?php } ?>
+<!-- MODAL-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Conditions de vente</h4>
+      </div>
+      <div class="modal-body">
+        <h5>Après paiement :</h5>    
+    <p> AUCUN REMBOURSEMENT N'EST POSSIBLE APRES PAIEMENT. <br>
+
+    Il est possible d'acheter des tickets boissons par carte bleue le jour du gala. <br> </p>
+
+
+
+    <h5>Avant la soirée :</h5>
+
+    <p>Il vous sera transmis un bracelet nominatif après votre inscription au gala. Vous devrez venir le chercher à une pause auprès de membres de la promotion 120 dans un stand prévu à cet effet. <br>
+
+    Il est obligatoire de venir chercher ce bracelet et vous présenter à notre promotion après le paiement sur PayIcam. <br>
+
+    Il est totalement interdit de changer d'invité sans en informer le Gala. Si votre invité n'est pas sur la liste de participants au Gala, même s'il a un bracelet, il sera refusé.</p>
+
+
+
+    <h5>Conditions d'entrée à la soirée :</h5>  
+
+    <p>Vous êtes obligés de vous présenter à votre créneau attribué, sinon vous ne pourrez rentrer. Le Gala se réserve le droit de ne pas vous accepter si vous vous présentez au mauvais créneau.<br>
+
+    Une pièce d'identité est nécessaire pour entrer au Gala. Vous ne pourrez rentrer si vous n'avez pas 18 ans.<br>
+
+    Vous êtes obligés de quitter le site du gala après la conférence, et vous n'y entrerez de nouveau qu'à votre créneau attribué. Toute sortie du Gala après 21 heures est définitive.</p>
+
+
+
+    <h5>Sécurité :</h5>
+
+    <p>Le Gala se réserve le droit de ne pas vous accepter si vous ou vos invités vous présentez en état d'ébriété.<br>
+
+    Le Gala se réserve le droit de vous expulser de la soirée si votre comportement n'est pas adapté. Des vigiles seront présents et veilleront à cela.</p>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" href="http://www.villardieres.com/">Je refuse</button>
+        <button type="button" href="<?= $editLink ?>" class="btn btn-primary">J'accepte les conditions</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- FIN MODAL-->
+
 <?php if(!empty($newResa)){ ?>
     <h2 class="page-header">
         Votre nouvelle réservation:

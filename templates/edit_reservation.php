@@ -45,7 +45,7 @@
 
 
                     <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
-                        '<div class="checkbox">Vous avez réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree[$UserReservation['plage_horaire_entrees']]).'</div>' : ''; ?>
+                        '<div class="checkbox">Vous avez réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].'</div>' : ''; ?>
                 </div>
             </div>
             <?= (isset($UserReservation['tickets_boisson']) && $UserReservation['tickets_boisson']) ? '' :
@@ -86,7 +86,7 @@
 
 
                                 <?= (isset($UserGuests[$i]['plage_horaire_entrees']) && $UserGuests[$i]['plage_horaire_entrees']) ?
-                                    '<div class="checkbox">Vous avez réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree[$UserGuests[$i]['plage_horaire_entrees']]).'</div>' : ''; ?>
+                                    '<div class="checkbox">Vous avez réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserGuests[$i]['plage_horaire_entrees']].'</div>' : ''; ?>
                             </div>
                         </div>
                         <?= (isset($UserGuests[$i]['tickets_boisson']) && $UserGuests[$i]['tickets_boisson']) ? '' :
@@ -215,7 +215,7 @@ angular.module('editGuestApp', [])
         if (user.buffet == true || parseInt(user.buffet))
             options.push({'nom':'Conférence', 'price':$scope.prixPromo[typeUser]['buffet']});
         if (parseInt(user.tickets_boisson))
-            options.push({'nom':'Tickets boisson', 'price':parseInt(user.tickets_boisson)*0.9});
+            options.push({'nom':'Tickets boisson', 'price':parseInt(user.tickets_boisson)});
         return options;
     }
 
