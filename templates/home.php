@@ -152,7 +152,7 @@
         <dt>Prix payé:</dt>
         <dd><?= $UserReservation['price']; ?> <em><small>par <?= $UserReservation['paiement'] ?> le <?= substr($UserReservation['inscription'], 0, 10) ?></small></em></dd>
         <dt>Plage horaire d'entrée :</dt>
-        <dd><?= $UserReservation['plage_horaire_entrees'] ?></dd>
+        <dd><?= corriger_horaire($UserReservation['plage_horaire_entrees']) ?></dd>
         <dt>Numéro de bracelet:</dt>
         <dd><?= ($UserReservation['bracelet_id'])?$UserReservation['bracelet_id']:'<em>Vous avez bien réservé votre place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
     </dl>
@@ -175,7 +175,7 @@
                 <dt>Prix payé:</dt>
                 <dd><?= $guest['price']; ?> <em><small>par <?= $guest['paiement'] ?> le <?= substr($UserReservation['inscription'], 0, 10) ?></small></em></dd>
                 <dt>Plage horaire d'entrée :</dt>
-                <dd><?= $guest['plage_horaire_entrees'] ?></dd>
+                <dd><?= corriger_horaire($guest['plage_horaire_entrees']) ?></dd>
                 <dt>Numéro de bracelet:</dt>
                 <dd><?= ($guest['bracelet_id'])?$guest['bracelet_id']:'<em>Vous avez bien réservé sa place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
             </dl>
