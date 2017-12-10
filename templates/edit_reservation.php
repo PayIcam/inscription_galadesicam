@@ -49,7 +49,7 @@
                 </div>
             </div>
             <?= (isset($UserReservation['tickets_boisson']) && $UserReservation['tickets_boisson']) ? '' :
-                $Form->select('resa[tickets_boisson]', 'Tickets boisson : ', array('ng-model'=>'resa.tickets_boisson', 'data'=>array(0=>'0 tickets' ,10=>'10 tickets 10€', 20=>'20 tickets 20€', 30=>'30 tickets 30€', 40=>'40 tickets 40€', 50=>'50 tickets 50€'))); // On veut pas afficher les tickets boissons si il en a déjà pris ! ?>
+                $Form->select('resa[tickets_boisson]', 'Tickets boisson : ', array('ng-model'=>'resa.tickets_boisson', 'data'=>array(0=>0 ,10=>'10 tickets 10€', 20=>'20 tickets 20€', 30=>'30 tickets 30€', 40=>'40 tickets 40€', 50=>'50 tickets 50€'))); // On veut pas afficher les tickets boissons si il en a déjà pris ! ?>
             <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ? '' :
                 $Form->select('resa[plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort))); ?>
         </div>
@@ -121,7 +121,7 @@
                                     <?= (isset($UserGuests[$j]['tickets_boisson']) && $UserGuests[$j]['tickets_boisson']) ?
                                         '<div class="checkbox">Vous avez déjà réservé '.$UserGuests[$j]['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserGuests[$j]['tickets_boisson'].'€</span></div>' : ''; ?>
 
-                                        
+
                                     <?= (isset($UserGuests[$j]['plage_horaire_entrees']) && $UserGuests[$j]['plage_horaire_entrees']) ?
                                         '<div class="checkbox">Vous avez réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree[$UserGuests[$j]['plage_horaire_entrees']]).'</div>' : ''; ?>
                                 </div>
@@ -170,6 +170,10 @@
 <!-- <pre><?php // var_dump($Form->data); ?></pre> -->
 <!-- <pre><?php // var_dump($Form->data['resa']['invites']); ?></pre> -->
 <!-- <pre><?php // var_dump($Form); ?></pre> -->
+<?php
+    function corriger_horaire($fakehoraire){
+        $vraihoraire=array( "21h-21h45"=> "21h-21h35: 1er créneau", "21h45-22h30"=> "21h50-22h25: 2ème créneau", "22h30-23h"=> "22h40-23h10: 3ème créneau"); return $vraihoraire;}
+?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script>
@@ -201,13 +205,6 @@ angular.module('editGuestApp', [])
         setCheckBoxToTrueFalse($scope.resa.invites[i]);
     };
 
-
-    function corriger_horaire($fakehoraire){
-        if $fakehoraire == '21h-21h45: 1er créneau' {$vraihoraire = '21h-21h35: 1er créneau'}
-        if $fakehoraire == '21h45-22h30: 2ème créneau' {$vraihoraire = '21h50-22h25: 2ème créneau'}
-        if $fakehoraire == '22h30-23h: 3ème créneau' {$vraihoraire = '22h40-21h10: 3ème créneau'}
-    return $vraihoraire
-    }
 
     function getOptions(user, typeUser){
         options = [];

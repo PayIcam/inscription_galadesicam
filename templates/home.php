@@ -114,7 +114,7 @@
                 </ul></dd>
                 <dt>Prix payé:</dt>
                 <dd><?= $guest['price']; ?> <em><small>par <?= $guest['paiement'] ?> le <?= substr($newResa->date_option, 0, 10) ?></small></em></dd>
-                <dt>Plage horaire d'entrée :</dt>
+                <dt>Horaire d'entrée :</dt>
                 <dd><?= corriger_horaire($guest['plage_horaire_entrees']) ?></dd>
                 <dt>Numéro de bracelet:</dt>
                 <dd><?= ($guest['bracelet_id'])?$guest['bracelet_id']:'<em>Vous avez bien réservé sa place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
@@ -187,8 +187,8 @@
 <?php } // fin réservation 
 
 function corriger_horaire($fakehoraire){
-        if $fakehoraire == '21h-21h45' {$vraihoraire = '21h-21h35'}
-        if $fakehoraire == '21h45-22h30' {$vraihoraire = '21h50-22h25'}
-        if $fakehoraire == '22h30-23h' {$vraihoraire = '22h40-21h10'}
-    return $vraihoraire
+        if ($fakehoraire == '21h-21h45' ){$vraihoraire = '21h-21h35';}
+        if ($fakehoraire == '21h45-22h30') {$vraihoraire = '21h50-22h25';}
+        if ($fakehoraire == '22h30-23h' ){$vraihoraire = '22h40-23h10';}
+    return $vraihoraire;
     }?>
