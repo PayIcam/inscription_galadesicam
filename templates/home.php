@@ -4,14 +4,8 @@
         <h3>Horaires:</h3>
         <ul>
             <li>
-                17h30-19h30: Conférence
+                17h30-19h: Conférence
                 <?php if ($quotas['buffet'] - $stats['buffetsG'] <= 0): ?>
-                    <span class="label label-danger">complet</span>
-                <?php endif ?>
-            </li>
-            <li>
-                19h30-20h: Diner
-                <?php if ($quotas['repas'] - $stats['repasG'] <= 0): ?>
                     <span class="label label-danger">complet</span>
                 <?php endif ?>
             </li>
@@ -22,19 +16,19 @@
                 <?php endif ?>
             </div>
             <li>
-                21h-21h45: 1er créneau
+                21h-21h35: 1er créneau
                 <?php if ($quotas['creneau_21h_21h45'] - $stats['creneau_21h_21h45'] <= 0): ?>
                     <span class="label label-danger">complet</span>
                 <?php endif ?>
             </li>
             <li>
-                21h45-22h30: 2ème créneau
+                21h50-22h25: 2ème créneau
                 <?php if ($quotas['creneau_21h45_22h30'] - $stats['creneau_21h45_22h30'] <= 0): ?>
                     <span class="label label-danger">complet</span>
                 <?php endif ?>
             </li>
             <li>
-                22h30-23h: 3ème créneau
+                22h40-23h10: 3ème créneau
                 <?php if ($quotas['creneau_22h30_23h'] - $stats['creneau_22h30_23h'] <= 0): ?>
                     <span class="label label-danger">complet</span>
                 <?php endif ?>
@@ -121,7 +115,7 @@
                 <dt>Prix payé:</dt>
                 <dd><?= $guest['price']; ?> <em><small>par <?= $guest['paiement'] ?> le <?= substr($newResa->date_option, 0, 10) ?></small></em></dd>
                 <dt>Plage horaire d'entrée :</dt>
-                <dd><?= $guest['plage_horaire_entrees'] ?></dd>
+                <dd><?= corriger_horaire($guest['plage_horaire_entrees']) ?></dd>
                 <dt>Numéro de bracelet:</dt>
                 <dd><?= ($guest['bracelet_id'])?$guest['bracelet_id']:'<em>Vous avez bien réservé sa place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
             </dl>
@@ -153,7 +147,7 @@
             <li><span class="label label-success">Soirée</span></li>
             <li><span class="label label-<?= ($UserReservation['repas'])?'success':'default' ?>">Repas</span></li>
             <li><span class="label label-<?= ($UserReservation['buffet'])?'success':'default' ?>">Conférence</span></li>
-            <li><span class="label label-<?= ($UserReservation['tickets_boisson'])?'success':'default' ?>"><?= $UserReservation['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson'] * 0.9 ?>€)</em></small></span></li>
+            <li><span class="label label-<?= ($UserReservation['tickets_boisson'])?'success':'default' ?>"><?= $UserReservation['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson'] ?>€)</em></small></span></li>
         </ul></dd>
         <dt>Prix payé:</dt>
         <dd><?= $UserReservation['price']; ?> <em><small>par <?= $UserReservation['paiement'] ?> le <?= substr($UserReservation['inscription'], 0, 10) ?></small></em></dd>
@@ -176,7 +170,7 @@
                     <li><span class="label label-success">Soirée</span></li>
                     <li><span class="label label-<?= ($guest['repas'])?'success':'default' ?>">Repas</span></li>
                     <li><span class="label label-<?= ($guest['buffet'])?'success':'default' ?>">Conférence</span></li>
-                    <li><span class="label label-<?= ($guest['tickets_boisson'])?'success':'default' ?>"><?= $guest['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson'] * 0.9 ?>€)</em></small></span></li>
+                    <li><span class="label label-<?= ($guest['tickets_boisson'])?'success':'default' ?>"><?= $guest['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson'] ?>€)</em></small></span></li>
                 </ul></dd>
                 <dt>Prix payé:</dt>
                 <dd><?= $guest['price']; ?> <em><small>par <?= $guest['paiement'] ?> le <?= substr($UserReservation['inscription'], 0, 10) ?></small></em></dd>
@@ -190,4 +184,11 @@
             <p><em>Vous n'avez pas encore d'invités.<?= ($canWeRegisterNewGuests)?" Il est cependant encore temps d'en rajouter !":"" ?></em></p>
         <?php } ?>
     <?php } // endelse ?>
-<?php } // fin réservation ?>
+<?php } // fin réservation 
+
+function corriger_horaire($fakehoraire){
+        if $fakehoraire == '21h-21h45' {$vraihoraire = '21h-21h35'}
+        if $fakehoraire == '21h45-22h30' {$vraihoraire = '21h50-22h25'}
+        if $fakehoraire == '22h30-23h' {$vraihoraire = '22h40-21h10'}
+    return $vraihoraire
+    }?>
