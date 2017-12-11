@@ -89,10 +89,10 @@ class Participant {
 				'prixInvite' => array("repas" => NULL, "buffet" => NULL, "soiree" => NULL)),
 		"Artistes" => array('nbInvites' => 0,
 				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soiree" => 0),
-				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soiree" => 22)),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soiree" => 23)),
 		"Autre Site" => array('nbInvites' => 0,
-				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soiree" => 22),
-				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soiree" => 22)),
+				'prixIcam' => array("repas" => NULL, "buffet" => NULL, "soiree" => 23),
+				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soiree" => 23)),
 		"VIP" => array('nbInvites' => 3,
 				'prixIcam' => array("repas" => 0, "buffet" => 0, "soiree" => 20),
 				'prixInvite' => array("repas" => NULL, "buffet" => 3, "soiree" => 20))

@@ -173,7 +173,7 @@ class Reservation{
         var_dump($type);
         var_dump($nb);
         if ($type == 'tickets_boisson')
-            $price = 10*$nb;
+            $price = 10*$nb*.9;
         else
             $price = $this->prixPromo[($is_icam)?'prixIcam':'prixInvite'][$type];
         $article = $this->getPayIcamArticle($type, $price);
