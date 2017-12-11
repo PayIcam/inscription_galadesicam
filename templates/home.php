@@ -105,8 +105,8 @@
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal" href="http://www.villardieres.com/">Je refuse</button>
-        <button type="button" href="<?= $editLink ?>" class="btn btn-primary">J'accepte les conditions</button>
+        <a href="http://www.villardieres.com/"><button type="button" class="btn btn-default">Je refuse</button></a> <!-- CLIQUE GODDAMNIT -->
+        <a href="<?= $editLink ?>"><button type="button" class="btn btn-primary">J'accepte les conditions</button></a>
       </div>
     </div>
   </div>
@@ -199,7 +199,7 @@
             <li><span class="label label-success">Soirée</span></li>
             <li><span class="label label-<?= ($UserReservation['repas'])?'success':'default' ?>">Repas</span></li>
             <li><span class="label label-<?= ($UserReservation['buffet'])?'success':'default' ?>">Conférence</span></li>
-            <li><span class="label label-<?= ($UserReservation['tickets_boisson'])?'success':'default' ?>"><?= $UserReservation['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson'] ?>€)</em></small></span></li>
+            <li><span class="label label-<?= ($UserReservation['tickets_boisson'])?'success':'default' ?>"><?= $UserReservation['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson']*0.9 ?>€)</em></small></span></li>
         </ul></dd>
         <dt>Prix payé:</dt>
         <dd><?= $UserReservation['price']; ?> <em><small>par <?= $UserReservation['paiement'] ?> le <?= substr($UserReservation['inscription'], 0, 10) ?></small></em></dd>
