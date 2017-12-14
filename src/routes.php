@@ -559,11 +559,11 @@ $app->post('/edit', function ($request, $response, $args) {
             }if ($placesRestantes['buffets'] < 0) {
                 $msg .= "<p>Plus de places pour la conférence</p>";
             }if ($placesRestantes['creneau_21h_21h45'] < 0) {
-                $msg .= "<p>Plus de places pour le créneau 21h - 21h45</p>";
+                $msg .= "<p>Plus de places pour le créneau 21h - 21h35</p>";
             }if ($placesRestantes['creneau_21h45_22h30'] < 0) {
-                $msg .= "<p>Plus de places pour le créneau 21h45 - 22h30</p>";
+                $msg .= "<p>Plus de places pour le créneau 21h50 - 22h25</p>";
             }if ($placesRestantes['creneau_22h30_23h'] < 0) {
-                $msg .= "<p>Plus de places pour le créneau 22h - 0_23h</p>";
+                $msg .= "<p>Plus de places pour le créneau 22h40 - 23h15</p>";
             }
             $this->flash->addMessage('danger', $msg);
             echo $msg;
