@@ -102,7 +102,7 @@ $app->get('/', function ($request, $response, $args) {
 function secureEditPart($Auth, $status, $UserReservation, $UserWaitingResa, $app, $response, $canWeRegisterNewGuests, $canWeEditOurReservation, $emailContactGala) {
     if (!$Auth->isLogged() || empty($status->user) || empty($status->application)) {
         if(isset($_SESSION['Auth'])) unset($_SESSION['Auth']);
-        $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala de Icam");
+        $app->flash->addMessage('warning', "Vous devez être connecté à PayIcam pour accéder aux inscriptions du Gala Icam");
         return $response->withStatus(303)->withHeader('Location', $app->router->pathFor('about'));
     }
     if (count($UserWaitingResa) >= 1) {$count = count($UserWaitingResa);
@@ -289,7 +289,7 @@ function getIcamData($gingerUserCard, $prixPromo, $resa, $oldResa="") {
         'prenom' => $gingerUserCard->prenom,
         'is_icam' => 1,
         'paiement' => $resa['paiement'],
-        'telephone' => $resa['telephone'],
+        'telephone' => nettoyer($resa['telephone']),
         'promo' => $gingerUserCard->promo,
         'email' => $gingerUserCard->mail,
         'sexe' => $gingerUserCard->sexe,
@@ -305,8 +305,8 @@ function getIcamData($gingerUserCard, $prixPromo, $resa, $oldResa="") {
 }
 function getGuestData($guest, $prixPromo, $oldResa="") {
     $guestData = array(
-        'nom' => $guest['nom'],
-        'prenom' => $guest['prenom'],
+        'nom' => nettoyer($guest['nom']),
+        'prenom' => nettoyer($guest['prenom']),
         'is_icam' => 0,
         'paiement' => $guest['paiement'],
         'sexe' => guessSexe($guest['prenom']),
@@ -374,9 +374,6 @@ $app->post('/edit', function ($request, $response, $args) {
     // On continue
     $prixPromo = getPrixPromo($gingerUserCard);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId, dataResaForm
-    foreach($dataResaForm as $key=>$value){
-        $dataResaForm[$key]=nettoyer($value);
-    }
     $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody(), $prixPromo );
     var_dump($_SESSION['newResa']['resa']['invites']);
 
