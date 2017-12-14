@@ -25,7 +25,7 @@ $app->add(function ($request, $response, $next) {
             }
         }
         if (!in_array($gingerUserCard, [122, 121, 120, 119, 118, 2022, 2021, 2020, 2019, 2018])){
-            $this->flash->addMessage('info', "Vous devez être connecté pour accéder au reste de l'application");
+            $this->flash->addMessage('info', "Vous ne pouvez pas prendre votre place par PayIcam");
             return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
         }
             // tout va bien
