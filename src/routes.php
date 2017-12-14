@@ -374,7 +374,9 @@ $app->post('/edit', function ($request, $response, $args) {
     // On continue
     $prixPromo = getPrixPromo($gingerUserCard);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId, dataResaForm
-    $dataResaForm=nettoyer($dataResaForm);
+    foreach($dataResaForm as $key=>$value){
+        $dataResaForm[$key]=nettoyer($value);
+    }
     $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody(), $prixPromo );
     var_dump($_SESSION['newResa']['resa']['invites']);
 
