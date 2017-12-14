@@ -336,6 +336,21 @@ function getUpdatedFields($newResa, $curResa) {
     return $updates;
 }
 
+function nettoyer($chaine)
+{
+    $caracteres=array('a', 'Á' => 'a', 'Â' => 'a', 'Ä' => 'a', 'à' => 'a', 'á' => 'a', 'â' => 'a', 'ä' => 'a',
+        'È' => 'e', 'É' => 'e', 'Ê' => 'e', 'Ë' => 'e', 'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e', '€' => 'e',
+        'Ì' => 'i', 'Í' => 'i', 'Î' => 'i', 'Ï' => 'i', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i',
+        'Ò' => 'o', 'Ó' => 'o', 'Ô' => 'o', 'Ö' => 'o', 'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'ö' => 'o',
+        'Ù' => 'u', 'Ú' => 'u', 'Û' => 'u', 'Ü' => 'u', 'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u', 'µ' => 'u',
+        'Œ' => 'oe', 'œ' => 'oe',
+        '$' => 's', '0'=>'0');
+    $chaine = strtr($chaine, $caracteres);
+    $chaine = preg_replace('#[^A-Za-z0-9.-_]+#', '-', $chaine);
+
+    return $chaine;
+}
+
 $app->post('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
@@ -359,6 +374,7 @@ $app->post('/edit', function ($request, $response, $args) {
     // On continue
     $prixPromo = getPrixPromo($gingerUserCard);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId, dataResaForm
+    $dataResaForm=nettoyer($dataResaForm);
     $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody(), $prixPromo );
     var_dump($_SESSION['newResa']['resa']['invites']);
 
