@@ -256,9 +256,10 @@ function checkUserFieldsIntegrity($newUser, $oldUser='') {
     }
     $ticket = intval($newUser['tickets_boisson']);
     $oldTicket = (isset($oldUser['tickets_boisson']))?intval($oldUser['tickets_boisson']):0;
-    if ($ticket != 0 && $ticket != 10 && $ticket != 20 && $ticket != 30 && $ticket != $oldTicket) {
-        $errors['tickets_boisson'] = 'Vous avez un problème avec les tickets boisson, vous avez le choix que entre 0, 10, 20 ou 30 tickets!';
+    if ($ticket != 0 && $ticket != 10 && $ticket != 20 && $ticket != 30 && $ticket != 40 && $ticket != 50 && $ticket != $oldTicket) {
+        $errors['tickets_boisson'] = 'Vous avez un problème avec les tickets boisson, vous avez le choix que entre 0, 10, 20, 30, 40 ou 50 tickets!';
     }
+
     return $errors;
 }
 
@@ -358,7 +359,6 @@ $app->post('/edit', function ($request, $response, $args) {
     // On continue
     $prixPromo = getPrixPromo($gingerUserCard);
     extract(getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCard, $DB)); // UserGuests, UserReservation, UserId, dataResaForm
-    var_dump($UserGuests);
     $_SESSION['newResa'] = mergeUserReservations( $dataResaForm , $request->getParsedBody(), $prixPromo );
     var_dump($_SESSION['newResa']['resa']['invites']);
 
@@ -559,11 +559,11 @@ $app->post('/edit', function ($request, $response, $args) {
             }if ($placesRestantes['buffets'] < 0) {
                 $msg .= "<p>Plus de places pour la conférence</p>";
             }if ($placesRestantes['creneau_21h_21h45'] < 0) {
-                $msg .= "<p>Plus de places pour le créneau 21h - 21h45</p>";
+                $msg .= "<p>Plus de places pour le créneau 21h - 21h35</p>";
             }if ($placesRestantes['creneau_21h45_22h30'] < 0) {
-                $msg .= "<p>Plus de places pour le créneau 21h45 - 22h30</p>";
+                $msg .= "<p>Plus de places pour le créneau 21h50 - 22h25</p>";
             }if ($placesRestantes['creneau_22h30_23h'] < 0) {
-                $msg .= "<p>Plus de places pour le créneau 22h - 0_23h</p>";
+                $msg .= "<p>Plus de places pour le créneau 22h40 - 23h15</p>";
             }
             $this->flash->addMessage('danger', $msg);
             echo $msg;

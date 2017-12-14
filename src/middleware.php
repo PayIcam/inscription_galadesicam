@@ -23,6 +23,11 @@ $app->add(function ($request, $response, $next) {
                     return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
                 }
             }
+        }
+        if (!in_array($gingerUserCard, [122, 121, 120, 119, 118, 2022, 2021, 2020, 2019, 2018])){
+            $this->flash->addMessage('info', "Vous devez être connecté pour accéder au reste de l'application");
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
+        }
             // tout va bien
             $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
             if (empty($gingerUserCard)) { // l'utilisateur n'avait jamais été ajouté à Ginger O.o
@@ -37,7 +42,6 @@ $app->add(function ($request, $response, $next) {
                 $canWeRegisterNewGuests = 1;
                 $canWeEditOurReservation = 1;
             }
-        }
     }
 
     // $response->getBody()->write('BEFORE');

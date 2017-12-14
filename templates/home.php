@@ -132,13 +132,12 @@
         <dt>Options:</dt>
         <dd><ul class="list-unstyled">
             <li><span class="label label-<?= (!empty($UserReservation['guest_id'])&&$UserReservation['guest_id']>0)?'success':'info'?>">Soirée</span></li>
-            <li><span class="label label-<?= (!empty($UserReservation['repas']))?'success':(($newResa->icamData['repas'])?'info':'default') ?>">Repas</span></li>
             <li><span class="label label-<?= (!empty($UserReservation['buffet']))?'success':(($newResa->icamData['buffet'])?'info':'default') ?>">Conférence</span></li>
             <li><span class="label label-<?= (!empty($UserReservation['tickets_boisson']))?'success':(($newResa->icamData['tickets_boisson'])?'info':'default') ?>"><?= $newResa->icamData['tickets_boisson'] ?> Tickets boisson</span></li>
         </ul></dd>
         <dt>Prix payé:</dt>
         <dd><?= $newResa->icamData['price']; ?> <em><small>par <?= $newResa->icamData['paiement'] ?> le <?= substr($newResa->date_option, 0, 10) ?></small></em></dd>
-        <dt>Plage horaire d'entrée :</dt>
+        <dt>Plage horaire:</dt>
         <dd><?= $newResa->icamData['plage_horaire_entrees'] ?></dd>
         <dt>Numéro de bracelet:</dt>
         <dd><?= ($newResa->icamData['bracelet_id'])?$newResa->icamData['bracelet_id']:'<em>Vous avez bien réservé votre place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
@@ -160,7 +159,6 @@
                 <dt>Options:</dt>
                 <dd><ul class="list-unstyled">
                     <li><span class="label label-<?= (!empty($oldGuest))?'success':'info'?>">Soirée</span></li>
-                    <li><span class="label label-<?= (!empty($oldGuest['repas']))?'success':(($guest['repas'])?'info':'default') ?>">Repas</span></li>
                     <li><span class="label label-<?= (!empty($oldGuest['buffet']))?'success':(($guest['buffet'])?'info':'default') ?>">Conférence</span></li>
                     <li><span class="label label-<?= (!empty($oldGuest['tickets_boisson']))?'success':(($guest['tickets_boisson'])?'info':'default') ?>"><?= $guest['tickets_boisson'] ?> tickets boisson</span></li>
                 </ul></dd>
@@ -197,13 +195,12 @@
         <dt>Options:</dt>
         <dd><ul class="list-unstyled">
             <li><span class="label label-success">Soirée</span></li>
-            <li><span class="label label-<?= ($UserReservation['repas'])?'success':'default' ?>">Repas</span></li>
             <li><span class="label label-<?= ($UserReservation['buffet'])?'success':'default' ?>">Conférence</span></li>
             <li><span class="label label-<?= ($UserReservation['tickets_boisson'])?'success':'default' ?>"><?= $UserReservation['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson']*0.9 ?>€)</em></small></span></li>
         </ul></dd>
         <dt>Prix payé:</dt>
         <dd><?= $UserReservation['price']; ?> <em><small>par <?= $UserReservation['paiement'] ?> le <?= substr($UserReservation['inscription'], 0, 10) ?></small></em></dd>
-        <dt>Plage horaire d'entrée :</dt>
+        <dt>Plage horaire:</dt>
         <dd><?= corriger_horaire($UserReservation['plage_horaire_entrees']) ?></dd>
         <dt>Numéro de bracelet:</dt>
         <dd><?= ($UserReservation['bracelet_id'])?$UserReservation['bracelet_id']:'<em>Vous avez bien réservé votre place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>
@@ -220,13 +217,12 @@
                 <dt>Options:</dt>
                 <dd><ul class="list-unstyled">
                     <li><span class="label label-success">Soirée</span></li>
-                    <li><span class="label label-<?= ($guest['repas'])?'success':'default' ?>">Repas</span></li>
                     <li><span class="label label-<?= ($guest['buffet'])?'success':'default' ?>">Conférence</span></li>
                     <li><span class="label label-<?= ($guest['tickets_boisson'])?'success':'default' ?>"><?= $guest['tickets_boisson'] ?> tickets boisson <small><em>(<?= $UserReservation['tickets_boisson'] ?>€)</em></small></span></li>
                 </ul></dd>
                 <dt>Prix payé:</dt>
                 <dd><?= $guest['price']; ?> <em><small>par <?= $guest['paiement'] ?> le <?= substr($UserReservation['inscription'], 0, 10) ?></small></em></dd>
-                <dt>Plage horaire d'entrée :</dt>
+                <dt>Plage horaire:</dt>
                 <dd><?= corriger_horaire($guest['plage_horaire_entrees']) ?></dd>
                 <dt>Numéro de bracelet:</dt>
                 <dd><?= ($guest['bracelet_id'])?$guest['bracelet_id']:'<em>Vous avez bien réservé sa place. Cependant, vous devez récupérer votre bracelet.</em>'; ?></dd>

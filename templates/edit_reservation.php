@@ -41,7 +41,7 @@
 
 
                     <?= (isset($UserReservation['tickets_boisson']) && $UserReservation['tickets_boisson']) ?
-                        '<div class="checkbox">Vous avez déjà réservé '.$UserReservation['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserReservation['tickets_boisson'].'€</span></div>' : ''; ?>
+                        '<div class="checkbox">Vous avez déjà réservé '.$UserReservation['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserReservation['tickets_boisson']*0.9.'€</span></div>' : ''; ?>
 
 
                     <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
@@ -129,6 +129,7 @@
 
                             <?= (isset($UserGuests[$j]['tickets_boisson']) && $UserGuests[$j]['tickets_boisson']) ? '' :
                                 $Form->select('resa[invites]['.$j.'][tickets_boisson]','Tickets boisson : ', array('ng-model' => 'resa.invites['.$j.'].tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 9€', 20=>'20 tickets 18€', 30=>'30 tickets 27€', 40=>'40 tickets 36€', 50=>'50 tickets 45€'))); ?>
+
                             <?= (isset($UserGuests[$j]['plage_horaire_entrees']) && $UserGuests[$j]['plage_horaire_entrees']) ? '' :
                                 $Form->select('resa[invites]['.$j.'][plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.invites['.$j.'].plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort))); ?>
                         </div>
@@ -138,7 +139,7 @@
         <?php } ?>
     </fieldset>
     <fieldset class="recap">
-        <legend>Récaputilatif - prix à payer</legend>
+        <legend>Récapitulatif - prix à payer</legend>
         <h3>Déjà payé <small>{{dejaPaye}}€</small></h3>
         <ul>
             <li ng-repeat="guest in guestsDejaPaye">{{guest.nom}}: <span style="margin-right:5px;" class="label label-success" ng-repeat="option in guest.options">{{option.nom}} : {{option.price}}€</span></li>
