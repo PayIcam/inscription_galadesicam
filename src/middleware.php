@@ -29,7 +29,7 @@ $app->add(function ($request, $response, $next) {
             $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
         }
 
-        $autorisation_eleve=$db->prepare("SELECT COUNT(*) FROM etudiant_icam_lille WHERE mail=?")
+        $autorisation_eleve=$db->prepare("SELECT * FROM etudiant_icam_lille WHERE mail=?")
         $autorisation_eleve->execute(array($Auth->getUserField('email')));
         $present=$autorisation_eleve->fetch();
 
