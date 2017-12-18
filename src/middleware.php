@@ -28,7 +28,12 @@ $app->add(function ($request, $response, $next) {
         if (empty($gingerUserCard)) { // l'utilisateur n'avait jamais été ajouté à Ginger O.o
             $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
         }
-        if (!in_array($gingerUserCard->promo, [122, 121, 120, 119, 118, 2022, 2021, 2020, 2019, 2018])){
+
+        $autorisation_eleve=$db->prepare("SELECT * FROM etudiant_icam_lille WHERE mail=?")
+        $autorisation_eleve->execute(array($Auth->getUserField('email')));
+        $present=$autorisation_eleve->fetch();
+
+        if (is_null($present) || empty($present)){
             $this->flash->addMessage('info', "Vous ne pouvez pas prendre votre place par PayIcam");
             return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
         }
