@@ -36,6 +36,7 @@
           <ul class="nav navbar-nav">
             <li<?php if($RouteHelper->curPage == '/') echo ' class="active"'; ?>><a href="<?= $RouteHelper->getPathFor() ?>">Accueil</a></li>
             <li<?php if($RouteHelper->curPage == '/about') echo ' class="active"'; ?>><a href="<?= $RouteHelper->getPathFor('about') ?>">A propos</a></li>
+            <li><a href="http://151.80.232.129/gala_icam/">Site externe</a></li>
           </ul>
           <?php if ($Auth->isLogged()): ?>
           <ul class="nav navbar-nav navbar-right">
