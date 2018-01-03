@@ -6,6 +6,11 @@
 // sécuriser l'application
 $app->add(function ($request, $response, $next) {
     global $status, $payutcClient, $gingerUserCard, $gingerClient, $Auth, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    try{
+    $db = new PDO('mysql:host=localhost;dbname=galadesicam;charset=utf8','galadesicam','HTxTiHZtEbdmeFT8',array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ));
+    } catch(Exeption $e) {
+    die('erreur:'.$e->getMessage());
+    }
 
     if (!in_array($request->getUri()->getPath(), ['about', 'login', 'callback'])) {
         if((!isset($status) || !$status->user)) {
@@ -29,7 +34,7 @@ $app->add(function ($request, $response, $next) {
             $gingerUserCard = $gingerClient->getUser($Auth->getUserField('email'));
         }
 
-        $autorisation_eleve=$db->prepare("SELECT * FROM etudiant_icam_lille WHERE mail=?")
+        $autorisation_eleve=$db->prepare("SELECT * FROM etudiants_icam_lille WHERE email=?");
         $autorisation_eleve->execute(array($Auth->getUserField('email')));
         $present=$autorisation_eleve->fetch();
 
