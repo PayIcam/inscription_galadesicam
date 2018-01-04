@@ -7,9 +7,10 @@
     $dataPlageHoraireEntree = \PayIcam\Participant::$plage_horaire_entrees;
     $dataPlageHoraireEntreeShort = \PayIcam\Participant::$plage_horaire_entrees;
     unset($dataPlageHoraireEntreeShort['17h30-19h30'], $dataPlageHoraireEntreeShort['19h30-20h']);
-
+    global $settings
+    $confSQL = $settings['settings']['confSQL'];
     try{
-        $db_bracelet = new PDO('mysql:host='.$this->host.';dbname='.$this->database, $this->username, $this->password, array(
+        $db_bracelet = new PDO('mysql:host='.$confSQL['sql_host'].';dbname='.$confSQL['sql_db'],$confSQL['sql_user'], $confSQL['sql_pass'], array(
                     PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES UTF8',
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
         }
@@ -18,7 +19,7 @@
         };
 
 $is_set_bracelet=$db_bracelet->prepare("SELECT bracelet_id FROM guests WHERE id=?" );
-$is_set_bracelet->execute();
+$is_set_bracelet->execute(array($UserReservation['repas']));
 $result_bracelet=$is_set_bracelet->fetch();
 $num_bracelet=$result_bracelet["bracelet_id"];
 
@@ -58,9 +59,9 @@ $num_bracelet=$result_bracelet["bracelet_id"];
                         '<div class="checkbox">Vous avez déjà réservé '.$UserReservation['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserReservation['tickets_boisson']*0.9.'€</span></div>' : ''; ?>
 
 
-                    <?= if ($num_bracelet==null)
-                    {
-                        (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
+                    <?php if ($num_bracelet==null)
+                    {?>
+                        <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
                         '<div class="checkbox">Vous avez réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].'</div>' : '';
                     }
                     else
