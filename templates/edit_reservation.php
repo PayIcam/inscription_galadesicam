@@ -7,7 +7,7 @@
     $dataPlageHoraireEntree = \PayIcam\Participant::$plage_horaire_entrees;
     $dataPlageHoraireEntreeShort = \PayIcam\Participant::$plage_horaire_entrees;
     unset($dataPlageHoraireEntreeShort['17h30-19h30'], $dataPlageHoraireEntreeShort['19h30-20h']);
-    global $settings
+    global $settings;
     $confSQL = $settings['settings']['confSQL'];
     try{
         $db_bracelet = new PDO('mysql:host='.$confSQL['sql_host'].';dbname='.$confSQL['sql_db'],$confSQL['sql_user'], $confSQL['sql_pass'], array(
@@ -61,19 +61,19 @@ $num_bracelet=$result_bracelet["bracelet_id"];
                     <?= (isset($UserReservation['tickets_boisson']) && $UserReservation['tickets_boisson']) ?
                         '<div class="checkbox">Vous avez déjà réservé '.$UserReservation['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserReservation['tickets_boisson']*0.9.'€</span></div>' : ''; ?>
 
+                </div>
+            </div>
 
-                    <?php if ($num_bracelet==null)
+            <?php if (!is_null($num_bracelet))
                     {?>
                         <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
-                        '<div class="checkbox">Vous avez réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].'</div>' : '';
+                        '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].' et vous avez déja pris votre bracelet</div>' : '';
                     }
                     else
                     {?>
-                        <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ? '' :
-                            $Form->select('resa[plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort))); ?>
+                        <?= $Form->select('resa[plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort)));
                     }?>
-                </div>
-            </div>
+
             <?= (isset($UserReservation['tickets_boisson']) && $UserReservation['tickets_boisson']) ? '' :
                 $Form->select('resa[tickets_boisson]', 'Tickets boisson : ', array('ng-model'=>'resa.tickets_boisson', 'data'=>array(0=>0 ,10=>'10 tickets 9€', 20=>'20 tickets 18€', 30=>'30 tickets 27€', 40=>'40 tickets 36€', 50=>'50 tickets 45€'))); // On veut pas afficher les tickets boissons si il en a déjà pris ! ?>
         </div>
@@ -86,6 +86,16 @@ $num_bracelet=$result_bracelet["bracelet_id"];
                 <div id="invite<?= ($i+1); ?>" class="col-sm-6 invite">
                     <legend>Invité <?= ($i+1); ?></legend>
                     <div>
+
+                        <?php 
+                        $is_set_bracelet=$db_bracelet->prepare("SELECT bracelet_id FROM guests WHERE id=?" );
+
+                        $is_set_bracelet->execute(array($UserGuests[$i]['id']));
+
+                        $result_bracelet=$is_set_bracelet->fetch();
+
+                        $num_bracelet=$result_bracelet["bracelet_id"];?>
+
                         <?= $Form->input('resa[invites]['.$i.'][id]', 'hidden', array('ng-model' => 'resa.invites['.$i.'].id', )); ?>
                         <?= $Form->input('resa[invites]['.$i.'][nom]','Nom : ', array('ng-model' => 'resa.invites['.$i.'].nom', 'maxlength'=>'155')); ?>
                         <?= $Form->input('resa[invites]['.$i.'][prenom]','Prénom : ', array('ng-model' => 'resa.invites['.$i.'].prenom', 'maxlength'=>'155')); ?>
@@ -115,9 +125,16 @@ $num_bracelet=$result_bracelet["bracelet_id"];
                         </div>
                         <?= (isset($UserGuests[$i]['tickets_boisson']) && $UserGuests[$i]['tickets_boisson']) ? '' :
                             $Form->select('resa[invites]['.$i.'][tickets_boisson]','Tickets boisson : ', array('ng-model' => 'resa.invites['.$i.'].tickets_boisson', 'data'=>array(0=>0,10=>'10 tickets 9€', 20=>'20 tickets 18€', 30=>'30 tickets 27€', 40=>'40 tickets 36€', 50=>'50 tickets 45€'))); ?>
-                            
-                        <?= (isset($UserGuests[$i]['plage_horaire_entrees']) && $UserGuests[$i]['plage_horaire_entrees']) ? '' :
-                            $Form->select('resa[invites]['.$i.'][plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.invites['.$i.'].plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort))); ?>
+                        
+                    <?php if (!is_null($num_bracelet))
+                        {?>
+                            <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
+                            '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].' et vous avez déja pris votre bracelet</div>' : '';
+                        }
+                        else
+                        {?>
+                            <?= $Form->select('resa[plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort)));
+                        }?>
                     </div>
                 </div>
                 <?php $j = $i+1; if ($j+1 <= $nb){; ?>
