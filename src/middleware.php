@@ -44,7 +44,7 @@ $app->add(function ($request, $response, $next) {
         }
 
         $mail_boss=$Auth->getUserField('email');
-        if ($mail_boss != 'guillaume.dubois-malafosse@2019.icam.fr' || $mail_boss != 'gregoire.dervaux@2019.icam.fr' ){
+        if ($mail_boss != 'guillaume.dubois-malafosse@2019.icam.fr' && $mail_boss != 'gregoire.dervaux@2019.icam.fr' ){
             $this->flash->addMessage('info', "Maintenance en cours, les ventes reprennent demain");
             return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
         }
