@@ -53,7 +53,7 @@ $invite=$place_invite->fetchAll();?>
 		<?php }
 		else{ ?>
 		<em>Cet invité a déjà un bracelet, vous ne pouvez donc pas changer son créneau</em>
-
+		<br>
 	<?php } 
 		}
 	}?>
