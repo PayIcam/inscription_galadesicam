@@ -199,7 +199,7 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
     // var_dump($prixPromo['nbInvites']);
     // var_dump(count($UserGuests));
     if ($prixPromo['nbInvites'] - count($UserGuests) > 0) {
-        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0, 'plage_horaire_entrees' => '');
+        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0, 'plage_horaire_entrees' => '', 'id' => null);
         for ($i=0; $i < ($prixPromo['nbInvites'] - count($UserGuests) +1); $i++) {
             // echo "<p>".$i."</p>";
             $UserGuests[] = $emptyUser;

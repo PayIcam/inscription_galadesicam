@@ -153,8 +153,8 @@ else
 
                                     <input type="button" href="<?php $lien_creneau ?>" class="btn btn-default" value="Changer d'horaire">
 
-                                }
-                            }?>
+                             <?php }
+                           } ?>
 
                             </div>
                         </div>
@@ -174,6 +174,13 @@ else
                 <?php $j = $i+1; if ($j+1 <= $nb){; ?>
                     <div id="invite<?= ($j+1); ?>" class="col-sm-6 invite">
                         <legend>Invité <?= ($j+1); ?></legend>
+
+                        <?php 
+                        $is_set_bracelet=$db_bracelet->prepare("SELECT bracelet_id FROM guests WHERE id=?" );
+                        $is_set_bracelet->execute(array($UserGuests[$j]['id']));
+                        $result_bracelet=$is_set_bracelet->fetch();
+                        $num_bracelet=$result_bracelet["bracelet_id"]; ?>
+
                         <div>
                             <?= $Form->input('resa[invites]['.$j.'][id]', 'hidden', array('ng-model' => 'resa.invites['.$j.'].id', )); ?>
                             <?= $Form->input('resa[invites]['.$j.'][nom]','Nom : ', array('ng-model' => 'resa.invites['.$j.'].nom', 'maxlength'=>'155')); ?>
@@ -211,7 +218,7 @@ else
 
                                         <input type="button" href="<?php $lien_creneau ?>" class="btn btn-default" value="Changer d'horaire">
 
-                                    }
+                                    <?php }
                                 }?>
                                 </div>
                             </div>
