@@ -79,7 +79,7 @@ else
                         <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
                             '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].'</div>' : ''; ?>
 
-                        <button type="button" href="<?php $lien_creneau ?>" class="btn btn-default">Changer d'horaire:</button>
+                        <button type="button" href="<?php $lien_creneau ?>" class="btn btn-default">Changer d'horaire</button>
 
                         <?php }
                     }?>
