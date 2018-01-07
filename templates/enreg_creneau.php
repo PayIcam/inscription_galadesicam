@@ -48,16 +48,14 @@ if ($quotat3<$nb_creneau3){  //verifie si creneau dispo
 
 foreach ($_POST as $creneau) {
 	if ($creneau == '21h-21h45' && $creneau1==false){
-			// Functions::setFlash("Le premier créneau est complet",'danger');
+		Functions::setFlash("Le premier créneau est complet",'danger');
 		echo('Premier créneau complet');
 	}
 	if ($creneau == '21h45-22h30' && $creneau2==false){
-			// Functions::setFlash("Le second créneau est complet",'danger');
-		echo('Deuxième créneau complet');
+		Functions::setFlash("Le second créneau est complet",'danger');
 	}
 	if ($creneau == '22h30-23h' && $creneau3==false){
-			// Functions::setFlash("Le troisième créneau est complet",'danger');
-		echo('Troisième créneau complet');
+		Functions::setFlash("Le troisième créneau est complet",'danger');
 	}
 }
 foreach ($_POST as $key => $value) {

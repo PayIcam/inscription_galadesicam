@@ -48,7 +48,7 @@ $app->get('/modif_creneau', function($request,$response, $args){
         global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
     $flash = $this->flash;
-    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Accueil');
+    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'modification_du_creneau');
     $emailContactGala = $this->get('settings')['emailContactGala'];
 
     // Sample log message
@@ -65,10 +65,10 @@ $app->get('/modif_creneau', function($request,$response, $args){
     $deconnexionUrl = $this->router->pathFor('logout');;
 
     $this->renderer->render($response, 'header.php', compact('Auth', 'flash', 'RouteHelper', $args));
-    $this->renderer->render($response, 'modif_creneau.php', compact('Auth','RouteHelper', $args));
+    $this->renderer->render($response, 'modif_creneau.php', compact('Auth','RouteHelper', 'flash', $args));
     return $this->renderer->render($response, 'footer.php', compact('Auth', 'RouteHelper', $args));
 
-})->setName('modification_du_ creneau')
+})->setName('modification_du_creneau')
 
 $app->get('/', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;

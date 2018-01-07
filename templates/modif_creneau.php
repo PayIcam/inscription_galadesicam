@@ -1,11 +1,12 @@
-<?php include 'header.php' ;
- include 'config.php' ;
-
- $place=$bd->prepare('SELECT * FROM guests WHERE email=\'axel.wesolowski@2021.icam.fr\'');
+<?php
+$email = $Auth->getUserField('email');
+$place=$bd->prepare('SELECT * FROM guests WHERE email= :email');
+$place -> bindParam('email', $email, PDO::PARAM_STR);
 $place->execute();
 $icam=$place->fetch();
 
- $place_invite=$bd->prepare('SELECT * FROM guests WHERE id IN (SELECT guest_id FROM icam_has_guest JOIN guests ON guests.id = icam_has_guest.icam_id WHERE guests.email=\'adrien.leplat@2020.icam.fr\')');
+$place_invite=$bd->prepare('SELECT * FROM guests WHERE id IN (SELECT guest_id FROM icam_has_guest JOIN guests ON guests.id = icam_has_guest.icam_id WHERE guests.email= :email)');
+$place_invite -> bindParam('email', $email, PDO::PARAM_STR);
 $place_invite->execute();
 $invite=$place_invite->fetchAll();?>
 <h1>Changement de créneau</h1>
@@ -47,5 +48,3 @@ $invite=$place_invite->fetchAll();?>
 	 <input type="submit" class="btn btn-primary" value='Enregistrer'>
 	 <button type="button" class="btn btn-default">Annuler</button>
  </form>
-
-<?php include 'footer.php' ?>
