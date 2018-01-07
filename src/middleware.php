@@ -42,6 +42,12 @@ $app->add(function ($request, $response, $next) {
             $this->flash->addMessage('info', "Vous ne pouvez pas prendre votre place par PayIcam");
             return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
         }
+
+        $mail_boss=$Auth->getUserField('email');
+        if ($mail_boss != 'guillaume.dubois-malafosse@2019.icam.fr' || $mail_boss != 'gregoire.dervaux@2019.icam.fr' ){
+            $this->flash->addMessage('info', "Maintenance en cours, les ventes reprennent demain");
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('about'));
+        }
     }
             if (empty($gingerUserCard)) { // l'utilisateur n'a pas un mail icam valide // on ne devrait jamais avoir cette erreur car on passe par payutc et lui a besoin d'avoir ginger qui marche ... je crois ...
             $this->flash->addMessage('warning', "Votre Mail Icam n'est pas reconnu par Ginger...");
