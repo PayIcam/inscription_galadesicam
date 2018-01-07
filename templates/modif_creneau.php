@@ -1,11 +1,24 @@
 <?php
+
+global $settings;
+$confSQL = $settings['settings']['confSQL'];
+try{
+    $db_creneau = new PDO('mysql:host='.$confSQL['sql_host'].';dbname='.$confSQL['sql_db'],$confSQL['sql_user'], $confSQL['sql_pass'], array(
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES UTF8',
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
+    }
+catch(PDOException $e) {
+    die('<h1>Impossible de se connecter a la base de donnee</h1><p>'.$e->getMessage().'<p>');
+    };
+
+
 $email = $Auth->getUserField('email');
-$place=$bd->prepare('SELECT * FROM guests WHERE email= :email');
+$place=$db_creneau->prepare('SELECT * FROM guests WHERE email= :email');
 $place -> bindParam('email', $email, PDO::PARAM_STR);
 $place->execute();
 $icam=$place->fetch();
 
-$place_invite=$bd->prepare('SELECT * FROM guests WHERE id IN (SELECT guest_id FROM icam_has_guest JOIN guests ON guests.id = icam_has_guest.icam_id WHERE guests.email= :email)');
+$place_invite=$db_creneau->prepare('SELECT * FROM guests WHERE id IN (SELECT guest_id FROM icam_has_guest JOIN guests ON guests.id = icam_has_guest.icam_id WHERE guests.email= :email)');
 $place_invite -> bindParam('email', $email, PDO::PARAM_STR);
 $place_invite->execute();
 $invite=$place_invite->fetchAll();?>
