@@ -48,7 +48,7 @@ $app->get('/modif_creneau', function($request,$response, $args){
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
     $flash = $this->flash;
-    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'modification_du_creneau');
+    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'modif_creneau');
     $emailContactGala = $this->get('settings')['emailContactGala'];
 
     // Sample log message
