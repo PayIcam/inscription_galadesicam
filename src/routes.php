@@ -212,7 +212,7 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
 
 $app->get('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
-    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation,$RouteHelper;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
     $emailContactGala = $this->get('settings')['emailContactGala'];
@@ -385,8 +385,6 @@ $app->post('/enreg', function($request, $response, $args){
     $confSQL = $settings['settings']['confSQL'];
 
     $post=$request->getParsedBody();
-    var_dump($post);
-    die();
 
     try{
         $bd = new PDO('mysql:host='.$confSQL['sql_host'].';dbname='.$confSQL['sql_db'],$confSQL['sql_user'], $confSQL['sql_pass'], array(
@@ -464,6 +462,7 @@ $app->post('/enreg', function($request, $response, $args){
 
     $this->flash->addMessage('info', 'Vos changements de crénaux ont bien été pris en compte.');
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+    }
 
 });
 
