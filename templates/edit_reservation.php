@@ -20,11 +20,14 @@
 
 $is_set_bracelet=$db_bracelet->prepare("SELECT bracelet_id FROM guests WHERE id=?" );
 
-$is_set_bracelet->execute(array($UserReservation['id']));
-
-$result_bracelet=$is_set_bracelet->fetch();
-
-$num_bracelet=$result_bracelet["bracelet_id"];
+if (isset($UserReservation['id'])){
+    $is_set_bracelet->execute(array($UserReservation['id']));}
+    $result_bracelet=$is_set_bracelet->fetch();
+    $num_bracelet=$result_bracelet["bracelet_id"];
+else
+{
+    $num_bracelet=null;
+}
 
 ?>
 <div ng-app="editGuestApp">
@@ -62,19 +65,38 @@ $num_bracelet=$result_bracelet["bracelet_id"];
                         '<div class="checkbox">Vous avez déjà réservé '.$UserReservation['tickets_boisson'].' tickets boisson <span class="label label-success">+'.$UserReservation['tickets_boisson']*0.9.'€</span></div>' : ''; ?>
 
 
-                    <?php if (!is_null($num_bracelet))
-                    {?>
+                    <?php 
+
+                    if (isset($UserReservation['id'])){
+
+                        if (!is_null($num_bracelet))
+                        {?>
+                            <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
+                            '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].' et vous avez déja pris votre bracelet</div>' : ''; 
+                        }
+                        else
+                        {?>
                         <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
-                        '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].' et vous avez déja pris votre bracelet</div>' : ''; 
-                    }
-                    else
-                    {?>
-                    <?= $Form->select('resa[plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort)));
+                            '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].'</div>' : ''; ?>
+
+                        <button type="button" href="<?php $RouteHelper->getPathFor('about')?>" class="btn btn-default">Changer d'horaire:</button>
+
+                        <?php }
                     }?>
                 </div>
             </div>
             <?= (isset($UserReservation['tickets_boisson']) && $UserReservation['tickets_boisson']) ? '' :
                 $Form->select('resa[tickets_boisson]', 'Tickets boisson : ', array('ng-model'=>'resa.tickets_boisson', 'data'=>array(0=>0 ,10=>'10 tickets 9€', 20=>'20 tickets 18€', 30=>'30 tickets 27€', 40=>'40 tickets 36€', 50=>'50 tickets 45€'))); // On veut pas afficher les tickets boissons si il en a déjà pris ! ?>
+
+            <?php 
+
+            if (!isset($UserReservation['id'])){?>
+
+                <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ? '' : 
+                    $Form->select('resa[plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort)));
+            }?> 
+           
+
         </div>
     </fieldset>
     <fieldset class="isIcam">

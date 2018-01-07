@@ -44,6 +44,32 @@ function getStatsQuotas() {
     return compact('stats', 'quotas');
 }
 
+$app->get('/modif_creneau', function($request,$response, $args){
+        global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+
+    $flash = $this->flash;
+    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Accueil');
+    $emailContactGala = $this->get('settings')['emailContactGala'];
+
+    // Sample log message
+    // $this->logger->info("Slim-Skeleton '/' index");
+
+    $fun_id = $this->get('settings')['fun_id'];
+    $prixPromo = getPrixPromo($gingerUserCard);
+
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
+
+    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
+    $casUrl = $payutcClient->getCasUrl().'login?service=' . urlencode($RouteHelper->curPageBaseUrl. '/login');
+    $deconnexionUrl = $this->router->pathFor('logout');;
+
+    $this->renderer->render($response, 'header.php', compact('Auth', 'flash', 'RouteHelper', $args));
+    $this->renderer->render($response, 'modif_creneau.php', compact('Auth','RouteHelper', $args));
+    return $this->renderer->render($response, 'footer.php', compact('Auth', 'RouteHelper', $args));
+
+})->setName('modification_du_ creneau')
+
 $app->get('/', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
