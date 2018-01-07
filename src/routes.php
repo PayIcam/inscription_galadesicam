@@ -443,16 +443,16 @@ $app->post('/enreg', function($request, $response, $args){
 
     foreach ($post as $creneau) {
         if ($creneau == '21h-21h45' && $creneau1==false){
-            $this->flash->addMessage('info', 'le premier créneau est complet');
-            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+            $this->flash->addMessage('warning', 'Le premier créneau est complet');
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('modification_du_creneau'));
         }
         if ($creneau == '21h45-22h30' && $creneau2==false){
-            $this->flash->addMessage('info', 'le deuxième créneau est complet');
-            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+            $this->flash->addMessage('warning', 'Le deuxième créneau est complet');
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('modification_du_creneau'));
         }
         if ($creneau == '22h30-23h' && $creneau3==false){
-            $this->flash->addMessage('info', 'le troisème créneau est complet');
-            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+            $this->flash->addMessage('warning', 'Le troisème créneau est complet');
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('modification_du_creneau'));
         }
     }
     foreach ($post as $key => $value) {
