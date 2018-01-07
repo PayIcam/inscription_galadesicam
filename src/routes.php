@@ -45,7 +45,7 @@ function getStatsQuotas() {
 }
 
 $app->get('/modif_creneau', function($request,$response, $args){
-        global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'modification_du_creneau');
@@ -68,7 +68,7 @@ $app->get('/modif_creneau', function($request,$response, $args){
     $this->renderer->render($response, 'modif_creneau.php', compact('Auth','RouteHelper', 'flash', $args));
     return $this->renderer->render($response, 'footer.php', compact('Auth', 'RouteHelper', $args));
 
-})->setName('modification_du_ creneau');
+})->setName('modification_du_creneau');
 
 $app->get('/', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
@@ -218,7 +218,7 @@ $app->get('/edit', function ($request, $response, $args) {
     $emailContactGala = $this->get('settings')['emailContactGala'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
-    $lien_creneau = $this->router->pathFor('modif_creneau');
+    $lien_creneau = $this->router->pathFor('modification_du_creneau');
 
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');
@@ -386,7 +386,7 @@ $app->post('/edit', function ($request, $response, $args) {
     $emailContactGala = $this->get('settings')['emailContactGala'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
-    $lien_creneau = $this->router->pathFor('modif_creneau');
+    $lien_creneau = $this->router->pathFor('modification_du_creneau');
 
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');
