@@ -423,19 +423,19 @@ $app->post('/enreg', function($request, $response, $args){
     $quotat_creneau3->execute();
     $quotat3 = $quotat_creneau3->fetch();
      
-    if ($quotat1<$nb_creneau1){  //verifie si creneau dispo
+    if (($quotat1['value'])<$nb_creneau1['COUNT(*)']){  //verifie si creneau dispo
         $creneau1=false;
     }else{
         $creneau1=true;
     } 
 
-    if ($quotat2<$nb_creneau2){  //verifie si creneau dispo
+    if (($quotat2['value'])<$nb_creneau2['COUNT(*)']){  //verifie si creneau dispo
         $creneau2=false;
     }else{
         $creneau2=true;
     } 
 
-    if ($quotat3<$nb_creneau3){  //verifie si creneau dispo
+    if (($quotat3['value'])<$nb_creneau3['COUNT(*)']){  //verifie si creneau dispo
         $creneau3=false;
     }else{
         $creneau3=true;
