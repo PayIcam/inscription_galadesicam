@@ -455,7 +455,7 @@ $app->post('/enreg', function($request, $response, $args){
             Functions::setFlash("Le troisième créneau est complet",'danger');
         }
     }
-    foreach ($_POST as $key => $value) {
+    foreach ($post as $key => $value) {
 
         $new_creneau = $bd->prepare('UPDATE guests SET plage_horaire_entrees = :horaire WHERE id = :login ');
         $new_creneau -> bindParam('horaire', $value, PDO::PARAM_STR);
