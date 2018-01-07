@@ -378,6 +378,95 @@ function nettoyer($chaine)
     return $chaine;
 }
 
+$app->post('/enreg', function($request, $response, $args){
+
+    global $Auth,$settings, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    $flash = $this->flash;
+    $confSQL = $settings['settings']['confSQL'];
+
+    $post=$request->getParsedBody();
+    var_dump($post);
+    die();
+
+    try{
+        $bd = new PDO('mysql:host='.$confSQL['sql_host'].';dbname='.$confSQL['sql_db'],$confSQL['sql_user'], $confSQL['sql_pass'], array(
+                    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES UTF8',
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
+        }
+    catch(PDOException $e) {
+        die('<h1>Impossible de se connecter a la base de donnee</h1><p>'.$e->getMessage().'<p>');
+        };
+
+    $participants = $bd->prepare('SELECT COUNT(*) FROM guests');
+    $participants->execute();
+    $nb_participants = $participants->fetch();
+
+    $premier_creneau = $bd->prepare('SELECT COUNT(*) FROM guests WHERE plage_horaire_entrees =\'21h-21h45\'');
+    $premier_creneau->execute();
+    $nb_creneau1 = $premier_creneau->fetch();
+
+    $deuxieme_creneau = $bd->prepare('SELECT COUNT(*) FROM guests WHERE plage_horaire_entrees = \'21h45-22h30\'');
+    $deuxieme_creneau->execute();
+    $nb_creneau2 = $deuxieme_creneau->fetch();
+
+    $troisieme_creneau = $bd->prepare('SELECT COUNT(*) FROM guests WHERE plage_horaire_entrees = \'22h30-23h\'');
+    $troisieme_creneau->execute();
+    $nb_creneau3 = $troisieme_creneau->fetch();
+
+    $quotat_creneau1 = $bd->prepare('SELECT value FROM configs WHERE name = \'quota_entree_21h_21h45\'');
+    $quotat_creneau1->execute();
+    $quotat1 = $quotat_creneau1->fetch();
+
+    $quotat_creneau2 = $bd->prepare('SELECT value FROM configs WHERE name = \'quota_entree_21h45_22h30\'');
+    $quotat_creneau2->execute();
+    $quotat2 = $quotat_creneau2->fetch();
+
+    $quotat_creneau3 = $bd->prepare('SELECT value FROM configs WHERE name = \'quota_entree_22h30_23h\'');
+    $quotat_creneau3->execute();
+    $quotat3 = $quotat_creneau3->fetch();
+     
+    if ($quotat1<$nb_creneau1){  //verifie si creneau dispo
+        $creneau1=false;
+    }else{
+        $creneau1=true;
+    } 
+
+    if ($quotat2<$nb_creneau2){  //verifie si creneau dispo
+        $creneau2=false;
+    }else{
+        $creneau2=true;
+    } 
+
+    if ($quotat3<$nb_creneau3){  //verifie si creneau dispo
+        $creneau3=false;
+    }else{
+        $creneau3=true;
+    }
+
+    foreach ($post as $creneau) {
+        if ($creneau == '21h-21h45' && $creneau1==false){
+            Functions::setFlash("Le premier créneau est complet",'danger');
+            echo('Premier créneau complet');
+        }
+        if ($creneau == '21h45-22h30' && $creneau2==false){
+            Functions::setFlash("Le second créneau est complet",'danger');
+        }
+        if ($creneau == '22h30-23h' && $creneau3==false){
+            Functions::setFlash("Le troisième créneau est complet",'danger');
+        }
+    }
+    foreach ($_POST as $key => $value) {
+
+        $new_creneau = $bd->prepare('UPDATE guests SET plage_horaire_entrees = :horaire WHERE id = :login ');
+        $new_creneau -> bindParam('horaire', $value, PDO::PARAM_STR);
+        $new_creneau -> bindParam('login', $key, PDO::PARAM_INT);
+        $new_creneau->execute();
+
+    $this->flash->addMessage('info', 'Vos changements de crénaux ont bien été pris en compte.');
+        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+
+});
+
 $app->post('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
