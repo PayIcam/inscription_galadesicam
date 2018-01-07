@@ -62,13 +62,13 @@ $app->get('/modif_creneau', function($request,$response, $args){
 
     $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
     $casUrl = $payutcClient->getCasUrl().'login?service=' . urlencode($RouteHelper->curPageBaseUrl. '/login');
-    $deconnexionUrl = $this->router->pathFor('logout');;
+    $deconnexionUrl = $this->router->pathFor('logout');
 
     $this->renderer->render($response, 'header.php', compact('Auth', 'flash', 'RouteHelper', $args));
     $this->renderer->render($response, 'modif_creneau.php', compact('Auth','RouteHelper', 'flash', $args));
     return $this->renderer->render($response, 'footer.php', compact('Auth', 'RouteHelper', $args));
 
-})->setName('modification_du_creneau')
+})->setName('modification_du_ creneau');
 
 $app->get('/', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
@@ -218,6 +218,7 @@ $app->get('/edit', function ($request, $response, $args) {
     $emailContactGala = $this->get('settings')['emailContactGala'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
+    $lien_creneau = $this->router->pathFor('modif_creneau');
 
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');
@@ -247,7 +248,7 @@ $app->get('/edit', function ($request, $response, $args) {
 
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
-    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'Form', 'prixPromo', 'gingerUserCard', $args));
+    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'Form', 'prixPromo', 'gingerUserCard','RouteHelper','lien_creneau', $args));
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('edit');
 $app->get('/edit/', function ($request, $response, $args) {
@@ -385,6 +386,7 @@ $app->post('/edit', function ($request, $response, $args) {
     $emailContactGala = $this->get('settings')['emailContactGala'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
+    $lien_creneau = $this->router->pathFor('modif_creneau');
 
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');

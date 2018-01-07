@@ -21,9 +21,9 @@
 $is_set_bracelet=$db_bracelet->prepare("SELECT bracelet_id FROM guests WHERE id=?" );
 
 if (isset($UserReservation['id'])){
-    $is_set_bracelet->execute(array($UserReservation['id']));}
+    $is_set_bracelet->execute(array($UserReservation['id']));
     $result_bracelet=$is_set_bracelet->fetch();
-    $num_bracelet=$result_bracelet["bracelet_id"];
+    $num_bracelet=$result_bracelet["bracelet_id"];}
 else
 {
     $num_bracelet=null;
@@ -79,7 +79,7 @@ else
                         <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
                             '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].'</div>' : ''; ?>
 
-                        <button type="button" href="<?php $RouteHelper->getPathFor('about')?>" class="btn btn-default">Changer d'horaire:</button>
+                        <button type="button" href="<?php $lien_creneau ?>" class="btn btn-default">Changer d'horaire:</button>
 
                         <?php }
                     }?>
