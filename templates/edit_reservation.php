@@ -18,6 +18,7 @@
         die('<h1>Impossible de se connecter a la base de donnee</h1><p>'.$e->getMessage().'<p>');
         };
 
+global $RouteHelper;
 $is_set_bracelet=$db_bracelet->prepare("SELECT bracelet_id FROM guests WHERE id=?" );
 
 if (isset($UserReservation['id'])){ //Bracelet de l'icam
@@ -79,7 +80,7 @@ else
                         <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
                             '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].'</div>' : ''; ?>
 
-                        <input type="button" href="<?php $lien_creneau ?>" class="btn btn-default" value="Changer d'horaire">
+                        <input type="button" href="<?php $RouteHelper->getPathFor('modification_du_creneau') ?>" class="btn btn-default" value="Changer d'horaire">
 
                         <?php }
                     }?>

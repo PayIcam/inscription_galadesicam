@@ -212,7 +212,7 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
 
 $app->get('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
-    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation,$RouteHelper;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
     $emailContactGala = $this->get('settings')['emailContactGala'];
@@ -385,8 +385,6 @@ $app->post('/enreg', function($request, $response, $args){
     $confSQL = $settings['settings']['confSQL'];
 
     $post=$request->getParsedBody();
-    var_dump($post);
-    die();
 
     try{
         $bd = new PDO('mysql:host='.$confSQL['sql_host'].';dbname='.$confSQL['sql_db'],$confSQL['sql_user'], $confSQL['sql_pass'], array(
@@ -401,29 +399,43 @@ $app->post('/enreg', function($request, $response, $args){
     $participants->execute();
     $nb_participants = $participants->fetch();
 
+    var_dump($participants);
+
     $premier_creneau = $bd->prepare('SELECT COUNT(*) FROM guests WHERE plage_horaire_entrees =\'21h-21h45\'');
     $premier_creneau->execute();
     $nb_creneau1 = $premier_creneau->fetch();
+
+    var_dump($nb_creneau1);
 
     $deuxieme_creneau = $bd->prepare('SELECT COUNT(*) FROM guests WHERE plage_horaire_entrees = \'21h45-22h30\'');
     $deuxieme_creneau->execute();
     $nb_creneau2 = $deuxieme_creneau->fetch();
 
+    var_dump($nb_creneau2);
+
     $troisieme_creneau = $bd->prepare('SELECT COUNT(*) FROM guests WHERE plage_horaire_entrees = \'22h30-23h\'');
     $troisieme_creneau->execute();
     $nb_creneau3 = $troisieme_creneau->fetch();
+
+    var_dump($nb_creneau3);
 
     $quotat_creneau1 = $bd->prepare('SELECT value FROM configs WHERE name = \'quota_entree_21h_21h45\'');
     $quotat_creneau1->execute();
     $quotat1 = $quotat_creneau1->fetch();
 
+    var_dump($quotat1);
+
     $quotat_creneau2 = $bd->prepare('SELECT value FROM configs WHERE name = \'quota_entree_21h45_22h30\'');
     $quotat_creneau2->execute();
     $quotat2 = $quotat_creneau2->fetch();
 
+    var_dump($quotat2);
+
     $quotat_creneau3 = $bd->prepare('SELECT value FROM configs WHERE name = \'quota_entree_22h30_23h\'');
     $quotat_creneau3->execute();
     $quotat3 = $quotat_creneau3->fetch();
+
+    var_dump($quotat3)
      
     if ($quotat1<$nb_creneau1){  //verifie si creneau dispo
         $creneau1=false;
@@ -443,19 +455,25 @@ $app->post('/enreg', function($request, $response, $args){
         $creneau3=true;
     }
 
+    var_dump($creneau1, $creneau2, $creneau3);
+
+    var_dump($post);
+
     foreach ($post as $creneau) {
         if ($creneau == '21h-21h45' && $creneau1==false){
-            Functions::setFlash("Le premier créneau est complet",'danger');
-            echo('Premier créneau complet');
+            $this->flash->addMessage('info', 'le premier créneau est complet');
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
         }
         if ($creneau == '21h45-22h30' && $creneau2==false){
-            Functions::setFlash("Le second créneau est complet",'danger');
+            $this->flash->addMessage('info', 'le deuxième créneau est complet');
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
         }
         if ($creneau == '22h30-23h' && $creneau3==false){
-            Functions::setFlash("Le troisième créneau est complet",'danger');
+            $this->flash->addMessage('info', 'le troisème créneau est complet');
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
         }
     }
-    foreach ($_POST as $key => $value) {
+    foreach ($post as $key => $value) {
 
         $new_creneau = $bd->prepare('UPDATE guests SET plage_horaire_entrees = :horaire WHERE id = :login ');
         $new_creneau -> bindParam('horaire', $value, PDO::PARAM_STR);
@@ -464,6 +482,7 @@ $app->post('/enreg', function($request, $response, $args){
 
     $this->flash->addMessage('info', 'Vos changements de crénaux ont bien été pris en compte.');
         return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+    }
 
 });
 

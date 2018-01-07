@@ -24,7 +24,7 @@ $place_invite->execute();
 $invite=$place_invite->fetchAll();?>
 <h1>Changement de créneau</h1>
 
-<form action="enreg.php" method="post" id='creneau_change'>
+<form action="enreg" method="post" id='creneau_change'>
 		<h3>Votre place </h3>
 		<?php if (is_null($icam['bracelet_id'])){?> 	<!-- Verifie si pas bracelet -->
 		<select class="form-control" name='<?php echo($icam['id'])?>' form='creneau_change'>
