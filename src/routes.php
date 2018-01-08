@@ -44,6 +44,32 @@ function getStatsQuotas() {
     return compact('stats', 'quotas');
 }
 
+$app->get('/modification_du_creneau', function($request,$response, $args){
+    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+
+    $flash = $this->flash;
+    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'modification_du_creneau');
+    $emailContactGala = $this->get('settings')['emailContactGala'];
+
+    // Sample log message
+    // $this->logger->info("Slim-Skeleton '/' index");
+
+    $fun_id = $this->get('settings')['fun_id'];
+    $prixPromo = getPrixPromo($gingerUserCard);
+
+    $mailPersonne = $Auth->getUserField('email');
+    // $mailPersonne = 'hugo.leandri@2018.icam.fr';
+
+    $UserReservation = $DB->query('SELECT * FROM guests WHERE email = :email', array('email' => $mailPersonne));
+    $casUrl = $payutcClient->getCasUrl().'login?service=' . urlencode($RouteHelper->curPageBaseUrl. '/login');
+    $deconnexionUrl = $this->router->pathFor('logout');
+
+    $this->renderer->render($response, 'header.php', compact('Auth', 'flash', 'RouteHelper', $args));
+    $this->renderer->render($response, 'modif_creneau.php', compact('Auth','RouteHelper', 'flash', $args));
+    return $this->renderer->render($response, 'footer.php', compact('Auth', 'RouteHelper', $args));
+
+})->setName('modification_du_creneau');
+
 $app->get('/', function ($request, $response, $args) {
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
@@ -173,7 +199,7 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
     // var_dump($prixPromo['nbInvites']);
     // var_dump(count($UserGuests));
     if ($prixPromo['nbInvites'] - count($UserGuests) > 0) {
-        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0, 'plage_horaire_entrees' => '');
+        $emptyUser = array('price' => 0, 'repas' => 0, 'buffet' => 0, 'tickets_boisson' => 0, 'is_icam' => 0, 'plage_horaire_entrees' => '', 'id' => null);
         for ($i=0; $i < ($prixPromo['nbInvites'] - count($UserGuests) +1); $i++) {
             // echo "<p>".$i."</p>";
             $UserGuests[] = $emptyUser;
@@ -186,7 +212,7 @@ function getUserReservationAndGuests($UserReservation, $prixPromo, $gingerUserCa
 
 $app->get('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
-    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation,$RouteHelper;
     $flash = $this->flash;
     $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'Edition réservation');
     $emailContactGala = $this->get('settings')['emailContactGala'];
@@ -221,7 +247,7 @@ $app->get('/edit', function ($request, $response, $args) {
 
     // Render index view
     $this->renderer->render($response, 'header.php', compact('flash', 'RouteHelper', 'Auth', $args));
-    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'Form', 'prixPromo', 'gingerUserCard', $args));
+    $this->renderer->render($response, 'edit_reservation.php', compact('Auth', 'UserId', 'UserReservation', 'UserGuests', 'canWeRegisterNewGuests', 'canWeEditOurReservation', 'emailContactGala', 'editLink', 'Form', 'prixPromo', 'gingerUserCard','RouteHelper','lien_creneau', $args));
     return $this->renderer->render($response, 'footer.php', compact('RouteHelper', 'Auth', $args));
 })->setName('edit');
 $app->get('/edit/', function ($request, $response, $args) {
@@ -351,6 +377,98 @@ function nettoyer($chaine)
     return $chaine;
 }
 
+$app->post('/enreg', function($request, $response, $args){
+
+    global $Auth,$settings, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    $flash = $this->flash;
+    $confSQL = $settings['settings']['confSQL'];
+
+    $post=$request->getParsedBody();
+
+    try{
+        $bd = new PDO('mysql:host='.$confSQL['sql_host'].';dbname='.$confSQL['sql_db'],$confSQL['sql_user'], $confSQL['sql_pass'], array(
+                    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES UTF8',
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
+        }
+    catch(PDOException $e) {
+        die('<h1>Impossible de se connecter a la base de donnee</h1><p>'.$e->getMessage().'<p>');
+        };
+
+    $participants = $bd->prepare('SELECT COUNT(*) FROM guests');
+    $participants->execute();
+    $nb_participants = $participants->fetch();
+
+    $premier_creneau = $bd->prepare('SELECT COUNT(*) FROM guests WHERE plage_horaire_entrees =\'21h-21h45\'');
+    $premier_creneau->execute();
+    $nb_creneau1 = $premier_creneau->fetch();
+
+    $deuxieme_creneau = $bd->prepare('SELECT COUNT(*) FROM guests WHERE plage_horaire_entrees = \'21h45-22h30\'');
+    $deuxieme_creneau->execute();
+    $nb_creneau2 = $deuxieme_creneau->fetch();
+
+    $troisieme_creneau = $bd->prepare('SELECT COUNT(*) FROM guests WHERE plage_horaire_entrees = \'22h30-23h\'');
+    $troisieme_creneau->execute();
+    $nb_creneau3 = $troisieme_creneau->fetch();
+
+    $quotat_creneau1 = $bd->prepare('SELECT value FROM configs WHERE name = \'quota_entree_21h_21h45\'');
+    $quotat_creneau1->execute();
+    $quotat1 = $quotat_creneau1->fetch();
+
+    $quotat_creneau2 = $bd->prepare('SELECT value FROM configs WHERE name = \'quota_entree_21h45_22h30\'');
+    $quotat_creneau2->execute();
+    $quotat2 = $quotat_creneau2->fetch();
+
+    $quotat_creneau3 = $bd->prepare('SELECT value FROM configs WHERE name = \'quota_entree_22h30_23h\'');
+    $quotat_creneau3->execute();
+    $quotat3 = $quotat_creneau3->fetch();
+     
+    if (($quotat1['value'])<$nb_creneau1['COUNT(*)']){  //verifie si creneau dispo
+        $creneau1=false;
+    }else{
+        $creneau1=true;
+    } 
+
+    if (($quotat2['value'])<$nb_creneau2['COUNT(*)']){  //verifie si creneau dispo
+        $creneau2=false;
+    }else{
+        $creneau2=true;
+    } 
+
+    if (($quotat3['value'])<$nb_creneau3['COUNT(*)']){  //verifie si creneau dispo
+        $creneau3=false;
+    }else{
+        $creneau3=true;
+    }
+
+    foreach ($post as $creneau) {
+        if ($creneau == '21h-21h45' && $creneau1==false){
+            $this->flash->addMessage('warning', 'Le premier créneau est complet');
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('modification_du_creneau'));
+        }
+        if ($creneau == '21h45-22h30' && $creneau2==false){
+            $this->flash->addMessage('warning', 'Le deuxième créneau est complet');
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('modification_du_creneau'));
+        }
+        if ($creneau == '22h30-23h' && $creneau3==false){
+            $this->flash->addMessage('warning', 'Le troisème créneau est complet');
+            return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('modification_du_creneau'));
+        }
+    }
+    foreach ($post as $key => $value) {
+
+        $key=preg_replace('#[^0-9]#',"",$key);
+
+        $new_creneau = $bd->prepare('UPDATE guests SET plage_horaire_entrees = :horaire WHERE id = :login ');
+        $new_creneau -> bindParam('horaire', $value, PDO::PARAM_STR);
+        $new_creneau -> bindParam('login', $key, PDO::PARAM_INT);
+        $new_creneau->execute();
+
+    }
+
+    $this->flash->addMessage('info', 'Vos changements de crénaux ont bien été pris en compte.');
+        return $response->withStatus(303)->withHeader('Location', $this->router->pathFor('edit'));
+});
+
 $app->post('/edit', function ($request, $response, $args) {
     // Initialisation, récupération variables utiles
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
@@ -359,6 +477,7 @@ $app->post('/edit', function ($request, $response, $args) {
     $emailContactGala = $this->get('settings')['emailContactGala'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
+    $lien_creneau = $this->router->pathFor('modification_du_creneau');
 
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');
