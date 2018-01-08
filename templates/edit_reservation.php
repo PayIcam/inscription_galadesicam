@@ -81,7 +81,7 @@ else
                         <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
                             '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].'</div>' : ''; ?>
 
-                        <input type="button" href="<?php $RouteHelper->getPathFor('modification_du_creneau') ?>" class="btn btn-default" value="Changer d'horaire" name="resa[plage_horaire_entrees]" ng-model="resa.plage_horaire_entrees">
+                        <a href="<?php $RouteHelper->getPathFor('modification_du_creneau') ?>"><button class="btn btn-default" name="resa[plage_horaire_entrees]" ng-model="resa.plage_horaire_entrees">Changer d'horaire</button></a>
 
                         <?php }
                     }?>
