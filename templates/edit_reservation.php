@@ -242,7 +242,7 @@ else
             </div>
         <?php } ?>
     </fieldset>
-    <fieldset class="recap">
+    <!-- <fieldset class="recap">
         <legend>Récapitulatif - prix à payer</legend>
         <h3>Déjà payé <small>{{dejaPaye}}€</small></h3>
         <ul>
@@ -253,7 +253,7 @@ else
             <li ng-repeat="guest in guestsDoitEncorePayer">{{guest.nom}}: <span style="margin-right:5px;" class="label label-info" ng-repeat="option in guest.options">{{option.nom}} : {{option.price}}€</span></li>
         </ul>
         <p ng-hide="{{newPrice}}">Vous n'avez rien pour le moment à payer, les modifications portant sur le nom des invités sont sans coûts.</p>
-    </fieldset>
+    </fieldset> -->
     <hr>
     <div class="form-actions">
         <button class="btn btn-primary" type="submit">Valider</button>
