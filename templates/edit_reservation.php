@@ -167,7 +167,7 @@ else
                         if (!isset($UserGuests[$i]['id'])){?>
 
                         <?= (isset($UserGuests[$i]['plage_horaire_entrees']) && $UserGuests[$i]['plage_horaire_entrees']) ? '' : 
-                        $Form->select('resa[plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort)));
+                        $Form->select('resa[invites]['.$i.'][plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.invites['.$i.'].plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort)));
                         }?> 
                          <!-- FIN INVITE PAIR -->
 
@@ -234,7 +234,7 @@ else
                                 if (!isset($UserGuests[$j]['id'])){?>
 
                                 <?= (isset($UserGuests[$j]['plage_horaire_entrees']) && $UserGuests[$j]['plage_horaire_entrees']) ? '' : 
-                                $Form->select('resa[plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort)));
+                                $Form->select('resa[invites]['.$j.'][plage_horaire_entrees]', 'Plage horaire entrée : ', array('ng-model'=>'resa.invites['.$j.'].plage_horaire_entrees', 'data'=>corriger_horaire($dataPlageHoraireEntreeShort)));
                             }?> 
                         </div>
                     </div>
@@ -242,7 +242,7 @@ else
             </div>
         <?php } ?>
     </fieldset>
-    <!-- <fieldset class="recap">
+    <fieldset class="recap">
         <legend>Récapitulatif - prix à payer</legend>
         <h3>Déjà payé <small>{{dejaPaye}}€</small></h3>
         <ul>
@@ -253,7 +253,7 @@ else
             <li ng-repeat="guest in guestsDoitEncorePayer">{{guest.nom}}: <span style="margin-right:5px;" class="label label-info" ng-repeat="option in guest.options">{{option.nom}} : {{option.price}}€</span></li>
         </ul>
         <p ng-hide="{{newPrice}}">Vous n'avez rien pour le moment à payer, les modifications portant sur le nom des invités sont sans coûts.</p>
-    </fieldset> -->
+    </fieldset>
     <hr>
     <div class="form-actions">
         <button class="btn btn-primary" type="submit">Valider</button>
