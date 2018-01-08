@@ -44,11 +44,11 @@ function getStatsQuotas() {
     return compact('stats', 'quotas');
 }
 
-$app->get('/modif_creneau', function($request,$response, $args){
+$app->get('/modification_du_creneau', function($request,$response, $args){
     global $Auth, $payutcClient, $gingerUserCard, $DB, $canWeRegisterNewGuests, $canWeEditOurReservation;
 
     $flash = $this->flash;
-    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'modif_creneau');
+    $RouteHelper = new \PayIcam\RouteHelper($this, $request, 'modification_du_creneau');
     $emailContactGala = $this->get('settings')['emailContactGala'];
 
     // Sample log message
@@ -218,7 +218,6 @@ $app->get('/edit', function ($request, $response, $args) {
     $emailContactGala = $this->get('settings')['emailContactGala'];
     $status = $payutcClient->getStatus();
     $editLink = $this->router->pathFor('edit');
-    $lien_creneau = $this->router->pathFor('modification_du_creneau');
 
     // Récupération infos utilisateur
     $mailPersonne = $Auth->getUserField('email');
