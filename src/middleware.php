@@ -5,9 +5,10 @@
 
 // sécuriser l'application
 $app->add(function ($request, $response, $next) {
-    global $status, $payutcClient, $gingerUserCard, $gingerClient, $Auth, $canWeRegisterNewGuests, $canWeEditOurReservation;
+    global $status, $payutcClient, $gingerUserCard, $gingerClient, $Auth, $canWeRegisterNewGuests, $canWeEditOurReservation,$settings;
+    $confSQL = $settings['settings']['confSQL'];
     try{
-    $db = new PDO('mysql:host=localhost;dbname=galadesicam;charset=utf8','galadesicam','HTxTiHZtEbdmeFT8',array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ));
+    $db = new PDO('mysql:host='.$confSQL['sql_host'].';dbname='.$confSQL['sql_db'],$confSQL['sql_user'], $confSQL['sql_pass'],array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ));
     } catch(Exeption $e) {
     die('erreur:'.$e->getMessage());
     }

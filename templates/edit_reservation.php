@@ -73,7 +73,7 @@ else
                         if (!is_null($num_bracelet))
                         {?>
                             <?= (isset($UserReservation['plage_horaire_entrees']) && $UserReservation['plage_horaire_entrees']) ?
-                            '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].' et vous avez déja pris votre bracelet</div>' : '';
+                            '<div class="checkbox">Vous avez deja réservé la plage horaire d\'entrée de '.corriger_horaire($dataPlageHoraireEntree)[$UserReservation['plage_horaire_entrees']].' et vous avez déja pris votre bracelet</div><label class="control-label" for="inputnom">Numéro de ticket : '.$num_bracelet.' </label>' : '';
                         }
                         else
                         {?>
