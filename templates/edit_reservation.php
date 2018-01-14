@@ -110,10 +110,12 @@ else
                     <div>
 
                     <?php 
+
+                    if (isset($UserGuests[$i]['id'])){
                     $is_set_bracelet=$db_bracelet->prepare("SELECT bracelet_id FROM guests WHERE id=?" );
                     $is_set_bracelet->execute(array($UserGuests[$i]['id']));
                     $result_bracelet=$is_set_bracelet->fetch();
-                    $num_bracelet=$result_bracelet["bracelet_id"]; ?>
+                    $num_bracelet=$result_bracelet["bracelet_id"]; } ?>
 
 
                         <?= $Form->input('resa[invites]['.$i.'][id]', 'hidden', array('ng-model' => 'resa.invites['.$i.'].id', )); ?>
@@ -178,10 +180,11 @@ else
                         <legend>Invité <?= ($j+1); ?></legend>
 
                         <?php 
+                        if (isset($UserGuests[$i]['id'])){
                         $is_set_bracelet=$db_bracelet->prepare("SELECT bracelet_id FROM guests WHERE id=?" );
                         $is_set_bracelet->execute(array($UserGuests[$j]['id']));
                         $result_bracelet=$is_set_bracelet->fetch();
-                        $num_bracelet=$result_bracelet["bracelet_id"]; ?>
+                        $num_bracelet=$result_bracelet["bracelet_id"]; } ?>
 
                         <div>
                             <?= $Form->input('resa[invites]['.$j.'][id]', 'hidden', array('ng-model' => 'resa.invites['.$j.'].id', )); ?>
